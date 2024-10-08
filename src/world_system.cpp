@@ -295,7 +295,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	Motion& motion = registry.motions.get(player_salmon);
 
-
 	// Use WASD keys to control movement
 	if (action == GLFW_PRESS) {
 		switch (key) {

@@ -224,6 +224,9 @@ void WorldSystem::restart_game() {
 	player_salmon = createSalmon(renderer, { window_width_px/2, window_height_px - 200 });
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
+	// Spawn an enemy (with eel sprite asset: need changing) in the middle of the screen
+	createEnemy(renderer, { window_width_px / 2, window_height_px / 2 });
+
 	// !! TODO A2: Enable static eggs on the ground, for reference
 	// Create eggs on the floor, use this for reference
 	/*
@@ -286,6 +289,12 @@ bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));
 }
 
+
+// Should the game be over ?
+bool WorldSystem::is_over() const {
+	return bool(glfwWindowShouldClose(window));
+}
+
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -310,6 +319,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		case GLFW_KEY_D:
 			motion.velocity.x = PLAYER_SPEED;   // Rightward
 			break;
+		case GLFW_KEY_LEFT_SHIFT:
+			isSprinting = true;  // Start sprinting
+			break;
 		}
 	}
 	else if (action == GLFW_RELEASE) {
@@ -322,8 +334,37 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		case GLFW_KEY_D:
 			motion.velocity.x = 0.f;  // Stop moving horizontally
 			break;
+		case GLFW_KEY_LEFT_SHIFT:
+			isSprinting = false;  // Stop sprinting
+			break;
 		}
 	}
+
+	if (isSprinting) {
+		if (motion.velocity.x != 0) {
+			motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;  // Double horizontal speed
+		}
+		if (motion.velocity.y != 0) {
+			motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;  // Double vertical speed
+		}
+	}
+	else {
+		// Reset speed if not sprinting and direction key is pressed
+		if (motion.velocity.x > PLAYER_SPEED) {
+			motion.velocity.x = PLAYER_SPEED;
+		}
+		else if (motion.velocity.x < -PLAYER_SPEED) {
+			motion.velocity.x = -PLAYER_SPEED;
+		}
+		if (motion.velocity.y > PLAYER_SPEED) {
+			motion.velocity.y = PLAYER_SPEED;
+		}
+		else if (motion.velocity.y < -PLAYER_SPEED) {
+			motion.velocity.y = -PLAYER_SPEED;
+		}
+	}
+
+
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
@@ -341,15 +382,15 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
+	//if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
+	//	current_speed -= 0.1f;
+	//	printf("Current speed = %f\n", current_speed);
+	//}
+	//if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
+	//	current_speed += 0.1f;
+	//	printf("Current speed = %f\n", current_speed);
+	//}
+	//current_speed = fmax(0.f, current_speed);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

@@ -10,6 +10,10 @@ struct Player
 
 };
 
+struct Health {
+	int current_health;  // Health points of an entity
+};
+
 // anything that is deadly to the player
 struct Deadly
 {

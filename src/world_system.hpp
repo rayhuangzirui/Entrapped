@@ -15,6 +15,7 @@
 
 //Adjust here: gloabl constant for player speed
 const float PLAYER_SPEED = 200.f;  // Adjust as needed for proper movement speed
+const float SPRINT_MULTIPLIER = 2.0f;  // Speed multiplier when sprinting
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -60,6 +61,9 @@ private:
 	float next_eel_spawn;
 	float next_fish_spawn;
 	Entity player_salmon;
+
+	// Sprint flag to check if sprinting
+	bool isSprinting;
 
 	// music references
 	Mix_Music* background_music;

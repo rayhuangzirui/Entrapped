@@ -20,12 +20,43 @@ Entity createPlayer(RenderSystem* renderer, vec2 position) {
 	// Add the Player component to the entity
 	registry.players.emplace(entity);
 
+	// Add the Health component to the player entity with initial health of 100
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 100;
+
 	// Register render requests
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture needed for now
 		  EFFECT_ASSET_ID::SALMON,
 		  GEOMETRY_BUFFER_ID::SALMON });
+
+	return entity;
+}
+
+Entity createEnemy(RenderSystem* renderer, vec2 position)
+{
+	auto entity = Entity();
+
+	// Store a reference to the mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and velocity
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.velocity = { 0.f, 0.f };  // Enemy remains stationary initially
+	motion.scale = vec2({ -EEL_BB_WIDTH, EEL_BB_HEIGHT });
+
+	// Assign render request
+	registry.renderRequests.insert(entity, {
+		TEXTURE_ASSET_ID::EEL,
+		EFFECT_ASSET_ID::TEXTURED,
+		GEOMETRY_BUFFER_ID::SPRITE
+		});
+
+	// Create an (empty) enemy component
+	registry.deadlys.emplace(entity);
 
 	return entity;
 }

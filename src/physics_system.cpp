@@ -38,8 +38,9 @@ void PhysicsSystem::step(float elapsed_ms)
 		Entity entity = motion_registry.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 
-		// [enemy] move from right to left with a constant velocity
-		if (registry.deadlys.has(registry.motions.entities[i]))
+		// Dummy enemy move from right to left with a constant velocity
+		// TODO: Apply simple AI for enemy movement
+		if (registry.enemies.has(registry.motions.entities[i]))
 		{
 			motion.velocity.x = -150.f;
 			motion.velocity.y = 0;

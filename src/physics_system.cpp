@@ -28,22 +28,27 @@ bool collides(const Motion& motion1, const Motion& motion2)
 
 void PhysicsSystem::step(float elapsed_ms)
 {
-	// Move fish based on how much time has passed, this is to (partially) avoid
+	// Move [Enemy] based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
 	auto& motion_registry = registry.motions;
 	for(uint i = 0; i< motion_registry.size(); i++)
 	{
-		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
-		//Motion& motion = motion_registry.components[i];
-		//Entity entity = motion_registry.entities[i];
-		//float step_seconds = elapsed_ms / 1000.f;
-		(void)elapsed_ms; // placeholder to silence unused warning until implemented
-	}
+		// update motion.position based on step_seconds and motion.velocity
+		Motion& motion = motion_registry.components[i];
+		Entity entity = motion_registry.entities[i];
+		float step_seconds = elapsed_ms / 1000.f;
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE EGG UPDATES HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// [enemy] move from right to left with a constant velocity
+		if (registry.deadlys.has(registry.motions.entities[i]))
+		{
+			motion.velocity.x = -150.f;
+			motion.velocity.y = 0;
+		}
+
+		// Player moves by keys input, with a constant velocity, handled in the input system
+
+		motion.position += motion.velocity * step_seconds;
+	}
 
 	// Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
@@ -67,8 +72,4 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE EGG collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

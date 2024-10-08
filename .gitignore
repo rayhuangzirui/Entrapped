@@ -1,0 +1,8 @@
+# Ignore Visual Studio files
+.vs/
+
+# Ignore output folder
+out/
+
+# Ignore external folder
+ext/

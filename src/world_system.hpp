@@ -13,6 +13,9 @@
 
 #include "render_system.hpp"
 
+//Adjust here: gloabl constant for player speed
+const float PLAYER_SPEED = 200.f;  // Adjust as needed for proper movement speed
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem

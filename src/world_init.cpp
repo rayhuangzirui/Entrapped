@@ -1,6 +1,35 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
+Entity createPlayer(RenderSystem* renderer, vec2 position) {
+	// Create a new entity
+	auto entity = Entity();
+
+	// Store a reference to the mesh used (the salmon sprite)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SALMON);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting up initial motion values for the player
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = mesh.original_size * 300.f;
+	motion.scale.y *= -1;  // Flipping for proper orientation
+
+	// Add the Player component to the entity
+	registry.players.emplace(entity);
+
+	// Register render requests
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture needed for now
+		  EFFECT_ASSET_ID::SALMON,
+		  GEOMETRY_BUFFER_ID::SALMON });
+
+	return entity;
+}
+
 Entity createSalmon(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();

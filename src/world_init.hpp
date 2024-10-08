@@ -11,6 +11,9 @@ const float FISH_BB_HEIGHT = 0.6f * 165.f;
 const float EEL_BB_WIDTH   = 0.6f * 300.f;	// 1001
 const float EEL_BB_HEIGHT  = 0.6f * 202.f;	// 870
 
+//I call this the real player
+Entity createPlayer(RenderSystem* renderer, vec2 position);
+
 // the player
 Entity createSalmon(RenderSystem* renderer, vec2 pos);
 

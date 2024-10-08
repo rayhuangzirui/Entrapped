@@ -117,6 +117,9 @@ GLFWwindow* WorldSystem::create_window() {
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
+
+	createPlayer(renderer, vec2(300, 300));
+
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
@@ -217,7 +220,7 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Salmon
+	// create a new player in the salmon sprite
 	player_salmon = createSalmon(renderer, { window_width_px/2, window_height_px - 200 });
 	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
 
@@ -290,7 +293,37 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	Motion& motion = registry.motions.get(player_salmon);
 
+	// Use WASD keys to control movement
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_W:
+			motion.velocity.y = -PLAYER_SPEED;  // Upward
+			break;
+		case GLFW_KEY_S:
+			motion.velocity.y = PLAYER_SPEED;   // Downward
+			break;
+		case GLFW_KEY_A:
+			motion.velocity.x = -PLAYER_SPEED;  // Leftward
+			break;
+		case GLFW_KEY_D:
+			motion.velocity.x = PLAYER_SPEED;   // Rightward
+			break;
+		}
+	}
+	else if (action == GLFW_RELEASE) {
+		switch (key) {
+		case GLFW_KEY_W:
+		case GLFW_KEY_S:
+			motion.velocity.y = 0.f;  // Stop moving vertically
+			break;
+		case GLFW_KEY_A:
+		case GLFW_KEY_D:
+			motion.velocity.x = 0.f;  // Stop moving horizontally
+			break;
+		}
+	}
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;

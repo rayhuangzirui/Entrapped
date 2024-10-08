@@ -24,14 +24,40 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SALMON, mesh_path("salmon.obj"))
-		  // specify meshes of other assets here
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SALMON, mesh_path("salmon.obj")),
+		// specify meshes of other assets here
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-			textures_path("green_fish.png"),
-			textures_path("eel.png") };
+			textures_path("player_1.png"),
+			textures_path("player_3.png"),
+			textures_path("player_2.png"),
+
+			textures_path("player_back_1.png"),
+			textures_path("player_back_2.png"),
+			textures_path("player_back_3.png"),
+
+			textures_path("player_front_1.png"),
+			textures_path("player_front_2.png"),
+			textures_path("player_front_3.png"),
+
+			textures_path("tile_door_open.png"),
+			textures_path("tile_door_closed.png"),
+
+			textures_path("tile_wall_1.png"),
+			textures_path("tile_wall_2.png"),
+			textures_path("tile_wall_3.png"),
+			textures_path("tile_wall_4.png"),
+			textures_path("tile_wall_5.png"),
+			textures_path("tile_wall_6.png"),
+
+			textures_path("tile_floor_1.png"),
+			textures_path("tile_floor_2.png"),
+			textures_path("tile_floor_3.png"),
+			textures_path("tile_floor_4.png"),
+			textures_path("tile_floor_5.png")
+	};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.

@@ -14,16 +14,17 @@ Entity createSalmon(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 300.f;
-	motion.scale.y *= -1; // point front to the right
+	motion.scale = mesh.original_size * 500.f;
+	motion.scale.x *= 1; // point front to the right
 
 	// create an empty Salmon component for our character
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
-			EFFECT_ASSET_ID::SALMON,
-			GEOMETRY_BUFFER_ID::SALMON });
+		{ PLAYER_TEXTURE_ASSET_ID::PLAYER_1, // TEXTURE_COUNT indicates that no texture is needed
+		// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
@@ -51,7 +52,8 @@ Entity createFish(RenderSystem* renderer, vec2 position)
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::FISH,
+			PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
+			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE
 		});
@@ -81,7 +83,8 @@ Entity createEel(RenderSystem* renderer, vec2 position)
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::EEL,
+			PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
+			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE
 		});
@@ -96,7 +99,8 @@ Entity createLine(vec2 position, vec2 scale)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	registry.renderRequests.insert(
 		entity, {
-			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			PLAYER_TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::EGG,
 			GEOMETRY_BUFFER_ID::DEBUG_LINE
 		});
@@ -127,7 +131,8 @@ Entity createEgg(vec2 pos, vec2 size)
 	registry.deadlys.emplace(entity);
 	registry.renderRequests.insert(
 		entity, {
-			TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			PLAYER_TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
+			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::EGG,
 			GEOMETRY_BUFFER_ID::EGG
 		});

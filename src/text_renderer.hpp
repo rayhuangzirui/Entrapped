@@ -34,7 +34,6 @@ public:
     std::map<char, Character> Characters;
     // load fonts
     TextRenderer();
-
     int loadFont();
 
     Entity createText(std::string txt, glm::vec2 position, float scale, glm::vec3 color);

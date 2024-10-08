@@ -16,6 +16,7 @@
 #include "render_system.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "tiny_ecs.hpp"
+#include "common.hpp"
 
 TextRenderer::TextRenderer() {
     std::cout << ">>> Text Renderer Initialized" << std::endl;
@@ -30,7 +31,7 @@ int TextRenderer::loadFont() {
     }
 
     FT_Face face;
-    if (FT_New_Face(ft, "D:/UBCThings/Classes/CPSC 427/Team16/fonts/arial.ttf", 0, &face))
+    if (FT_New_Face(ft, font_path("arial.ttf").c_str(), 0, &face))
     {
         std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
         return -1;

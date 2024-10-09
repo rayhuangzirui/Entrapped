@@ -25,7 +25,7 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::PLAYER,
+		{ TEXTURE_ASSET_ID::PLAYER_1,
 //		{
 //			PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
 			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
@@ -77,7 +77,7 @@ Entity createLine(vec2 position, vec2 scale)
 	registry.renderRequests.insert(
 		entity, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::BULLET,	// BULLET is a simple shader that renders the object in a single color
+			EFFECT_ASSET_ID::TEXTURED,	// BULLET is a simple shader that renders the object in a single color
 			GEOMETRY_BUFFER_ID::DEBUG_LINE // DEBUG_LINE is a 1x1 unit square
 		});
 
@@ -114,7 +114,7 @@ Entity createBullet(RenderSystem* renderer, vec2 pos, vec2 vel)
 	registry.renderRequests.insert(
 		entity, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::BULLET,
+			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::BULLET
 		});
 

@@ -24,22 +24,22 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	static int frame = 0;
 	static int frame_counter = 0;
 	const int frame_delay = 5;
-	PLAYER_TEXTURE_ASSET_ID walking_sideways[3] = {
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_2,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_3
+	TEXTURE_ASSET_ID walking_sideways[3] = {
+	TEXTURE_ASSET_ID::PLAYER_1,
+	TEXTURE_ASSET_ID::PLAYER_2,
+	TEXTURE_ASSET_ID::PLAYER_3
 	};
 
-	PLAYER_TEXTURE_ASSET_ID walking_front[3] = {
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_FRONT_1,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_FRONT_2,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_FRONT_3
+	TEXTURE_ASSET_ID walking_front[3] = {
+	TEXTURE_ASSET_ID::PLAYER_FRONT_1,
+	TEXTURE_ASSET_ID::PLAYER_FRONT_2,
+	TEXTURE_ASSET_ID::PLAYER_FRONT_3
 	};
 
-	PLAYER_TEXTURE_ASSET_ID walking_back[3] = {
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_BACK_1,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_BACK_2,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_BACK_3
+	TEXTURE_ASSET_ID walking_back[3] = {
+	TEXTURE_ASSET_ID::PLAYER_BACK_1,
+	TEXTURE_ASSET_ID::PLAYER_BACK_2,
+	TEXTURE_ASSET_ID::PLAYER_BACK_3
 	};
 
 	// Control direction of the salmon
@@ -149,7 +149,7 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ PLAYER_TEXTURE_ASSET_ID::PLAYER_1, // TEXTURE_COUNT indicates that no texture is needed
+		{ TEXTURE_ASSET_ID::PLAYER_1, // TEXTURE_COUNT indicates that no texture is needed
 		// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });

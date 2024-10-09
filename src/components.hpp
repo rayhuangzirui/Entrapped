@@ -24,7 +24,7 @@ struct Bullet
 	int damage = 1;
 
 	// Initializer of the bullet
-	Bullet(int dmg) : damage(dmg) {};
+	//Bullet(int dmg) : damage(dmg) {};
 };
 
 // Enemy component
@@ -156,11 +156,6 @@ struct Mesh
 
 
 enum class TEXTURE_ASSET_ID {
-	PLAYER = 0,
-	ENEMY = PLAYER + 1,
-	TEXTURE_COUNT = ENEMY + 1
-};
-enum class PLAYER_TEXTURE_ASSET_ID {
 	PLAYER_1 = 0,
 	PLAYER_2 = PLAYER_1 + 1,
 	PLAYER_3 = PLAYER_2 + 1,
@@ -189,9 +184,11 @@ enum class PLAYER_TEXTURE_ASSET_ID {
 	FLOOR_4 = FLOOR_3 + 1,
 	FLOOR_5 = FLOOR_4 + 1,
 
+	ENEMY = FLOOR_5 + 1,
+
 	TEXTURE_COUNT = FLOOR_5 + 1
 };
-const int texture_count = (int)PLAYER_TEXTURE_ASSET_ID::TEXTURE_COUNT;
+const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 //enum class PLAYER_BACK_TEXTURE_ASSET_ID {
 //	PLAYER_BACK_1 = 0,
@@ -236,9 +233,7 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	TEXT = WATER + 1,
-  BULLET = TEXT + 1,
-  MAZE = BULLET + 1,
-	EFFECT_COUNT = MAZE + 1,
+	EFFECT_COUNT = TEXT + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -257,12 +252,8 @@ enum class GEOMETRY_BUFFER_ID {
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 struct RenderRequest {
-	PLAYER_TEXTURE_ASSET_ID used_texture = PLAYER_TEXTURE_ASSET_ID::TEXTURE_COUNT;
+	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	// PLAYER_BACK_TEXTURE_ASSET_ID player_back = PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
-};
-
-struct LightUp {
-	float counter_ms = 1000;
 };

@@ -101,7 +101,7 @@ Entity TextRenderer::createText(std::string txt, vec2 position, float scale, vec
     registry.colors.insert(entity, color);
     registry.renderRequests.insert(
         entity,
-        { PLAYER_TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no texture is needed
             EFFECT_ASSET_ID::TEXT,
             GEOMETRY_BUFFER_ID::SPRITE });
     std::cout << ">>> Text created" << std::endl;

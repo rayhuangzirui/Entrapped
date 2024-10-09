@@ -29,22 +29,22 @@ WorldSystem::WorldSystem()
 WorldSystem::~WorldSystem() {
 
 	// destroy music components
-	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
-	// replace with player dead sound
-	if (player_dead_sound != nullptr)
-		Mix_FreeChunk(player_dead_sound);
-	if (enemy_dead_sound != nullptr)
-		Mix_FreeChunk(enemy_dead_sound);
-	if (enemy_hit_sound != nullptr)
-		Mix_FreeChunk(enemy_hit_sound);
-	if (bullet_hit_sound != nullptr)
-		Mix_FreeChunk(bullet_hit_sound);
-	if (bullet_fire_sound != nullptr)
-		Mix_FreeChunk(bullet_fire_sound);
+	//if (background_music != nullptr)
+	//	Mix_FreeMusic(background_music);
+	//// replace with player dead sound
+	//if (player_dead_sound != nullptr)
+	//	Mix_FreeChunk(player_dead_sound);
+	//if (enemy_dead_sound != nullptr)
+	//	Mix_FreeChunk(enemy_dead_sound);
+	//if (enemy_hit_sound != nullptr)
+	//	Mix_FreeChunk(enemy_hit_sound);
+	//if (bullet_hit_sound != nullptr)
+	//	Mix_FreeChunk(bullet_hit_sound);
+	//if (bullet_fire_sound != nullptr)
+	//	Mix_FreeChunk(bullet_fire_sound);
 
 
-	Mix_CloseAudio();
+	//Mix_CloseAudio();
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -114,24 +114,22 @@ GLFWwindow* WorldSystem::create_window() {
 
   background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
   player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
-	player_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
 	
 	// TODO: Sound effects are not added to the audio path yet
-	enemy_dead_sound = Mix_LoadWAV(audio_path("enemy_dead.wav").c_str());
-	enemy_hit_sound = Mix_LoadWAV(audio_path("enemy_hit.wav").c_str());
-	bullet_hit_sound = Mix_LoadWAV(audio_path("bullet_hit.wav").c_str());
-	bullet_fire_sound = Mix_LoadWAV(audio_path("bullet_fire.wav").c_str());
+	//enemy_dead_sound = Mix_LoadWAV(audio_path("enemy_dead.wav").c_str());
+	//enemy_hit_sound = Mix_LoadWAV(audio_path("enemy_hit.wav").c_str());
+	//bullet_hit_sound = Mix_LoadWAV(audio_path("bullet_hit.wav").c_str());
+	//bullet_fire_sound = Mix_LoadWAV(audio_path("bullet_fire.wav").c_str());
 
 	if (background_music == nullptr || player_dead_sound == nullptr || enemy_dead_sound == nullptr
 		|| enemy_hit_sound == nullptr || bullet_hit_sound == nullptr || bullet_fire_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("bgm.wav").c_str(),
-			audio_path("death_sound.wav").c_str(),
-      audio_path("eat_sound.wav").c_str()
-			audio_path("enemy_dead.wav").c_str(),
-			audio_path("enemy_hit.wav").c_str(),
-			audio_path("bullet_hit.wav").c_str(),
-			audio_path("bullet_fire.wav").c_str());
+			audio_path("death_sound.wav").c_str());
+			//audio_path("enemy_dead.wav").c_str(),
+			//audio_path("enemy_hit.wav").c_str(),
+			//audio_path("bullet_hit.wav").c_str(),
+			//audio_path("bullet_fire.wav").c_str());
 		return nullptr;
 	}
 

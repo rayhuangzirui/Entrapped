@@ -22,6 +22,7 @@ public:
 	ComponentContainer<Eatable> eatables;
 	ComponentContainer<Deadly> deadlys;
 	ComponentContainer<DebugComponent> debugComponents;
+	ComponentContainer<Text> texts;
 	ComponentContainer<vec3> colors;
 	ComponentContainer<LightUp> lightups;
 
@@ -40,6 +41,7 @@ public:
 		registry_list.push_back(&eatables);
 		registry_list.push_back(&deadlys);
 		registry_list.push_back(&debugComponents);
+		registry_list.push_back(&texts);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&lightups);
 	}

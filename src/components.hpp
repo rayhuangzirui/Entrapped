@@ -22,6 +22,11 @@ struct Eatable
 
 };
 
+// component used to render text
+struct Text {
+	std::string content;
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
@@ -185,7 +190,8 @@ enum class EFFECT_ASSET_ID {
 	SALMON = EGG + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+	TEXT = WATER + 1,
+	EFFECT_COUNT = TEXT + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -196,7 +202,8 @@ enum class GEOMETRY_BUFFER_ID {
 	DEBUG_LINE = EGG + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	PLAYER = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = PLAYER + 1
+  TEXT = PLAYER + 1,
+	GEOMETRY_COUNT = TEXT + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

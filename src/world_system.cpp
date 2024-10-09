@@ -27,14 +27,14 @@ WorldSystem::WorldSystem()
 WorldSystem::~WorldSystem() {
 
 	// destroy music components
-	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
-	if (salmon_dead_sound != nullptr)
-		Mix_FreeChunk(salmon_dead_sound);
-	if (salmon_eat_sound != nullptr)
-		Mix_FreeChunk(salmon_eat_sound);
+	//if (background_music != nullptr)
+	//	Mix_FreeMusic(background_music);
+	//if (salmon_dead_sound != nullptr)
+	//	Mix_FreeChunk(salmon_dead_sound);
+	//if (salmon_eat_sound != nullptr)
+	//	Mix_FreeChunk(salmon_eat_sound);
 
-	Mix_CloseAudio();
+	//Mix_CloseAudio();
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -92,6 +92,7 @@ GLFWwindow* WorldSystem::create_window() {
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
+  // MERGE TODO: move this part to game scene
 	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
 		fprintf(stderr, "Failed to initialize SDL Audio");
 		return nullptr;
@@ -119,15 +120,20 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
+	//Mix_PlayMusic(background_music, -1);
+	//fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
-	restart_game();
+  //restart_game();
+	this->scene_system.initialize(this->renderer);
+	this->scene_system.pushScene();
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
+	this->scene_system.step();
+
+	return true;
 	// Updating window title with points
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;

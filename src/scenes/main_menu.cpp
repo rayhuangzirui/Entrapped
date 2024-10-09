@@ -15,7 +15,14 @@ void MainMenu::step(RenderSystem* renderer) {
 }
 
 void MainMenu::destroy(RenderSystem* renderer) {
-	registry.clear_all_components();
+	while (registry.motions.entities.size() > 0)
+		registry.remove_all_components_of(registry.motions.entities.back());
 	(RenderSystem*)renderer;
+}
+
+void MainMenu::on_key(RenderSystem* renderer, int key, int action, int mod) {
+	(int)key;
+	(int)action;
+	(int)mod;
 }
 

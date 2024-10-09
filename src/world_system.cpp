@@ -8,6 +8,7 @@
 #include <sstream>
 
 #include "physics_system.hpp"
+#include <iostream>
 
 // Game configuration
 const size_t MAX_NUM_EELS = 15;
@@ -27,14 +28,14 @@ WorldSystem::WorldSystem()
 WorldSystem::~WorldSystem() {
 
 	// destroy music components
-	//if (background_music != nullptr)
-	//	Mix_FreeMusic(background_music);
-	//if (salmon_dead_sound != nullptr)
-	//	Mix_FreeChunk(salmon_dead_sound);
-	//if (salmon_eat_sound != nullptr)
-	//	Mix_FreeChunk(salmon_eat_sound);
+	if (background_music != nullptr)
+		Mix_FreeMusic(background_music);
+	if (salmon_dead_sound != nullptr)
+		Mix_FreeChunk(salmon_dead_sound);
+	if (salmon_eat_sound != nullptr)
+		Mix_FreeChunk(salmon_eat_sound);
 
-	//Mix_CloseAudio();
+	Mix_CloseAudio();
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -133,7 +134,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->scene_system.step();
 
-	return true;
 	// Updating window title with points
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;
@@ -142,90 +142,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
-
-	// Removing out of screen entities
-	auto& motions_registry = registry.motions;
-
-	//// now salmon can move on its own without pressing any keys
-	//Motion& motion = registry.motions.get(player_salmon);
-	//motion.position.x += 0.1f;
-	//motion.position.y += 0.1f;
-
-	//// water friction system
-	//float friction = 0.048f;
-
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-		Motion& motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motions_registry.entities[i]);
-		}
-	}
-
-	// spawn new eels
-	next_eel_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.deadlys.components.size() <= MAX_NUM_EELS && next_eel_spawn < 0.f) {
-		// reset timer
-		// next_eel_spawn = (EEL_SPAWN_DELAY_MS / 2) + uniform_dist(rng) * (EEL_SPAWN_DELAY_MS / 2);
-
-		// create Eel with random initial position
-		// createEel(renderer, vec2(window_width_px + 50, 50.f + uniform_dist(rng) * (window_width_px - 100.f)));
-	}
-
-	// spawn fish
-	next_fish_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.eatables.components.size() <= MAX_NUM_FISH && next_fish_spawn < 0.f) {
-		// !!!  TODO A1: create new fish with createFish({0,0}), see eels above
-		// reset timer
-		// next_fish_spawn = (FISH_SPAWN_DELAY_MS / 2) + uniform_dist(rng) * (FISH_SPAWN_DELAY_MS / 2);
-
-		// create Fish with random initial position
-		// createFish(renderer, vec2(window_width_px + 50, 50.f + uniform_dist(rng) * (window_width_px - 100.f)));
-	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A2: HANDLE EGG SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 2
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// Processing the salmon state
-	assert(registry.screenStates.components.size() <= 1);
-	ScreenState& screen = registry.screenStates.components[0];
-
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
-		DeathTimer& counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms) {
-			min_counter_ms = counter.counter_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if the salmon is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
-
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
-	for (Entity entity : registry.lightups.entities) {
-		LightUp& lightUp = registry.lightups.get(entity);
-		printf("light up = %f\n", lightUp.counter_ms);
-		lightUp.counter_ms -= elapsed_ms_since_last_update;
-		if (lightUp.counter_ms < 0.f) {
-			registry.lightups.remove(entity);
-		}
-	}
-
 	return true;
 }
 
@@ -246,24 +162,6 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Salmon
-	player_salmon = createSalmon(renderer, { 500, 500 });
-	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
-
-
-	// !! TODO A2: Enable static eggs on the ground, for reference
-	// Create eggs on the floor, use this for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity egg = createEgg({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
-					 { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(egg, { brightness, brightness, brightness});
-	}
-	*/
 }
 
 // Compute collisions between entities
@@ -336,140 +234,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	static int frame = 0;
-	static int frame_counter = 0;
-	const int frame_delay = 5;
-	PLAYER_TEXTURE_ASSET_ID walking_sideways[3] = {
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_2,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_3
-	};
-
-	PLAYER_TEXTURE_ASSET_ID walking_front[3] = {
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_FRONT_1,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_FRONT_2,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_FRONT_3
-	};
-
-	PLAYER_TEXTURE_ASSET_ID walking_back[3] = {
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_BACK_1,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_BACK_2,
-	PLAYER_TEXTURE_ASSET_ID::PLAYER_BACK_3
-	};
-
-	// Escape key: exit
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_G) {
+		scene_system.changeScene("game_scene");
+		//std::cout << "err here" << std::endl;
+		scene_system.pushScene();
+		return;
 	}
-
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-		restart_game();
-	}
-
-	// Debugging
-	if (key == GLFW_KEY_D) {
-		if (action == GLFW_RELEASE)
-			debugging.in_debug_mode = false;
-		else
-			debugging.in_debug_mode = true;
-	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
-
-	// Control direction of the salmon
-	if (action == GLFW_REPEAT && key == GLFW_KEY_UP) {
-		Motion& motion = registry.motions.get(player_salmon);
-		motion.position.y -= current_speed;
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_DOWN) {
-		Motion& motion = registry.motions.get(player_salmon);
-		motion.position.y += current_speed;
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_A) {
-		Motion& motion = registry.motions.get(player_salmon);
-		/*motion.position.x += current_speed * cos(motion.angle);
-		motion.position.y -= current_speed * sin(motion.angle);*/
-		motion.position.x -= current_speed;
-
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
-
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player_salmon);
-			texture.used_texture = walking_sideways[frame];
-
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
-		}
-
-		motion.scale.x = -abs(motion.scale.x);
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_D) {
-		Motion& motion = registry.motions.get(player_salmon);
-		/*motion.position.x += current_speed * cos(motion.angle);
-		motion.position.y -= current_speed * sin(motion.angle);*/
-		motion.position.x += current_speed;
-
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
-
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player_salmon);
-			texture.used_texture = walking_sideways[frame];
-
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
-		}
-		motion.scale.x = abs(motion.scale.x);
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_W) {
-		Motion& motion = registry.motions.get(player_salmon);
-		motion.position.y -= current_speed;
-
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
-
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player_salmon);
-			texture.used_texture = walking_back[frame];
-
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
-		}
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_S) {
-		Motion& motion = registry.motions.get(player_salmon);
-		motion.position.y += current_speed;
-
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
-
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player_salmon);
-			texture.used_texture = walking_front[frame];
-
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
-		}
-	}
+	scene_system.on_key(key, action, mod);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -481,8 +252,8 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 
-	Motion& salmon_motion = registry.motions.get(player_salmon);
-	vec2 direction = mouse_position - salmon_motion.position;
-	float angle = atan2(direction.y, direction.x);
-	salmon_motion.angle = -angle;
+	//Motion& salmon_motion = registry.motions.get(player_salmon);
+	//vec2 direction = mouse_position - salmon_motion.position;
+	//float angle = atan2(direction.y, direction.x);
+	//salmon_motion.angle = -angle;
 }

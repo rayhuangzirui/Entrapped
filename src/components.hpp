@@ -115,6 +115,12 @@ struct Mesh
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
+
+enum class TEXTURE_ASSET_ID {
+	FISH = 0,
+	EEL = FISH + 1,
+	TEXTURE_COUNT = EEL + 1
+};
 enum class PLAYER_TEXTURE_ASSET_ID {
 	PLAYER_1 = 0,
 	PLAYER_2 = PLAYER_1 + 1,

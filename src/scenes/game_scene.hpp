@@ -3,10 +3,15 @@
 #include "base_scene.hpp"
 #include "render_system.hpp"
 
-class MainMenu : public BaseScene {
+class GameScene : public BaseScene {
 public:
 	void initialize(RenderSystem* renderer);
 	void step(RenderSystem* renderer);
 	void destroy(RenderSystem* renderer);
 	void on_key(RenderSystem* renderer, int key, int action, int mod);
+private:
+    // Player state
+	float current_speed;
+	Entity player;
+	Entity createPlayer(RenderSystem* renderer, vec2 pos);
 };

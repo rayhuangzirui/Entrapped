@@ -139,7 +139,7 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 
-	createPlayer(renderer, vec2(300, 300));
+	//createPlayer(renderer, vec2(300, 300));
 
 	// Playing background music indefinitely
 	//Mix_PlayMusic(background_music, -1);

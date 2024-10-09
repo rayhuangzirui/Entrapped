@@ -100,8 +100,6 @@ void RenderSystem::initializeGlEffects()
 	{
 		const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
 		const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
-		std::cout << effect_paths[i] << std::endl;
-		std::cout << vertex_shader_name << std::endl;
 		bool is_valid = loadEffectFromFile(vertex_shader_name, fragment_shader_name, effects[i]);
 		assert(is_valid && (GLuint)effects[i] != 0);
 	}

@@ -4,9 +4,9 @@
 
 
 void GameScene::initialize(RenderSystem* renderer) {
-	player = createPlayer(renderer, { 500, 500 });
+	player = createPlayer(renderer, { 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
-	current_speed = 10.0f;
+	current_speed = 5.0f;
 	(RenderSystem*)renderer;
 }
 
@@ -134,26 +134,35 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SALMON);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
-	motion.angle = 0.f;
+	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = mesh.original_size * 500.f;
-	motion.scale.x *= 1; // point front to the right
+	motion.scale = vec2({ 0.6f * 165.f , 0.6f * 165.f });
 
-	// create an empty Salmon component for our character
-	registry.players.emplace(entity);
+	// create an empty Player component for our character
+	Player& player = registry.players.emplace(entity);
+	// Initialize health and ammo
+	player.health = 3;
+	player.ammo = 30;
+
+	// Add the Health component to the player entity with initial health of 100
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 100;
+
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::PLAYER_1, // TEXTURE_COUNT indicates that no texture is needed
-		// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
-	std::cout << "player successfully created" << std::endl;
+		{ TEXTURE_ASSET_ID::PLAYER_1,
+		//		{
+		//			PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
+					// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+
 	return entity;
 }
 

@@ -9,16 +9,21 @@
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include <iostream>
+#include <scenes/scene_system.hpp>
+#include <text_renderer.hpp>
 
 using Clock = std::chrono::high_resolution_clock;
 
 // Entry point
 int main()
 {
+	std::cout << "Main method entered" << std::endl;
 	// Global systems
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
+
 
 	// Initializing window
 	GLFWwindow* window = world.create_window();
@@ -32,6 +37,8 @@ int main()
 	// initialize the main systems
 	renderer.init(window);
 	world.init(&renderer);
+	//TextRenderer text_renderer;
+	//text_renderer.loadFont();
 
 	// variable timestep loop
 	auto t = Clock::now();

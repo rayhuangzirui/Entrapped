@@ -6,6 +6,7 @@
 #include "common.hpp"
 #include "components.hpp"
 #include "tiny_ecs.hpp"
+#include <text_renderer.hpp>
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
@@ -40,7 +41,9 @@ class RenderSystem {
 		shader_path("egg"),
 		shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water") };
+		shader_path("water"),
+		shader_path("text")
+	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
@@ -74,13 +77,20 @@ public:
 
 	mat3 createProjectionMatrix();
 
+	// Text renderer
+	TextRenderer text_renderer;
+
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
+	void drawText(Entity entity, const mat3& projection);
 	void drawToScreen();
 
 	// Window handle
 	GLFWwindow* window;
+
+	// Text renderer
+	//TextRenderer text_renderer;
 
 	// Screen texture handles
 	GLuint frame_buffer;

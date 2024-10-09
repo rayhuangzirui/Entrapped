@@ -60,6 +60,9 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 
+    // text renderer
+	this->text_renderer.loadFont();
+
 	return true;
 }
 
@@ -223,6 +226,22 @@ void RenderSystem::initializeGlGeometryBuffers()
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> screen_indices = { 0, 1, 2 };
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
+
+	//////////////////////////
+	//// Initialize Text
+	//GLfloat vertices[6][4] = {
+	//		{ -1.f/2,     1.f/2,   0.0, 0.0 },
+	//		{ -1.f / 2,     -1.f / 2,       0.0, 1.0 },
+	//		{ 1.f / 2, -1.f / 2,       1.0, 1.0 },
+
+	//		{ -1.f / 2,     1.f / 2,   0.0, 0.0 },
+	//		{ 1.f / 2, -1.f / 2,       1.0, 1.0 },
+	//		{ 1.f / 2, 1.f / 2,   1.0, 0.0 }
+	//};
+
+	//// Counterclockwise as it's the default opengl front winding direction.
+	//const std::vector<uint16_t> textured_indices = { 2, 1, 0, 5, 4, 3 };
+	//bindVBOandIBO(GEOMETRY_BUFFER_ID::TEXT, textured_vertices, textured_indices);
 }
 
 RenderSystem::~RenderSystem()

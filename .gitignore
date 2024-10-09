@@ -3,6 +3,3 @@
 
 # Ignore output folder
 out/
-
-# Ignore external folder
-ext/

@@ -26,6 +26,9 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::PLAYER,
+//		{
+//			PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
+			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -57,6 +60,8 @@ Entity createEnemy(RenderSystem* renderer, vec2 position)
 		entity,
 		{
 			TEXTURE_ASSET_ID::ENEMY, 
+			// PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
+			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE
 		});

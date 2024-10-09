@@ -2,6 +2,7 @@
 #include "world_system.hpp"
 #include "world_init.hpp"
 
+
 // stlib
 #include <cassert>
 #include <sstream>
@@ -26,7 +27,7 @@ WorldSystem::WorldSystem()
 }
 
 WorldSystem::~WorldSystem() {
-	
+
 	// destroy music components
 	if (background_music != nullptr)
 		Mix_FreeMusic(background_music);
@@ -54,7 +55,7 @@ WorldSystem::~WorldSystem() {
 
 // Debugging
 namespace {
-	void glfw_err_cb(int error, const char *desc) {
+	void glfw_err_cb(int error, const char* desc) {
 		fprintf(stderr, "%d: %s", error, desc);
 	}
 }
@@ -101,6 +102,7 @@ GLFWwindow* WorldSystem::create_window() {
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
+  // MERGE TODO: move this part to game scene
 	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
 		fprintf(stderr, "Failed to initialize SDL Audio");
 		return nullptr;
@@ -110,9 +112,9 @@ GLFWwindow* WorldSystem::create_window() {
 		return nullptr;
 	}
 
-	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
-	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str()); // replace with player dead sound
-	//salmon_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
+  background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
+  player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
+	player_eat_sound = Mix_LoadWAV(audio_path("eat_sound.wav").c_str());
 	
 	// TODO: Sound effects are not added to the audio path yet
 	enemy_dead_sound = Mix_LoadWAV(audio_path("enemy_dead.wav").c_str());
@@ -123,8 +125,9 @@ GLFWwindow* WorldSystem::create_window() {
 	if (background_music == nullptr || player_dead_sound == nullptr || enemy_dead_sound == nullptr
 		|| enemy_hit_sound == nullptr || bullet_hit_sound == nullptr || bullet_fire_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("music.wav").c_str(),
+			audio_path("bgm.wav").c_str(),
 			audio_path("death_sound.wav").c_str(),
+      audio_path("eat_sound.wav").c_str()
 			audio_path("enemy_dead.wav").c_str(),
 			audio_path("enemy_hit.wav").c_str(),
 			audio_path("bullet_hit.wav").c_str(),
@@ -138,15 +141,19 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
+	//Mix_PlayMusic(background_music, -1);
+	//fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
-    restart_game();
+  //restart_game();
+	this->scene_system.initialize(this->renderer);
+	this->scene_system.pushScene();
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
+  this->scene_system.step();
+  
 	// Updating window title: Entrapped
 	std::stringstream title_ss;
 	title_ss << "Entrapped";
@@ -154,59 +161,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
-	    registry.remove_all_components_of(registry.debugComponents.entities.back());
-	
-
-	// spawn new enemies as A1 eels
-	// TODO: change the enemy spawn logic
-	next_enemy_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.deadlys.components.size() <= MAX_NUM_EELS && next_enemy_spawn < 0.f) {
-		// reset timer
-		next_enemy_spawn = (ENEMY_SPAWN_DELAY_MS / 2) + uniform_dist(rng) * (ENEMY_SPAWN_DELAY_MS / 2);
-
-		// create a new enemy at the right of the screen
-		createEnemy(renderer, vec2(window_width_px + 30.f, 50.f + uniform_dist(rng) * (window_width_px - 100.f)));
-	}
-
-	// Processing the salmon state
-	assert(registry.screenStates.components.size() <= 1);
-    ScreenState &screen = registry.screenStates.components[0];
-
-    float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
-		DeathTimer& counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if(counter.counter_ms < min_counter_ms){
-		    min_counter_ms = counter.counter_ms;
-		}
-
-		std::cout << "Death timer: " << counter.counter_ms << " ms" << std::endl;
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-            restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if the player is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
-
-	// update LightUp timers and remove if time drops below zero, similar to the death counter
-	for (Entity entity : registry.lightUps.entities) {
-		// progress timer
-		LightUp& counter = registry.lightUps.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-
-		std::cout << "LightUp timer: " << counter.counter_ms << " ms" << std::endl;
-
-		if (counter.counter_ms < 0) {
-			registry.lightUps.remove(entity); // remove the light up effect when timer ends
-		}
-
-	}
+	registry.remove_all_components_of(registry.debugComponents.entities.back());
 	return true;
 }
 
@@ -222,17 +177,11 @@ void WorldSystem::restart_game() {
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, eels, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
-	    registry.remove_all_components_of(registry.motions.entities.back());
+		registry.remove_all_components_of(registry.motions.entities.back());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// create a new Player entity
-	
-	// Player should be created at the beginning of the maze(currently set to the top-left corner of the screen)
-	player_entity = createPlayer(renderer, {0, 0});
-
-	registry.colors.insert(player_entity, { 1, 0.8f, 0.8f });
 }
 
 // Compute collisions between entities
@@ -244,6 +193,7 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
+    // MERGE TODO
 		// Player & Enemy collision: Enemy attacks the player, player loses 1 health, if health is 0, player dies
 		if (registry.players.has(entity)) {
 			if (registry.enemies.has(entity_other)) {
@@ -357,69 +307,13 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// Handling salmon movement
-	Motion& salmon_motion = registry.motions.get(player_entity);
-	if (action == GLFW_PRESS || action == GLFW_RELEASE) {
-		// Invalidate the directional keys if the salmon is dying
-		// Setting the velocity to 0 if the key is released
-		float velocity = (action == GLFW_PRESS) ? 200.f : 0.f;
-
-		if (key == GLFW_KEY_UP) {
-			if (registry.deathTimers.has(player_entity))
-				return;
-			salmon_motion.velocity.y = -velocity;
-		}
-		if (key == GLFW_KEY_DOWN) {
-			if (registry.deathTimers.has(player_entity))
-				return;
-			salmon_motion.velocity.y = velocity;
-		}
-
-		if (key == GLFW_KEY_LEFT) {
-			if (registry.deathTimers.has(player_entity))
-				return;
-			salmon_motion.velocity.x = cos(salmon_motion.angle) * velocity;
-			salmon_motion.velocity.y = sin(salmon_motion.angle) * velocity;
-		}
-		if (key == GLFW_KEY_RIGHT) {
-			if (registry.deathTimers.has(player_entity))
-				return;
-			salmon_motion.velocity.x = cos(salmon_motion.angle) * -velocity;
-			salmon_motion.velocity.y = sin(salmon_motion.angle) * -velocity;
-		}
+	if (action == GLFW_RELEASE && key == GLFW_KEY_G) {
+		scene_system.changeScene("game_scene");
+		//std::cout << "err here" << std::endl;
+		scene_system.pushScene();
+		return;
 	}
-
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-        restart_game();
-	}
-
-	// Debugging
-	if (key == GLFW_KEY_D) {
-		if (action == GLFW_RELEASE)
-			debugging.in_debug_mode = false;
-		else
-			debugging.in_debug_mode = true;
-	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
-
-	// Handle closing the window by pressing ESC
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GL_TRUE);
+	scene_system.on_key(key, action, mod);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -430,4 +324,9 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
 	(vec2)mouse_position; // dummy to avoid compiler warning
+
+	//Motion& salmon_motion = registry.motions.get(player_salmon);
+	//vec2 direction = mouse_position - salmon_motion.position;
+	//float angle = atan2(direction.y, direction.x);
+	//salmon_motion.angle = -angle;
 }

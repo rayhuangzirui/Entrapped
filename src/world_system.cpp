@@ -1,6 +1,7 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
+#include "maze.hpp"
 
 // stlib
 #include <cassert>
@@ -13,6 +14,9 @@ const size_t MAX_NUM_EELS = 15;
 const size_t MAX_NUM_FISH = 5;
 const size_t EEL_SPAWN_DELAY_MS = 2000 * 3;
 const size_t FISH_SPAWN_DELAY_MS = 5000 * 3;
+
+//For the maze
+const int cell_size = 48;
 
 // create the underwater world
 WorldSystem::WorldSystem()
@@ -123,6 +127,19 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	// Set all states to default
     restart_game();
+
+	//initialize the maze
+	    for (int y = 0; y < MAZE_HEIGHT; ++y) {
+        for (int x = 0; x < MAZE_WIDTH; ++x) {
+            if (maze[y][x] == 1) {
+                // Create a wall at this grid position
+                vec2 wall_position = vec2(x * cell_size, y * cell_size);
+				vec2 wall_size = vec2(cell_size, cell_size); // this is a dummy value for now
+                createWall(renderer, wall_position, wall_size); //create wall function needs to be implemented
+            }
+        }
+    }
+
 }
 
 // Update our game world

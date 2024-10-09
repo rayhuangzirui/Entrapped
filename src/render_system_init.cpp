@@ -223,6 +223,23 @@ void RenderSystem::initializeGlGeometryBuffers()
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> screen_indices = { 0, 1, 2 };
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
+
+	std::vector<ColoredVertex> square_vertices(4);
+    square_vertices[0].position = { -1.f/2, +1.f/2, 0.f };  // Top-left
+    square_vertices[1].position = { +1.f/2, +1.f/2, 0.f };  // Top-right
+    square_vertices[2].position = { +1.f/2, -1.f/2, 0.f };  // Bottom-right
+    square_vertices[3].position = { -1.f/2, -1.f/2, 0.f };  // Bottom-left
+
+    // Assign the color for each vertex (black, as an example)
+    for (int i = 0; i < 4; i++) {
+    square_vertices[i].color = {0.f, 0.f, 0.f};  // Black
+    }
+
+    // Two triangles to form the square
+    std::vector<uint16_t> square_indices = { 0, 1, 2, 0, 2, 3 };
+
+    // Bind geometry for the wall (square)
+    bindVBOandIBO(GEOMETRY_BUFFER_ID::SQUARE, square_vertices, square_indices);
 }
 
 RenderSystem::~RenderSystem()

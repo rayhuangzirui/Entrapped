@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #include "tiny_ecs_registry.hpp"
+#include <iostream>
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
@@ -94,8 +95,39 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			gl_has_errors();
 		}
 	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::COLOURED)
+	{
+	 GLint in_position_loc = glGetAttribLocation(program, "in_position");
+    GLint in_color_loc = glGetAttribLocation(program, "in_color");
+    gl_has_errors();
+
+    glEnableVertexAttribArray(in_position_loc);
+    glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(ColoredVertex), (void *)0);
+    gl_has_errors();
+
+    glEnableVertexAttribArray(in_color_loc);
+    glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+                          sizeof(ColoredVertex), (void *)sizeof(vec3));
+    gl_has_errors();
+
+    // setticng the color
+    if (registry.colors.has(entity)) {
+        const vec3 color = registry.colors.get(entity);
+        glUniform3fv(glGetUniformLocation(program, "fcolor"), 1, (float *)&color);
+    } else {
+        vec3 default_color = vec3(0.f, 0.f, 0.f);  // Default to black
+        glUniform3fv(glGetUniformLocation(program, "fcolor"), 1, (float *)&default_color);
+    }
+	}
+	
 	else
 	{
+	std::cerr << "Unsupported RenderRequest encountered!" << std::endl;
+    std::cerr << "RenderRequest used_effect: " << (GLuint)render_request.used_effect << std::endl;
+    std::cerr << "RenderRequest used_texture: " << (GLuint)render_request.used_texture << std::endl;
+    std::cerr << "RenderRequest used_geometry: " << (GLuint)render_request.used_geometry << std::endl;
+
 		assert(false && "Type of render request not supported");
 	}
 

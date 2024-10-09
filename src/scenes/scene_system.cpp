@@ -1,19 +1,28 @@
 #include "scene_system.hpp"
 #include <iostream>
+#include "main_menu.cpp"
 
 SceneSystem::SceneSystem() {
-	current_scene = createMainMenuScene();
+	this->current_scene = new MainMenu();
 	std::cout << ">>> Scene System Initialized" << std::endl;
 }
 
-Entity createMainMenuScene() {
-	auto entity = Entity();
-
-	return entity;
+SceneSystem::~SceneSystem() {
+	delete this->current_scene;
 }
 
-Entity createGameScene() {
-	auto entity = Entity();
+void SceneSystem::initialize(RenderSystem* renderer) {
+	this->renderer = renderer;
+}
 
-	return entity;
+void SceneSystem::pushScene() {
+	current_scene->initialize(this->renderer);
+}
+
+void SceneSystem::step() {
+	current_scene->step(this->renderer);
+}
+
+void SceneSystem::popScene() {
+	current_scene->destroy(this->renderer);
 }

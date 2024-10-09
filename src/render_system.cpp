@@ -335,7 +335,7 @@ void RenderSystem::draw()
 		// albeit iterating through all Sprites in sequence. A good point to optimize
 
 		if (!registry.texts.has(entity)) {
-			//drawTexturedMesh(entity, projection_2D);
+			drawTexturedMesh(entity, projection_2D);
 		}
 		else {
 			drawText(entity, projection_2D);

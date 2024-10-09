@@ -118,15 +118,20 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
+	//Mix_PlayMusic(background_music, -1);
+	//fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
-    restart_game();
+    //restart_game();
+	this->scene_system.initialize(this->renderer);
+	this->scene_system.pushScene();
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
+	this->scene_system.step();
+
+	return true;
 	// Updating window title with points
 	std::stringstream title_ss;
 	title_ss << "Points: " << points;

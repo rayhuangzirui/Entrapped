@@ -19,7 +19,6 @@ using Clock = std::chrono::high_resolution_clock;
 int main()
 {
 	std::cout << "Main method entered" << std::endl;
-	SceneSystem scene_system;
 	// Global systems
 	WorldSystem world;
 	RenderSystem renderer;
@@ -38,11 +37,6 @@ int main()
 	// initialize the main systems
 	renderer.init(window);
 	world.init(&renderer);
-
-	renderer.text_renderer.createText("Main Menu", { 50.f, window_height_px - 200.f }, 40.f, {1.f, 1.f, 1.f});
-	renderer.text_renderer.createText("New Game", { 50.f, window_height_px - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-	renderer.text_renderer.createText("Upgrades", { 50.f, window_height_px - 110.f }, 20.f, { 1.f, 1.f, 1.f });
-	renderer.text_renderer.createText("Quit", { 50.f, window_height_px - 80.f }, 20.f, { 1.f, 1.f, 1.f });
 	//TextRenderer text_renderer;
 	//text_renderer.loadFont();
 

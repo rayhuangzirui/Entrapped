@@ -288,11 +288,7 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Handle Salmon Movement
 	Motion& motion = registry.motions.get(player_salmon);
 
 	static bool isSprinting = false;  // Flag to check if sprint is active
@@ -314,6 +310,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
 			isSprinting = true;  // Start sprinting
+			break;
+		case GLFW_KEY_SPACE:  // Dash
+			if (!registry.dashTimers.has(player_salmon)) {
+				registry.dashTimers.emplace(player_salmon, DashTimer{ 200.f }); // Dash for 200 ms
+				motion.velocity *= 2.5f; // Increase velocity to dash speed (e.g., 2.5x normal speed)
+			}
 			break;
 		}
 	}
@@ -373,23 +375,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		else
 			debugging.in_debug_mode = true;
 	}
-
-	// Removed the original speed adjustment code here
-
-	// Commented-out original speed control
-	/*
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
-	*/
 }
+
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A1: HANDLE SALMON ROTATION HERE

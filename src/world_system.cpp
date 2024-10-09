@@ -24,7 +24,7 @@ WorldSystem::WorldSystem()
 }
 
 WorldSystem::~WorldSystem() {
-	
+
 	// destroy music components
 	if (background_music != nullptr)
 		Mix_FreeMusic(background_music);
@@ -44,7 +44,7 @@ WorldSystem::~WorldSystem() {
 
 // Debugging
 namespace {
-	void glfw_err_cb(int error, const char *desc) {
+	void glfw_err_cb(int error, const char* desc) {
 		fprintf(stderr, "%d: %s", error, desc);
 	}
 }
@@ -125,7 +125,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
-    restart_game();
+	restart_game();
 }
 
 // Update our game world
@@ -137,7 +137,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
-	    registry.remove_all_components_of(registry.debugComponents.entities.back());
+		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
@@ -145,10 +145,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size()-1; i>=0; --i) {
-	    Motion& motion = motions_registry.components[i];
+	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+		Motion& motion = motions_registry.components[i];
 		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if(!registry.players.has(motions_registry.entities[i])) // don't remove the player
+			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
@@ -160,7 +160,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		next_eel_spawn = (EEL_SPAWN_DELAY_MS / 2) + uniform_dist(rng) * (EEL_SPAWN_DELAY_MS / 2);
 
 		// create Eel with random initial position
-        createEel(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), 100.f));
+		createEel(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), 100.f));
 	}
 
 	// spawn fish
@@ -176,22 +176,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Processing the salmon state
 	assert(registry.screenStates.components.size() <= 1);
-    ScreenState &screen = registry.screenStates.components[0];
+	ScreenState& screen = registry.screenStates.components[0];
 
-    float min_counter_ms = 3000.f;
+	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
 		// progress timer
 		DeathTimer& counter = registry.deathTimers.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
-		if(counter.counter_ms < min_counter_ms){
-		    min_counter_ms = counter.counter_ms;
+		if (counter.counter_ms < min_counter_ms) {
+			min_counter_ms = counter.counter_ms;
 		}
 
 		// restart the game once the death timer expired
 		if (counter.counter_ms < 0) {
 			registry.deathTimers.remove(entity);
 			screen.darken_screen_factor = 0;
-            restart_game();
+			restart_game();
 			return true;
 		}
 	}
@@ -215,17 +215,14 @@ void WorldSystem::restart_game() {
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all fish, eels, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
-	    registry.remove_all_components_of(registry.motions.entities.back());
+		registry.remove_all_components_of(registry.motions.entities.back());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
 	// create a new player in the salmon sprite
-	player_salmon = createSalmon(renderer, { window_width_px/2, window_height_px - 200 });
-	registry.colors.insert(player_salmon, {1, 0.8f, 0.8f});
-
-	// Spawn an enemy (with eel sprite asset: need changing) in the middle of the screen
-	createEnemy(renderer, { window_width_px / 2, window_height_px / 2 });
+	player_salmon = createSalmon(renderer, { window_width_px / 2, window_height_px - 200 });
+	registry.colors.insert(player_salmon, { 1, 0.8f, 0.8f });
 
 	// !! TODO A2: Enable static eggs on the ground, for reference
 	// Create eggs on the floor, use this for reference
@@ -235,7 +232,7 @@ void WorldSystem::restart_game() {
 		glfwGetWindowSize(window, &w, &h);
 		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
 		Entity egg = createEgg({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
-			         { radius, radius });
+					 { radius, radius });
 		float brightness = uniform_dist(rng) * 0.5 + 0.5;
 		registry.colors.insert(egg, { brightness, brightness, brightness});
 	}
@@ -289,12 +286,6 @@ bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));
 }
 
-
-// Should the game be over ?
-bool WorldSystem::is_over() const {
-	return bool(glfwWindowShouldClose(window));
-}
-
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -303,6 +294,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	Motion& motion = registry.motions.get(player_salmon);
+
+	static bool isSprinting = false;  // Flag to check if sprint is active
 
 	// Use WASD keys to control movement
 	if (action == GLFW_PRESS) {
@@ -340,6 +333,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
+	// Apply sprint effect if active
 	if (isSprinting) {
 		if (motion.velocity.x != 0) {
 			motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;  // Double horizontal speed
@@ -364,13 +358,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 
-        restart_game();
+		restart_game();
 	}
 
 	// Debugging
@@ -381,18 +374,22 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			debugging.in_debug_mode = true;
 	}
 
-	// Control the current speed with `<` `>`
-	//if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-	//	current_speed -= 0.1f;
-	//	printf("Current speed = %f\n", current_speed);
-	//}
-	//if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-	//	current_speed += 0.1f;
-	//	printf("Current speed = %f\n", current_speed);
-	//}
-	//current_speed = fmax(0.f, current_speed);
-}
+	// Removed the original speed adjustment code here
 
+	// Commented-out original speed control
+	/*
+	// Control the current speed with `<` `>`
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
+		current_speed -= 0.1f;
+		printf("Current speed = %f\n", current_speed);
+	}
+	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
+		current_speed += 0.1f;
+		printf("Current speed = %f\n", current_speed);
+	}
+	current_speed = fmax(0.f, current_speed);
+	*/
+}
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A1: HANDLE SALMON ROTATION HERE

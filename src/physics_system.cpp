@@ -26,51 +26,51 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
+const float DASH_MULTIPLIER = 5.0f;
+
 void PhysicsSystem::step(float elapsed_ms)
 {
-	// Move [Enemy] based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
-	auto& motion_registry = registry.motions;
-	for(uint i = 0; i< motion_registry.size(); i++)
-	{
-		// update motion.position based on step_seconds and motion.velocity
-		Motion& motion = motion_registry.components[i];
-		Entity entity = motion_registry.entities[i];
-		float step_seconds = elapsed_ms / 1000.f;
+    // Move fish based on how much time has passed, this is to (partially) avoid
+    // having entities move at different speed based on the machine.
+    auto& motion_registry = registry.motions;
+    float step_seconds = elapsed_ms / 1000.f;
 
-		// Dummy enemy move from right to left with a constant velocity
-		// TODO: Apply simple AI for enemy movement
-		if (registry.enemies.has(registry.motions.entities[i]))
-		{
-			motion.velocity.x = -150.f;
-			motion.velocity.y = 0;
-		}
+    for (uint i = 0; i < motion_registry.components.size(); i++) {
+        Motion& motion = motion_registry.components[i];
 
-		// Player moves by keys input, with a constant velocity, handled in the input system
+        // Handle dash effect if a DashTimer exists
+        if (registry.dashTimers.has(motion_registry.entities[i])) {
+            DashTimer& dash = registry.dashTimers.get(motion_registry.entities[i]);
+            motion.position += (motion.velocity * DASH_MULTIPLIER) * step_seconds;
 
-		motion.position += motion.velocity * step_seconds;
-	}
+            // Update dash timer
+            dash.counter_ms -= elapsed_ms;
+            if (dash.counter_ms <= 0) {
+                registry.dashTimers.remove(motion_registry.entities[i]);
+            }
+        }
+        else {
+            motion.position += motion.velocity * step_seconds;
+        }
+    }
 
-	// Check for collisions between all moving entities
-    ComponentContainer<Motion> &motion_container = registry.motions;
-	for(uint i = 0; i<motion_container.components.size(); i++)
-	{
-		Motion& motion_i = motion_container.components[i];
-		Entity entity_i = motion_container.entities[i];
-		
-		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for(uint j = i+1; j<motion_container.components.size(); j++)
-		{
-			Motion& motion_j = motion_container.components[j];
-			if (collides(motion_i, motion_j))
-			{
-				Entity entity_j = motion_container.entities[j];
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-			}
-		}
-	}
+    // Check for collisions between all moving entities
+    ComponentContainer<Motion>& motion_container = registry.motions;
+    for (uint i = 0; i < motion_container.components.size(); i++) {
+        Motion& motion_i = motion_container.components[i];
+        Entity entity_i = motion_container.entities[i];
 
+        // Note starting j at i+1 to compare all (i, j) pairs only once (and to not compare with itself)
+        for (uint j = i + 1; j < motion_container.components.size(); j++) {
+            Motion& motion_j = motion_container.components[j];
+            if (collides(motion_i, motion_j)) {
+                Entity entity_j = motion_container.entities[j];
+
+                // Create a collisions event
+                // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
+                registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+                registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+            }
+        }
+    }
 }

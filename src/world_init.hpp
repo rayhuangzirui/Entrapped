@@ -10,7 +10,6 @@ const float PLAYER_BB_WIDTH = 0.6f * 165.f;
 const float PLAYER_BB_HEIGHT = 0.6f * 165.f;
 const float ENEMY_BB_WIDTH = 0.6f * 165.f;
 const float ENEMY_BB_HEIGHT = 0.6f * 165.f;
-
 const float BULLET_BB_WIDTH = 10.f;
 const float BULLET_BB_HEIGHT = 10.f;
 

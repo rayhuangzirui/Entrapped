@@ -26,6 +26,8 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<Text> texts;
 	ComponentContainer<vec3> colors;
+	ComponentContainer<Health> healths;  // Adding Health component container
+	ComponentContainer<DashTimer> dashTimers;
 	ComponentContainer<LightUp> lightups;
 
 	// Add bullet container and enemy container
@@ -51,6 +53,8 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&texts);
 		registry_list.push_back(&colors);
+		registry_list.push_back(&healths);	// Register the new Health component container
+		registry_list.push_back(&dashTimers);
 		// Add bullet container and enemy container to the registry
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&enemies);

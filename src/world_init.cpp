@@ -22,6 +22,10 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	// Initialize health and ammo
 	player.health = 3;
 	player.ammo = 30;
+  
+  // Add the Health component to the player entity with initial health of 100
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 100;
 
 	registry.renderRequests.insert(
 		entity,

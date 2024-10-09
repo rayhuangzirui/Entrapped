@@ -37,6 +37,14 @@ struct Enemy
 	int damage = 1;
 };
 
+struct Health {
+	int current_health;  // Health points of an entity
+};
+
+struct DashTimer {
+	float counter_ms;  // Duration of dash in milliseconds
+};
+
 // anything that is deadly to the player
 struct Deadly
 {

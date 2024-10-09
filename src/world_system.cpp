@@ -138,6 +138,9 @@ GLFWwindow* WorldSystem::create_window() {
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
+
+	createPlayer(renderer, vec2(300, 300));
+
 	// Playing background music indefinitely
 	//Mix_PlayMusic(background_music, -1);
 	//fprintf(stderr, "Loaded music\n");
@@ -300,6 +303,95 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
+// MERGE TODO
+// 	// Handle Salmon Movement
+// 	Motion& motion = registry.motions.get(player_salmon);
+
+// 	static bool isSprinting = false;  // Flag to check if sprint is active
+
+// 	// Use WASD keys to control movement
+// 	if (action == GLFW_PRESS) {
+// 		switch (key) {
+// 		case GLFW_KEY_W:
+// 			motion.velocity.y = -PLAYER_SPEED;  // Upward
+// 			break;
+// 		case GLFW_KEY_S:
+// 			motion.velocity.y = PLAYER_SPEED;   // Downward
+// 			break;
+// 		case GLFW_KEY_A:
+// 			motion.velocity.x = -PLAYER_SPEED;  // Leftward
+// 			break;
+// 		case GLFW_KEY_D:
+// 			motion.velocity.x = PLAYER_SPEED;   // Rightward
+// 			break;
+// 		case GLFW_KEY_LEFT_SHIFT:
+// 			isSprinting = true;  // Start sprinting
+// 			break;
+// 		case GLFW_KEY_SPACE:  // Dash
+// 			if (!registry.dashTimers.has(player_salmon)) {
+// 				registry.dashTimers.emplace(player_salmon, DashTimer{ 200.f }); // Dash for 200 ms
+// 				motion.velocity *= 2.5f; // Increase velocity to dash speed (e.g., 2.5x normal speed)
+// 			}
+// 			break;
+// 		}
+// 	}
+// 	else if (action == GLFW_RELEASE) {
+// 		switch (key) {
+// 		case GLFW_KEY_W:
+// 		case GLFW_KEY_S:
+// 			motion.velocity.y = 0.f;  // Stop moving vertically
+// 			break;
+// 		case GLFW_KEY_A:
+// 		case GLFW_KEY_D:
+// 			motion.velocity.x = 0.f;  // Stop moving horizontally
+// 			break;
+// 		case GLFW_KEY_LEFT_SHIFT:
+// 			isSprinting = false;  // Stop sprinting
+// 			break;
+// 		}
+// 	}
+
+// 	// Apply sprint effect if active
+// 	if (isSprinting) {
+// 		if (motion.velocity.x != 0) {
+// 			motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;  // Double horizontal speed
+// 		}
+// 		if (motion.velocity.y != 0) {
+// 			motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;  // Double vertical speed
+// 		}
+// 	}
+// 	else {
+// 		// Reset speed if not sprinting and direction key is pressed
+// 		if (motion.velocity.x > PLAYER_SPEED) {
+// 			motion.velocity.x = PLAYER_SPEED;
+// 		}
+// 		else if (motion.velocity.x < -PLAYER_SPEED) {
+// 			motion.velocity.x = -PLAYER_SPEED;
+// 		}
+// 		if (motion.velocity.y > PLAYER_SPEED) {
+// 			motion.velocity.y = PLAYER_SPEED;
+// 		}
+// 		else if (motion.velocity.y < -PLAYER_SPEED) {
+// 			motion.velocity.y = -PLAYER_SPEED;
+// 		}
+// 	}
+
+// 	// Resetting game
+// 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
+// 		int w, h;
+// 		glfwGetWindowSize(window, &w, &h);
+
+// 		restart_game();
+// 	}
+
+// 	// Debugging
+// 	if (key == GLFW_KEY_D) {
+// 		if (action == GLFW_RELEASE)
+// 			debugging.in_debug_mode = false;
+// 		else
+// 			debugging.in_debug_mode = true;
+// 	}
+
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A1: HANDLE SALMON MOVEMENT HERE
 	// key is of 'type' GLFW_KEY_
@@ -322,9 +414,4 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
 	(vec2)mouse_position; // dummy to avoid compiler warning
-
-	//Motion& salmon_motion = registry.motions.get(player_salmon);
-	//vec2 direction = mouse_position - salmon_motion.position;
-	//float angle = atan2(direction.y, direction.x);
-	//salmon_motion.angle = -angle;
 }

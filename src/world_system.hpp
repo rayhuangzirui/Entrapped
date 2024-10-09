@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include <scenes/scene_system.hpp>
 
 //Adjust here: gloabl constant for player speed
 const float PLAYER_SPEED = 200.f;  // Adjust as needed for proper movement speed
@@ -39,13 +40,16 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
+	// Shoot a bullet logic
+	void shoot_bullet();
+
 	// Should the game be over ?
 	bool is_over()const;
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
-
+	SceneSystem scene_system;
 	// restart level
 	void restart_game();
 
@@ -53,22 +57,26 @@ private:
 	GLFWwindow* window;
 
 	// Number of fish eaten by the salmon, displayed in the window title
-	unsigned int points;
+	//unsigned int points;// no longer needed
 
 	// Game state
 	RenderSystem* renderer;
 	float current_speed;
-	float next_eel_spawn;
-	float next_fish_spawn;
-	Entity player_salmon;
+	float next_enemy_spawn;
+	
+	Entity player_entity;
 
 	// Sprint flag to check if sprinting
 	bool isSprinting;
 
 	// music references
 	Mix_Music* background_music;
-	Mix_Chunk* salmon_dead_sound;
-	Mix_Chunk* salmon_eat_sound;
+	Mix_Chunk* player_dead_sound; 
+
+	Mix_Chunk* enemy_dead_sound;
+	Mix_Chunk* enemy_hit_sound;
+	Mix_Chunk* bullet_hit_sound;
+	Mix_Chunk* bullet_fire_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

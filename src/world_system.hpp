@@ -36,6 +36,9 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
+	// Shoot a bullet logic
+	void shoot_bullet();
+
 	// Should the game be over ?
 	bool is_over()const;
 private:
@@ -50,19 +53,23 @@ private:
 	GLFWwindow* window;
 
 	// Number of fish eaten by the salmon, displayed in the window title
-	unsigned int points;
+	//unsigned int points;// no longer needed
 
 	// Game state
 	RenderSystem* renderer;
 	float current_speed;
-	float next_eel_spawn;
-	float next_fish_spawn;
-	Entity player_salmon;
+	float next_enemy_spawn;
+	
+	Entity player_entity;
 
 	// music references
 	Mix_Music* background_music;
-	Mix_Chunk* salmon_dead_sound;
-	Mix_Chunk* salmon_eat_sound;
+	Mix_Chunk* player_dead_sound; 
+
+	Mix_Chunk* enemy_dead_sound;
+	Mix_Chunk* enemy_hit_sound;
+	Mix_Chunk* bullet_hit_sound;
+	Mix_Chunk* bullet_fire_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

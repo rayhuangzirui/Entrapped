@@ -7,19 +7,46 @@
 // Player component
 struct Player
 {
+	// Player's health
+	int health = 3;
 
+	// Player's initial ammo, associated with a weapon but currently associated with the player
+	int ammo = 30;
+
+	// Player's Profession may be used in the future
+	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+};
+
+// Bullet component
+struct Bullet
+{
+	// Bullet's damage
+	int damage = 1;
+
+	// Initializer of the bullet
+	Bullet(int dmg) : damage(dmg) {};
+};
+
+// Enemy component
+struct Enemy
+{
+	// Enemy's health
+	int health = 2;
+	
+	// Enemy's damage
+	int damage = 1;
 };
 
 // anything that is deadly to the player
 struct Deadly
 {
-
+	// A1 code
 };
 
 // anything the player can eat
 struct Eatable
 {
-
+	// A1 code
 };
 
 // component used to render text
@@ -66,6 +93,18 @@ struct DebugComponent
 struct DeathTimer
 {
 	float counter_ms = 3000;
+};
+
+// Added LightUp component: A timer that will be associated with the salmon lighting up after eating a fish
+struct LightUp
+{
+	float counter_ms = 500; // light up for 0.5 second
+};
+
+// A timer that will be associated with the knockback of the enemy
+struct KnockbackTimer
+{
+	float counter_ms = 100.f; // knockback for 0.1 second
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -117,9 +156,9 @@ struct Mesh
 
 
 enum class TEXTURE_ASSET_ID {
-	FISH = 0,
-	EEL = FISH + 1,
-	TEXTURE_COUNT = EEL + 1
+	PLAYER = 0,
+	ENEMY = PLAYER + 1,
+	TEXTURE_COUNT = ENEMY + 1
 };
 enum class PLAYER_TEXTURE_ASSET_ID {
 	PLAYER_1 = 0,
@@ -197,7 +236,9 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	TEXT = WATER + 1,
-	EFFECT_COUNT = TEXT + 1,
+  BULLET = TEXT + 1,
+  MAZE = BULLET + 1,
+	EFFECT_COUNT = MAZE + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -209,7 +250,9 @@ enum class GEOMETRY_BUFFER_ID {
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	PLAYER = SCREEN_TRIANGLE + 1,
   TEXT = PLAYER + 1,
-	GEOMETRY_COUNT = TEXT + 1
+  BULLET = TEXT + 1,
+  MAZE = BULLET + 1,
+	GEOMETRY_COUNT = MAZE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

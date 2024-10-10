@@ -1,11 +1,9 @@
 #version 330
 
-uniform vec3 color;
-
-// Output color
-layout(location = 0) out vec4 out_color;
+in vec3 fcolor;  // Color passed from vertex shader
+out vec4 FragColor;
 
 void main()
 {
-	out_color = vec4(color, 1.0);
+    FragColor = vec4(fcolor, 1.0);  // Output the color with full opacity
 }

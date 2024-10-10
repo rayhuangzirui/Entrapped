@@ -27,3 +27,10 @@ Entity createEnemy(RenderSystem* renderer, vec2 position);
 Entity createBullet(RenderSystem* renderer, vec2 position, vec2 velocity);
 
 
+
+// a egg
+Entity createEgg(vec2 pos, vec2 size);
+
+//a wall
+Entity createWall(RenderSystem* renderer, vec2 position, vec2 size);
+

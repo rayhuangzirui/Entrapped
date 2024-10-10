@@ -255,7 +255,9 @@ enum class GEOMETRY_BUFFER_ID {
   TEXT = PLAYER + 1,
   BULLET = TEXT + 1,
   MAZE = BULLET + 1,
+  SQUARE = MAZE + 1,
 	GEOMETRY_COUNT = MAZE + 1
+
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

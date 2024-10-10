@@ -4,8 +4,8 @@
 //For wall
 #include "render_system.hpp"
 
-Entity createSalmon(RenderSystem* renderer, vec2 pos)
-{
+//Entity createSalmon(RenderSystem* renderer, vec2 pos)
+//{
 	// auto entity = Entity();
 
 	// // Store a reference to the potentially re-used mesh object
@@ -29,10 +29,10 @@ Entity createSalmon(RenderSystem* renderer, vec2 pos)
 	// 		GEOMETRY_BUFFER_ID::SALMON });
 
 	// return entity;
-}
+//}
 
-Entity createFish(RenderSystem* renderer, vec2 position)
-{
+//Entity createFish(RenderSystem* renderer, vec2 position)
+//{
 	// // Reserve en entity
 	// auto entity = Entity();
 
@@ -60,6 +60,7 @@ Entity createFish(RenderSystem* renderer, vec2 position)
 	// 	});
 
 	// return entity;
+//}
 
 // Use createSalmon for creating the player
 Entity createPlayer(RenderSystem* renderer, vec2 pos)

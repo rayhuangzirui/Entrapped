@@ -33,7 +33,6 @@ int main()
 		getchar();
 		return EXIT_FAILURE;
 	}
-
 	// initialize the main systems
 	renderer.init(window);
 	world.init(&renderer);

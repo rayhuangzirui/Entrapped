@@ -54,7 +54,6 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	gl_has_errors();
-
 	initScreenTexture();
     initializeGlTextures();
 	initializeGlEffects();
@@ -147,7 +146,6 @@ void RenderSystem::initializeGlGeometryBuffers()
 
 	// Index and Vertex buffer data initialization.
 	initializeGlMeshes();
-
 	//////////////////////////
 	// Initialize sprite
 	// The position corresponds to the center of the texture.
@@ -214,7 +212,6 @@ void RenderSystem::initializeGlGeometryBuffers()
 	meshes[geom_index].vertices = line_vertices;
 	meshes[geom_index].vertex_indices = line_indices;
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::DEBUG_LINE, line_vertices, line_indices);
-
 	///////////////////////////////////////////////////////
 	// Initialize screen triangle (yes, triangle, not quad; its more efficient).
 	std::vector<vec3> screen_vertices(3);
@@ -226,7 +223,7 @@ void RenderSystem::initializeGlGeometryBuffers()
 	const std::vector<uint16_t> screen_indices = { 0, 1, 2 };
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
 
-
+	//std::cout << "broken here" << std::endl;
 	std::vector<ColoredVertex> square_vertices(4);
     square_vertices[0].position = { -1.f/2, +1.f/2, 0.f };  // Top-left
     square_vertices[1].position = { +1.f/2, +1.f/2, 0.f };  // Top-right
@@ -239,11 +236,9 @@ void RenderSystem::initializeGlGeometryBuffers()
     }
 
     // Two triangles to form the square
-    std::vector<uint16_t> square_indices = { 0, 1, 2, 0, 2, 3 };
-
+    const std::vector<uint16_t> square_indices = { 0, 1, 2, 0, 2, 3 };
     // Bind geometry for the wall (square)
     bindVBOandIBO(GEOMETRY_BUFFER_ID::SQUARE, square_vertices, square_indices);
-
 	//////////////////////////
 	//// Initialize Text
 	//GLfloat vertices[6][4] = {

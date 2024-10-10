@@ -23,7 +23,8 @@ void GameScene::destroy(RenderSystem* renderer) {
 void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	static int frame = 0;
 	static int frame_counter = 0;
-	const int frame_delay = 5;
+	static int first_round_frame_counter = 0;
+	const int frame_delay = 2;
 	TEXTURE_ASSET_ID walking_sideways[3] = {
 	TEXTURE_ASSET_ID::PLAYER_1,
 	TEXTURE_ASSET_ID::PLAYER_2,
@@ -42,87 +43,200 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_BACK_3
 	};
 
-	// Control direction of the salmon
-	if (action == GLFW_REPEAT && key == GLFW_KEY_UP) {
-		Motion& motion = registry.motions.get(player);
-		motion.position.y -= current_speed;
-	}
+	//// Control direction of the salmon
+	//if (action == GLFW_REPEAT && key == GLFW_KEY_UP) {
+	//	Motion& motion = registry.motions.get(player);
+	//	motion.position.y -= current_speed;
+	//}
 
-	if (action == GLFW_REPEAT && key == GLFW_KEY_DOWN) {
-		Motion& motion = registry.motions.get(player);
-		motion.position.y += current_speed;
-	}
+	//if (action == GLFW_REPEAT && key == GLFW_KEY_DOWN) {
+	//	Motion& motion = registry.motions.get(player);
+	//	motion.position.y += current_speed;
+	//}
 
-	if (action == GLFW_REPEAT && key == GLFW_KEY_A) {
-		Motion& motion = registry.motions.get(player);
-		/*motion.position.x += current_speed * cos(motion.angle);
-		motion.position.y -= current_speed * sin(motion.angle);*/
-		motion.position.x -= current_speed;
+	//if (action == GLFW_REPEAT && key == GLFW_KEY_A) {
+	//	Motion& motion = registry.motions.get(player);
+	//	/*motion.position.x += current_speed * cos(motion.angle);
+	//	motion.position.y -= current_speed * sin(motion.angle);*/
+	//	motion.position.x -= current_speed;
 
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
+	//	if (frame_counter++ >= frame_delay) {
+	//		frame_counter = 0; // Reset counter
 
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player);
-			texture.used_texture = walking_sideways[frame];
+	//		// Update the texture based on the current frame in the subset
+	//		auto& texture = registry.renderRequests.get(player);
+	//		texture.used_texture = walking_sideways[frame];
 
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
+	//		// Loop through the 3-frame subset
+	//		frame = (frame + 1) % 3;
+	//	}
+
+	//	motion.scale.x = -abs(motion.scale.x);
+	//}
+
+	//if (action == GLFW_REPEAT && key == GLFW_KEY_D) {
+	//	Motion& motion = registry.motions.get(player);
+	//	/*motion.position.x += current_speed * cos(motion.angle);
+	//	motion.position.y -= current_speed * sin(motion.angle);*/
+	//	motion.position.x += current_speed;
+
+	//	if (frame_counter++ >= frame_delay) {
+	//		frame_counter = 0; // Reset counter
+
+	//		// Update the texture based on the current frame in the subset
+	//		auto& texture = registry.renderRequests.get(player);
+	//		texture.used_texture = walking_sideways[frame];
+
+	//		// Loop through the 3-frame subset
+	//		frame = (frame + 1) % 3;
+	//	}
+	//	motion.scale.x = abs(motion.scale.x);
+	//}
+
+	//if (action == GLFW_REPEAT && key == GLFW_KEY_W) {
+	//	Motion& motion = registry.motions.get(player);
+	//	motion.position.y -= current_speed;
+
+	//	if (frame_counter++ >= frame_delay) {
+	//		frame_counter = 0; // Reset counter
+
+	//		// Update the texture based on the current frame in the subset
+	//		auto& texture = registry.renderRequests.get(player);
+	//		texture.used_texture = walking_back[frame];
+
+	//		// Loop through the 3-frame subset
+	//		frame = (frame + 1) % 3;
+	//	}
+	//}
+
+	//if (action == GLFW_REPEAT && key == GLFW_KEY_S) {
+	//	Motion& motion = registry.motions.get(player);
+	//	motion.position.y += current_speed;
+
+	//	if (frame_counter++ >= frame_delay) {
+	//		frame_counter = 0; // Reset counter
+
+	//		// Update the texture based on the current frame in the subset
+	//		auto& texture = registry.renderRequests.get(player);
+	//		texture.used_texture = walking_front[frame];
+
+	//		// Loop through the 3-frame subset
+	//		frame = (frame + 1) % 3;
+	//	}
+	//}
+
+	Motion& motion = registry.motions.get(player);
+	auto& texture = registry.renderRequests.get(player);
+	static bool isSprinting = false;
+
+	// Handle movement keys (W, A, S, D)
+	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		if (action == GLFW_PRESS) {
+			// Reset frame and counter when a new key is pressed
+			frame = 0;
+			frame_counter = 0;
 		}
 
-		motion.scale.x = -abs(motion.scale.x);
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_D) {
-		Motion& motion = registry.motions.get(player);
-		/*motion.position.x += current_speed * cos(motion.angle);
-		motion.position.y -= current_speed * sin(motion.angle);*/
-		motion.position.x += current_speed;
-
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
-
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player);
-			texture.used_texture = walking_sideways[frame];
-
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
-		}
-		motion.scale.x = abs(motion.scale.x);
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_W) {
-		Motion& motion = registry.motions.get(player);
-		motion.position.y -= current_speed;
-
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
-
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player);
+		switch (key) {
+		case GLFW_KEY_W:
+			motion.velocity.y = -PLAYER_SPEED;
 			texture.used_texture = walking_back[frame];
-
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
-		}
-	}
-
-	if (action == GLFW_REPEAT && key == GLFW_KEY_S) {
-		Motion& motion = registry.motions.get(player);
-		motion.position.y += current_speed;
-
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0; // Reset counter
-
-			// Update the texture based on the current frame in the subset
-			auto& texture = registry.renderRequests.get(player);
+			break;
+		case GLFW_KEY_S:
+			motion.velocity.y = PLAYER_SPEED;
 			texture.used_texture = walking_front[frame];
-
-			// Loop through the 3-frame subset
-			frame = (frame + 1) % 3;
+			break;
+		case GLFW_KEY_A:
+			motion.velocity.x = -PLAYER_SPEED;
+			texture.used_texture = walking_sideways[frame];
+			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
+			break;
+		case GLFW_KEY_D:
+			motion.velocity.x = PLAYER_SPEED;
+			texture.used_texture = walking_sideways[frame];
+			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
+			break;
+		case GLFW_KEY_LEFT_SHIFT:
+			isSprinting = true;
+			break;
+		case GLFW_KEY_SPACE:
+			if (!registry.dashTimers.has(player)) {
+				registry.dashTimers.emplace(player, DashTimer{ 200.f });
+				motion.velocity *= 2.5f;
+			}
+			break;
 		}
 	}
+	else if (action == GLFW_RELEASE) {
+		switch (key) {
+		case GLFW_KEY_W:
+		case GLFW_KEY_S:
+			motion.velocity.y = 0.f;
+			break;
+		case GLFW_KEY_A:
+		case GLFW_KEY_D:
+			motion.velocity.x = 0.f;
+			break;
+		case GLFW_KEY_LEFT_SHIFT:
+			isSprinting = false;
+			break;
+		}
+	}
+
+	// Apply sprint effect if active
+	if (isSprinting) {
+		if (motion.velocity.x != 0) {
+			motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+		}
+		if (motion.velocity.y != 0) {
+			motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+		}
+	}
+	else {
+		if (motion.velocity.x > PLAYER_SPEED) {
+			motion.velocity.x = PLAYER_SPEED;
+		}
+		else if (motion.velocity.x < -PLAYER_SPEED) {
+			motion.velocity.x = -PLAYER_SPEED;
+		}
+		if (motion.velocity.y > PLAYER_SPEED) {
+			motion.velocity.y = PLAYER_SPEED;
+		}
+		else if (motion.velocity.y < -PLAYER_SPEED) {
+			motion.velocity.y = -PLAYER_SPEED;
+		}
+	}
+
+	// Update frame and texture for animation when moving
+	if (action == GLFW_REPEAT) {
+		// Increment the frame after the delay to create animation effect
+		if (frame_counter++ >= frame_delay) {
+			frame_counter = 0;
+
+			// Loop through the frames for the current direction
+			if (key == GLFW_KEY_W) {
+				frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
+				texture.used_texture = walking_back[frame];  // Set texture for walking back
+			}
+			else if (key == GLFW_KEY_S) {
+				frame = (frame + 1) % 3;
+				texture.used_texture = walking_front[frame];  // Set texture for walking front
+			}
+			else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
+				frame = (frame + 1) % 3;
+				texture.used_texture = walking_sideways[frame];  // Set texture for walking sideways
+			}
+
+			// Adjust sprite orientation for left or right movement
+			if (key == GLFW_KEY_A) {
+				motion.scale.x = -abs(motion.scale.x);  // Face left
+			}
+			else if (key == GLFW_KEY_D) {
+				motion.scale.x = abs(motion.scale.x);  // Face right
+			}
+		}
+	}
+
 	(int)key;
 	(int)action;
 	(int)mod;

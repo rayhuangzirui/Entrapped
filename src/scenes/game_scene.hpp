@@ -14,4 +14,5 @@ private:
 	float current_speed;
 	Entity player;
 	Entity createPlayer(RenderSystem* renderer, vec2 pos);
+	float PLAYER_SPEED = 100.0f;
 };

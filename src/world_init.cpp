@@ -152,7 +152,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position)
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::ENEMY, 
+			TEXTURE_ASSET_ID::WOMAN_WALK_1,
 			// PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
 			// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
 			EFFECT_ASSET_ID::TEXTURED,

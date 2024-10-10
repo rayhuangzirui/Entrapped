@@ -8,7 +8,7 @@
 struct Player
 {
 	// Player's health
-	int health = 3;
+	int health = 5;
 
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
@@ -192,9 +192,12 @@ enum class TEXTURE_ASSET_ID {
 	FLOOR_4 = FLOOR_3 + 1,
 	FLOOR_5 = FLOOR_4 + 1,
 
-	ENEMY = FLOOR_5 + 1,
+	WOMAN_WALK_1 = FLOOR_5 + 1,
+	WOMAN_WALK_2 = WOMAN_WALK_1 + 1,
+	WOMAN_WALK_3 = WOMAN_WALK_2 + 1,
+	WOMAN_WALK_4 = WOMAN_WALK_3 + 1,
 
-	TEXTURE_COUNT = FLOOR_5 + 1
+	TEXTURE_COUNT = WOMAN_WALK_4 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

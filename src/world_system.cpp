@@ -227,6 +227,7 @@ void WorldSystem::handle_collisions() {
 
 				// Reduce player health
 				player.health -= enemy.damage;
+				printf("Player health: %d\n", player.health);
 
 				// Red tint light up effect on player
 				registry.lightUps.emplace(entity); 

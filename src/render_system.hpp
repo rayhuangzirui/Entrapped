@@ -57,7 +57,12 @@ class RenderSystem {
 			textures_path("tile_floor_2.png"),
 			textures_path("tile_floor_3.png"),
 			textures_path("tile_floor_4.png"),
-			textures_path("tile_floor_5.png")
+			textures_path("tile_floor_5.png"),
+
+			textures_path("woman_walk_1.png"),
+			textures_path("woman_walk_2.png"),
+			textures_path("woman_walk_3.png"),
+			textures_path("woman_walk_4.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

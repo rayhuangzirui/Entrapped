@@ -6,6 +6,10 @@
 void GameScene::initialize(RenderSystem* renderer) {
 	player = createPlayer(renderer, { 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
+
+	enemy = createEnemy(renderer, { 700, 300 });
+	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+
 	current_speed = 5.0f;
 	(RenderSystem*)renderer;
 }
@@ -280,3 +284,32 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
+Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 0.6f * 165.f , 0.6f * 165.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}

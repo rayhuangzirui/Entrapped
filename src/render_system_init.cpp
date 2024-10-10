@@ -60,6 +60,9 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 
+    // text renderer
+	this->text_renderer.loadFont();
+
 	return true;
 }
 
@@ -97,7 +100,6 @@ void RenderSystem::initializeGlEffects()
 	{
 		const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
 		const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
-
 		bool is_valid = loadEffectFromFile(vertex_shader_name, fragment_shader_name, effects[i]);
 		assert(is_valid && (GLuint)effects[i] != 0);
 	}
@@ -224,6 +226,7 @@ void RenderSystem::initializeGlGeometryBuffers()
 	const std::vector<uint16_t> screen_indices = { 0, 1, 2 };
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
 
+
 	std::vector<ColoredVertex> square_vertices(4);
     square_vertices[0].position = { -1.f/2, +1.f/2, 0.f };  // Top-left
     square_vertices[1].position = { +1.f/2, +1.f/2, 0.f };  // Top-right
@@ -240,6 +243,23 @@ void RenderSystem::initializeGlGeometryBuffers()
 
     // Bind geometry for the wall (square)
     bindVBOandIBO(GEOMETRY_BUFFER_ID::SQUARE, square_vertices, square_indices);
+
+	//////////////////////////
+	//// Initialize Text
+	//GLfloat vertices[6][4] = {
+	//		{ -1.f/2,     1.f/2,   0.0, 0.0 },
+	//		{ -1.f / 2,     -1.f / 2,       0.0, 1.0 },
+	//		{ 1.f / 2, -1.f / 2,       1.0, 1.0 },
+
+	//		{ -1.f / 2,     1.f / 2,   0.0, 0.0 },
+	//		{ 1.f / 2, -1.f / 2,       1.0, 1.0 },
+	//		{ 1.f / 2, 1.f / 2,   1.0, 0.0 }
+	//};
+
+	//// Counterclockwise as it's the default opengl front winding direction.
+	//const std::vector<uint16_t> textured_indices = { 2, 1, 0, 5, 4, 3 };
+	//bindVBOandIBO(GEOMETRY_BUFFER_ID::TEXT, textured_vertices, textured_indices);
+
 }
 
 RenderSystem::~RenderSystem()

@@ -7,19 +7,59 @@
 // Player component
 struct Player
 {
+	// Player's health
+	int health = 3;
 
+	// Player's initial ammo, associated with a weapon but currently associated with the player
+	int ammo = 30;
+
+	// Player's Profession may be used in the future
+	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+};
+
+// Bullet component
+struct Bullet
+{
+	// Bullet's damage
+	int damage = 1;
+
+	// Initializer of the bullet
+	//Bullet(int dmg) : damage(dmg) {};
+};
+
+// Enemy component
+struct Enemy
+{
+	// Enemy's health
+	int health = 2;
+	
+	// Enemy's damage
+	int damage = 1;
+};
+
+struct Health {
+	int current_health;  // Health points of an entity
+};
+
+struct DashTimer {
+	float counter_ms;  // Duration of dash in milliseconds
 };
 
 // anything that is deadly to the player
 struct Deadly
 {
-
+	// A1 code
 };
 
 // anything the player can eat
 struct Eatable
 {
+	// A1 code
+};
 
+// component used to render text
+struct Text {
+	std::string content;
 };
 
 // All data relevant to the shape and motion of entities
@@ -61,6 +101,18 @@ struct DebugComponent
 struct DeathTimer
 {
 	float counter_ms = 3000;
+};
+
+// Added LightUp component: A timer that will be associated with the salmon lighting up after eating a fish
+struct LightUp
+{
+	float counter_ms = 500; // light up for 0.5 second
+};
+
+// A timer that will be associated with the knockback of the enemy
+struct KnockbackTimer
+{
+	float counter_ms = 100.f; // knockback for 0.1 second
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
@@ -110,12 +162,77 @@ struct Mesh
  * enums there are, and as a default value to represent uninitialized fields.
  */
 
+
 enum class TEXTURE_ASSET_ID {
-	FISH = 0,
-	EEL = FISH + 1,
-	TEXTURE_COUNT = EEL + 1
+	PLAYER_1 = 0,
+	PLAYER_2 = PLAYER_1 + 1,
+	PLAYER_3 = PLAYER_2 + 1,
+
+	PLAYER_BACK_1 = PLAYER_3 + 1,
+	PLAYER_BACK_2 = PLAYER_BACK_1 + 1,
+	PLAYER_BACK_3 = PLAYER_BACK_2 + 1,
+
+	PLAYER_FRONT_1 = PLAYER_BACK_3 + 1,
+	PLAYER_FRONT_2 = PLAYER_FRONT_1 + 1,
+	PLAYER_FRONT_3 = PLAYER_FRONT_2 + 1,
+
+	DOOR_OPEN = PLAYER_FRONT_3 + 1,
+	DOOR_CLOSED = DOOR_OPEN + 1,
+
+	WALL_1 = DOOR_CLOSED + 1,
+	WALL_2 = WALL_1 + 1,
+	WALL_3 = WALL_2 + 1,
+	WALL_4 = WALL_3 + 1,
+	WALL_5 = WALL_4 + 1,
+	WALL_6 = WALL_5 + 1,
+
+	FLOOR_1 = WALL_6 + 1,
+	FLOOR_2 = FLOOR_1 + 1,
+	FLOOR_3 = FLOOR_2 + 1,
+	FLOOR_4 = FLOOR_3 + 1,
+	FLOOR_5 = FLOOR_4 + 1,
+
+	ENEMY = FLOOR_5 + 1,
+
+	TEXTURE_COUNT = FLOOR_5 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
+
+//enum class PLAYER_BACK_TEXTURE_ASSET_ID {
+//	PLAYER_BACK_1 = 0,
+//	PLAYER_BACK_2 = PLAYER_BACK_1 + 1,
+//	PLAYER_BACK_3 = PLAYER_BACK_2 + 1,
+//	TEXTURE_BACK_COUNT = PLAYER_BACK_3 + 1
+//};
+//const int texture_back_count = (int)PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT;
+//
+//enum class FLOOR_TEXTURE_ASSET_ID {
+//	FLOOR = 0,
+//	FLOOR_1 = FLOOR + 1,
+//	FLOOR_2 = FLOOR_1 + 1,
+//	FLOOR_3 = FLOOR_2 + 1,
+//	FLOOR_4 = FLOOR_3 + 1,
+//	FLOOR_TEXTURE_COUNT = FLOOR_4 + 1
+//};
+//const int floor_texture_count = (int)FLOOR_TEXTURE_ASSET_ID::FLOOR_TEXTURE_COUNT;
+//
+//enum class DOOR_TEXTURE_ASSET_ID {
+//	DOOR_OPEN = 0,
+//	DOOR_CLOSED = DOOR_OPEN + 1,
+//	DOOR_TEXTURE_COUNT = DOOR_CLOSED + 1
+//};
+//const int door_texture_count = (int)DOOR_TEXTURE_ASSET_ID::DOOR_TEXTURE_COUNT;
+//
+//enum class WALL_TEXTURE_ASSET_ID {
+//	WALL = 0,
+//	WALL_1 = WALL + 1,
+//	WALL_2 = WALL_1 + 1,
+//	WALL_3 = WALL_2 + 1,
+//	WALL_4 = WALL_3 + 1,
+//	WALL_5 = WALL_4 + 1,
+//	WALL_TEXTURE_COUNT = WALL_5 + 1
+//};
+//const int wall_texture_count = (int)WALL_TEXTURE_ASSET_ID::WALL_TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
@@ -123,7 +240,8 @@ enum class EFFECT_ASSET_ID {
 	SALMON = EGG + 1,
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
-	EFFECT_COUNT = WATER + 1
+	TEXT = WATER + 1,
+	EFFECT_COUNT = TEXT + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -133,14 +251,19 @@ enum class GEOMETRY_BUFFER_ID {
 	EGG = SPRITE + 1,
 	DEBUG_LINE = EGG + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	SQUARE = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = SQUARE + 1
+	PLAYER = SCREEN_TRIANGLE + 1,
+  TEXT = PLAYER + 1,
+  BULLET = TEXT + 1,
+  MAZE = BULLET + 1,
+  SQUARE = MAZE + 1,
+	GEOMETRY_COUNT = MAZE + 1
+
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
 struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
+	// PLAYER_BACK_TEXTURE_ASSET_ID player_back = PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
-

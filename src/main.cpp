@@ -23,6 +23,7 @@ int main()
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
+	BaseScene* game_scene = new GameScene();
 
 
 	// Initializing window
@@ -52,7 +53,7 @@ int main()
 		t = now;
 		world.step(elapsed_ms);
 		physics.step(elapsed_ms);
-		world.handle_collisions();
+		game_scene->handle_collisions();
 
 		renderer.draw();
 	}

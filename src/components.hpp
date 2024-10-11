@@ -10,6 +10,9 @@ struct Player
 	// Player's health
 	int health = 5;
 
+	// Hit cooldown
+	float hit_cooldown = 0.f;
+
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
 
@@ -107,6 +110,12 @@ struct DeathTimer
 struct LightUp
 {
 	float counter_ms = 500; // light up for 0.5 second
+};
+
+// A timer that will be associated with the damage cooldown of the player
+struct DamageCoolDown
+{
+	float counter_ms = 500; // damage cooldown for 0.5 second
 };
 
 // A timer that will be associated with the knockback of the enemy

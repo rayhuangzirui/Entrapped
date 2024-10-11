@@ -38,7 +38,7 @@ public:
 	bool step(float elapsed_ms);
 
 	// Check for collisions
-	void handle_collisions();
+	//void handle_collisions();
 
 	// Shoot a bullet logic
 	void shoot_bullet();

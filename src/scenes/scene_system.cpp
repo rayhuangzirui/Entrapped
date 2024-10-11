@@ -32,6 +32,10 @@ void SceneSystem::on_key(int key, int action, int mod) {
 	current_scene->on_key(this->renderer, key, action, mod);
 }
 
+void SceneSystem::handle_collisions() {
+	current_scene->handle_collisions();
+}
+
 void SceneSystem::changeScene(std::string name) {
 	if (name.compare("main_menu") == 0) {
 		this->popScene();

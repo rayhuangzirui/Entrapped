@@ -9,4 +9,5 @@ public:
 	void step(RenderSystem* renderer);
 	void destroy(RenderSystem* renderer);
 	void on_key(RenderSystem* renderer, int key, int action, int mod);
+	void handle_collisions();
 };

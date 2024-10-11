@@ -11,6 +11,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
 	current_speed = 5.0f;
+
 	(RenderSystem*)renderer;
 }
 
@@ -312,4 +313,83 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 		  GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
+}
+
+// Compute collisions between entities
+void GameScene::handle_collisions() {
+	// Loop over all collisions detected by the physics system
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		// Player & Enemy collision: Enemy attacks the player, player loses 1 health, if health is 0, player dies
+		if (registry.players.has(entity)) {
+			if (registry.enemies.has(entity_other)) {
+				// Player and enemy components
+				Player& player = registry.players.get(entity);
+				Enemy& enemy = registry.enemies.get(entity_other);
+
+				// Reduce player health
+				printf("Player health: %d\n", player.health);
+
+				if (!registry.damageCoolDowns.has(entity)) {
+					registry.damageCoolDowns.emplace(entity);
+					player.health -= enemy.damage;
+
+
+					if (!registry.lightUps.has(entity)) {
+						registry.lightUps.emplace(entity);
+					}
+
+					if (player.health <= 0) {
+						//registry.colors.get(entity) = { 1.f, 0.f, 0.f };
+						//registry.remove_all_components_of(entity);
+						
+						if (!registry.deathTimers.has(entity)) {
+							registry.deathTimers.emplace(entity, DeathTimer{ 2000.f });
+							// TODO: play death animation and restart the game
+						}
+					}
+				}
+			}
+		}
+
+		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
+		//if (registry.bullets.has(entity)) {
+		//	if (registry.enemies.has(entity_other)) {
+		//		// Bullet and enemy components
+		//		Bullet& bullet = registry.bullets.get(entity);
+		//		Enemy& enemy = registry.enemies.get(entity_other);
+
+		//		// Reduce enemy health
+		//		enemy.health -= bullet.damage;
+
+		//		// Red tint light up effect on enemy
+		//		registry.lightUps.emplace(entity_other);
+		//		//registry.colors.get(entity_other) = { 1.f, 0.f, 0.f }; // Red tint
+
+		//		// Play the bullet hit sound
+		//		//Mix_PlayChannel(-1, bullet_hit_sound, 0);
+
+		//		// Check if the enemy is dead
+		//		if (enemy.health <= 0) {
+		//			// TODO: play the enemy dead animation
+
+		//			// Play the enemy dead sound
+		//			//Mix_PlayChannel(-1, enemy_dead_sound, 0);
+
+		//			// Remove the enemy
+		//			registry.remove_all_components_of(entity_other);
+		//		}
+
+		//		// Remove the bullet
+		//		registry.remove_all_components_of(entity);
+		//	}
+		//}
+	}
+
+	// Remove all collisions from this simulation step
+	registry.collisions.clear();
 }

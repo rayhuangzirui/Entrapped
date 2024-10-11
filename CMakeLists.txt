@@ -35,7 +35,10 @@ if (IS_OS_MAC)
   include_directories(/usr/local/include)
   link_directories(/usr/local/lib)
   # 2024-09-24 - added for M-series Mac's
-  include_directories(/opt/homebrew/include)
+  #include_directories(/opt/homebrew/include)
+  #link_directories(/opt/homebrew/lib)
+
+  include_directories(/opt/homebrew/include /opt/homebrew/Cellar/freetype/2.13.3/include/freetype2)
   link_directories(/opt/homebrew/lib)
 endif()
 
@@ -59,6 +62,17 @@ endif()
 
 set(glm_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ext/glm/cmake/glm) # if necessary
 find_package(glm REQUIRED)
+
+find_library(FREETYPE_LIBRARY freetype REQUIRED PATHS /opt/homebrew/lib)
+find_path(FREETYPE_INCLUDE_DIR freetype/freetype.h REQUIRED PATHS /opt/homebrew/Cellar/freetype/2.13.3/include/freetype2)
+
+if (FREETYPE_LIBRARY AND FREETYPE_INCLUDE_DIR)
+    message(STATUS "Found FreeType library and include.")
+    include_directories(${FREETYPE_INCLUDE_DIR})
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${FREETYPE_LIBRARY})
+else()
+    message(FATAL_ERROR "Can't find FreeType.")
+endif()
 
 # GLFW, SDL2 could be precompiled (on windows) or installed by a package manager (on OSX and Linux)
 if (IS_OS_LINUX OR IS_OS_MAC)
@@ -158,9 +172,9 @@ if (NOT GLFW_FOUND OR NOT SDL2_FOUND)
       message(FATAL_ERROR "Can't find SDL2." )
    endif()
 endif()
-if (NOT FREETYPE_FOUND)
-    message(FATAL_ERROR "Can't find FREETYPE." )
-endif()
+#if (NOT FREETYPE_FOUND)
+#    message(FATAL_ERROR "Can't find FREETYPE." )
+#endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GLFW_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SDL2_INCLUDE_DIRS})

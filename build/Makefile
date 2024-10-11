@@ -57,10 +57,10 @@ RM = /opt/homebrew/Cellar/cmake/3.30.3/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1"
+CMAKE_SOURCE_DIR = "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/build"
+CMAKE_BINARY_DIR = "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/build/CMakeFiles" "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/build//CMakeFiles/progress.marks"
+	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build//CMakeFiles/progress.marks"
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/build/CMakeFiles" 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" 0
 .PHONY : all
 
 # The main clean target
@@ -321,6 +321,102 @@ src/render_system_init.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/render_system_init.cpp.s
 .PHONY : src/render_system_init.cpp.s
 
+src/scenes/game_scene.o: src/scenes/game_scene.cpp.o
+.PHONY : src/scenes/game_scene.o
+
+# target to build an object file
+src/scenes/game_scene.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o
+.PHONY : src/scenes/game_scene.cpp.o
+
+src/scenes/game_scene.i: src/scenes/game_scene.cpp.i
+.PHONY : src/scenes/game_scene.i
+
+# target to preprocess a source file
+src/scenes/game_scene.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.i
+.PHONY : src/scenes/game_scene.cpp.i
+
+src/scenes/game_scene.s: src/scenes/game_scene.cpp.s
+.PHONY : src/scenes/game_scene.s
+
+# target to generate assembly for a file
+src/scenes/game_scene.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.s
+.PHONY : src/scenes/game_scene.cpp.s
+
+src/scenes/main_menu.o: src/scenes/main_menu.cpp.o
+.PHONY : src/scenes/main_menu.o
+
+# target to build an object file
+src/scenes/main_menu.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o
+.PHONY : src/scenes/main_menu.cpp.o
+
+src/scenes/main_menu.i: src/scenes/main_menu.cpp.i
+.PHONY : src/scenes/main_menu.i
+
+# target to preprocess a source file
+src/scenes/main_menu.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.i
+.PHONY : src/scenes/main_menu.cpp.i
+
+src/scenes/main_menu.s: src/scenes/main_menu.cpp.s
+.PHONY : src/scenes/main_menu.s
+
+# target to generate assembly for a file
+src/scenes/main_menu.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.s
+.PHONY : src/scenes/main_menu.cpp.s
+
+src/scenes/scene_system.o: src/scenes/scene_system.cpp.o
+.PHONY : src/scenes/scene_system.o
+
+# target to build an object file
+src/scenes/scene_system.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o
+.PHONY : src/scenes/scene_system.cpp.o
+
+src/scenes/scene_system.i: src/scenes/scene_system.cpp.i
+.PHONY : src/scenes/scene_system.i
+
+# target to preprocess a source file
+src/scenes/scene_system.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.i
+.PHONY : src/scenes/scene_system.cpp.i
+
+src/scenes/scene_system.s: src/scenes/scene_system.cpp.s
+.PHONY : src/scenes/scene_system.s
+
+# target to generate assembly for a file
+src/scenes/scene_system.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.s
+.PHONY : src/scenes/scene_system.cpp.s
+
+src/text_renderer.o: src/text_renderer.cpp.o
+.PHONY : src/text_renderer.o
+
+# target to build an object file
+src/text_renderer.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/text_renderer.cpp.o
+.PHONY : src/text_renderer.cpp.o
+
+src/text_renderer.i: src/text_renderer.cpp.i
+.PHONY : src/text_renderer.i
+
+# target to preprocess a source file
+src/text_renderer.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/text_renderer.cpp.i
+.PHONY : src/text_renderer.cpp.i
+
+src/text_renderer.s: src/text_renderer.cpp.s
+.PHONY : src/text_renderer.s
+
+# target to generate assembly for a file
+src/text_renderer.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/text_renderer.cpp.s
+.PHONY : src/text_renderer.cpp.s
+
 src/tiny_ecs.o: src/tiny_ecs.cpp.o
 .PHONY : src/tiny_ecs.o
 
@@ -450,6 +546,18 @@ help:
 	@echo "... src/render_system_init.o"
 	@echo "... src/render_system_init.i"
 	@echo "... src/render_system_init.s"
+	@echo "... src/scenes/game_scene.o"
+	@echo "... src/scenes/game_scene.i"
+	@echo "... src/scenes/game_scene.s"
+	@echo "... src/scenes/main_menu.o"
+	@echo "... src/scenes/main_menu.i"
+	@echo "... src/scenes/main_menu.s"
+	@echo "... src/scenes/scene_system.o"
+	@echo "... src/scenes/scene_system.i"
+	@echo "... src/scenes/scene_system.s"
+	@echo "... src/text_renderer.o"
+	@echo "... src/text_renderer.i"
+	@echo "... src/text_renderer.s"
 	@echo "... src/tiny_ecs.o"
 	@echo "... src/tiny_ecs.i"
 	@echo "... src/tiny_ecs.s"

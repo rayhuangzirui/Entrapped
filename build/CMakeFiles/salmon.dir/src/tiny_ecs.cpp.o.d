@@ -1,6 +1,6 @@
 CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o: \
-  /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16-1/src/tiny_ecs.cpp \
-  /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16-1/src/tiny_ecs.hpp \
+  /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/tiny_ecs.cpp \
+  /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/tiny_ecs.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/algorithm \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/__assert \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/__config \

@@ -28,6 +28,7 @@ struct Bullet
 
 	// Initializer of the bullet
 	//Bullet(int dmg) : damage(dmg) {};
+
 };
 
 // Enemy component

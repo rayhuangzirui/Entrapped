@@ -107,16 +107,24 @@ struct DeathTimer
 	float counter_ms = 3000;
 };
 
-// Added LightUp component: A timer that will be associated with the salmon lighting up after eating a fish
+// Added LightUp component: A timer that will be associated with the player lighting up after getting attacked by an enemy
 struct LightUp
 {
 	float counter_ms = 500; // light up for 0.5 second
+	float blink_timer = 0.0f; // timer for blinking effect
+	bool active = false; // flag to indicate if the light up effect is active
 };
 
 // A timer that will be associated with the damage cooldown of the player
 struct DamageCoolDown
 {
 	float counter_ms = 500; // damage cooldown for 0.5 second
+};
+
+// Opacity component
+struct Opacity
+{
+	float opacity = 1.0f;
 };
 
 // A timer that will be associated with the knockback of the enemy

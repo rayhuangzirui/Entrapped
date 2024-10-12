@@ -185,18 +185,39 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
 	registry.remove_all_components_of(registry.debugComponents.entities.back());
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
+	// update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.lightUps.entities) {
 		// progress timer
-		LightUp& counter = registry.lightUps.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
+		LightUp& lightup = registry.lightUps.get(entity);
+		lightup.counter_ms -= elapsed_ms_since_last_update;
 
 		/*std::cout << "LightUp timer: " << counter.counter_ms << " ms" << std::endl;*/
 
-		if (counter.counter_ms < 0) {
+		// Interpolate the color and opacity using LERP: https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/a-brief-introduction-to-lerp-r4954/
+		// function lerp(start, end, t)
+		//    return start * (1 - t) + end * t;
+		float t = (sin(lightup.blink_timer * 10) + 1) / 2;
+
+		// Color shift: interpolate between the original color and the light up red color
+		vec3 original_color = { 1.f, 1.f, 1.f }; // white
+		vec3 lightup_color = { 1.f, 0.f, 0.f }; // red
+		vec3 new_color = original_color * (1 - t) + lightup_color * t;	// lerp
+
+		// Opacity shift: interpolate between the original opacity and 0.5
+		float original_opacity = 1.f;
+		float hit_opacity = 0.5f;
+		float new_opacity = original_opacity * (1 - t) + hit_opacity * t;	// lerp
+
+		// Update the color and opacity
+		registry.colors.get(entity) = new_color;
+		registry.opacities.get(entity).opacity = new_opacity;
+
+
+		if (lightup.counter_ms < 0) {
 			registry.lightUps.remove(entity); // remove the light up effect when timer ends
 		}
 
+		lightup.blink_timer += elapsed_ms_since_last_update / 1000.f; // update the blink timer
 	}
 	
 	// Damage cool down timer drop 

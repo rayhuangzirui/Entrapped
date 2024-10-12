@@ -15,6 +15,8 @@ public:
 	ComponentContainer<LightUp> lightUps;
 
 	ComponentContainer<DamageCoolDown> damageCoolDowns;
+	ComponentContainer<Opacity> opacities;
+	
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -32,6 +34,7 @@ public:
 	ComponentContainer<DashTimer> dashTimers;
 	ComponentContainer<LightUp> lightups;
 
+
 	// Add bullet container and enemy container
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Enemy> enemies;
@@ -46,6 +49,7 @@ public:
 		// TODO: A1 add a LightUp component
 		registry_list.push_back(&lightUps);
 		registry_list.push_back(&damageCoolDowns);
+		registry_list.push_back(&opacities);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

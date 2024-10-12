@@ -394,6 +394,10 @@ void GameScene::handle_collisions() {
 						registry.lightUps.emplace(entity);
 					}
 
+					if (!registry.opacities.has(entity)) {
+						registry.opacities.emplace(entity, Opacity{ 0.5f });
+					}
+
 					if (player.health <= 0) {
 						//registry.colors.get(entity) = { 1.f, 0.f, 0.f };
 						//registry.remove_all_components_of(entity);

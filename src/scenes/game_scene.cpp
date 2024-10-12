@@ -356,6 +356,12 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 10;
+	
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
 
 	registry.renderRequests.insert(
 		entity,

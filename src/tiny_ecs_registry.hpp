@@ -16,6 +16,7 @@ public:
 
 	ComponentContainer<DamageCoolDown> damageCoolDowns;
 	ComponentContainer<Opacity> opacities;
+	ComponentContainer<AITimer> aiTimers;
 	
 
 	ComponentContainer<DeathTimer> deathTimers;
@@ -50,6 +51,7 @@ public:
 		registry_list.push_back(&lightUps);
 		registry_list.push_back(&damageCoolDowns);
 		registry_list.push_back(&opacities);
+		registry_list.push_back(&aiTimers);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

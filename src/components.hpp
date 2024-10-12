@@ -115,6 +115,13 @@ struct LightUp
 	bool active = false; // flag to indicate if the light up effect is active
 };
 
+// AI timer component
+struct AITimer
+{
+	float interval = 2000.0f; // 2 second, period of time before the enemy changes direction
+	float counter_ms = 0.0f; // 1 second
+};
+
 // A timer that will be associated with the damage cooldown of the player
 struct DamageCoolDown
 {

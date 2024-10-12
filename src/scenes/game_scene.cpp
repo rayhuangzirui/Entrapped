@@ -5,8 +5,9 @@
 #include "render_system.hpp"
 #include <iostream>
 
-
+//bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
+
 	// *Render the maze before initializing player and enemy entities*
 	render_maze(renderer);
 
@@ -15,6 +16,11 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	enemy = createEnemy(renderer, { 700, 300 });
 	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+
+	// Render bounding boxes for debugging (if enabled)
+	//if (show_bounding_boxes) {
+	//	render_bounding_boxes(renderer);
+	//}
 
 	current_speed = 5.0f;
 
@@ -55,97 +61,9 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_BACK_3
 	};
 
-	//// Control direction of the salmon
-	//if (action == GLFW_REPEAT && key == GLFW_KEY_UP) {
-	//	Motion& motion = registry.motions.get(player);
-	//	motion.position.y -= current_speed;
-	//}
-
-	//if (action == GLFW_REPEAT && key == GLFW_KEY_DOWN) {
-	//	Motion& motion = registry.motions.get(player);
-	//	motion.position.y += current_speed;
-	//}
-
-	//if (action == GLFW_REPEAT && key == GLFW_KEY_A) {
-	//	Motion& motion = registry.motions.get(player);
-	//	/*motion.position.x += current_speed * cos(motion.angle);
-	//	motion.position.y -= current_speed * sin(motion.angle);*/
-	//	motion.position.x -= current_speed;
-
-	//	if (frame_counter++ >= frame_delay) {
-	//		frame_counter = 0; // Reset counter
-
-	//		// Update the texture based on the current frame in the subset
-	//		auto& texture = registry.renderRequests.get(player);
-	//		texture.used_texture = walking_sideways[frame];
-
-	//		// Loop through the 3-frame subset
-	//		frame = (frame + 1) % 3;
-	//	}
-
-	//	motion.scale.x = -abs(motion.scale.x);
-	//}
-
-	//if (action == GLFW_REPEAT && key == GLFW_KEY_D) {
-	//	Motion& motion = registry.motions.get(player);
-	//	/*motion.position.x += current_speed * cos(motion.angle);
-	//	motion.position.y -= current_speed * sin(motion.angle);*/
-	//	motion.position.x += current_speed;
-
-	//	if (frame_counter++ >= frame_delay) {
-	//		frame_counter = 0; // Reset counter
-
-	//		// Update the texture based on the current frame in the subset
-	//		auto& texture = registry.renderRequests.get(player);
-	//		texture.used_texture = walking_sideways[frame];
-
-	//		// Loop through the 3-frame subset
-	//		frame = (frame + 1) % 3;
-	//	}
-	//	motion.scale.x = abs(motion.scale.x);
-	//}
-
-	//if (action == GLFW_REPEAT && key == GLFW_KEY_W) {
-	//	Motion& motion = registry.motions.get(player);
-	//	motion.position.y -= current_speed;
-
-	//	if (frame_counter++ >= frame_delay) {
-	//		frame_counter = 0; // Reset counter
-
-	//		// Update the texture based on the current frame in the subset
-	//		auto& texture = registry.renderRequests.get(player);
-	//		texture.used_texture = walking_back[frame];
-
-	//		// Loop through the 3-frame subset
-	//		frame = (frame + 1) % 3;
-	//	}
-	//}
-
-	//if (action == GLFW_REPEAT && key == GLFW_KEY_S) {
-	//	Motion& motion = registry.motions.get(player);
-	//	motion.position.y += current_speed;
-
-	//	if (frame_counter++ >= frame_delay) {
-	//		frame_counter = 0; // Reset counter
-
-	//		// Update the texture based on the current frame in the subset
-	//		auto& texture = registry.renderRequests.get(player);
-	//		texture.used_texture = walking_front[frame];
-
-	//		// Loop through the 3-frame subset
-	//		frame = (frame + 1) % 3;
-	//	}
-	//}
-
 	Motion& motion = registry.motions.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
-
-	// Backup current position in case we need to revert
-	vec2 old_position = motion.position;
-
-	// Declare new_position outside the block to make it accessible throughout the function
-	vec2 new_position = motion.position;
 
 	// Handle movement keys (W, A, S, D)
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
@@ -185,45 +103,6 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 			}
 			break;
 		}
-
-		//Added new collision detection ---------------------------------//
-		// Calculate the player's bounding box for the new position
-		vec2 player_min = new_position - (motion.scale / 2.0f);
-		vec2 player_max = new_position + (motion.scale / 2.0f);
-
-		// Check collisions with nearby wall tiles
-		bool collision_detected = false;
-
-		const int TILE_SIZE = 48;
-		int tile_x_min = static_cast<int>(player_min.x) / TILE_SIZE;
-		int tile_x_max = static_cast<int>(player_max.x) / TILE_SIZE;
-		int tile_y_min = static_cast<int>(player_min.y) / TILE_SIZE;
-		int tile_y_max = static_cast<int>(player_max.y) / TILE_SIZE;
-
-		for (int row = tile_y_min; row <= tile_y_max; ++row) {
-			for (int col = tile_x_min; col <= tile_x_max; ++col) {
-				if (row >= 0 && row < MAZE_HEIGHT && col >= 0 && col < MAZE_WIDTH) {
-					if (box_testing_environment[row][col] == 1) {
-						// Calculate the bounding box of the wall tile
-						vec2 wall_min = vec2(col * TILE_SIZE, row * TILE_SIZE);
-						vec2 wall_max = wall_min + vec2(TILE_SIZE, TILE_SIZE);
-
-						// Check for collision with the wall tile
-						if (check_aabb_collision(player_min, player_max, wall_min, wall_max)) {
-							collision_detected = true;
-							break;
-						}
-					}
-				}
-			}
-			if (collision_detected) break;
-		}
-
-		// If no collision, update the player's position
-		if (!collision_detected) {
-			motion.position = new_position;
-		}
-		//Ended new collision detection//
 
 	}
 	else if (action == GLFW_RELEASE) {
@@ -296,10 +175,14 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		}
 	}
 
-	// Check for collision with walls
-	if (!check_player_wall_collision(motion)) {
-		// If no collision, update the player's position
-		motion.position = new_position;
+	// After updating player position:
+	if (registry.boundingBoxes.has(player)) {
+		Motion& motion = registry.motions.get(player);
+		BoundingBox& bounding_box = registry.boundingBoxes.get(player);
+		bounding_box.min = motion.position - (motion.scale / 2.0f);
+		bounding_box.max = motion.position + (motion.scale / 2.0f);
+		printf("Bounding box min: (%f, %f)\n", bounding_box.min.x, bounding_box.min.y);
+		printf("Bounding box max: (%f, %f)\n", bounding_box.max.x, bounding_box.max.y);
 	}
 
 	(int)key;
@@ -412,8 +295,7 @@ void GameScene::render_maze(RenderSystem* renderer) {
 }
 
 
-Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos)
-{
+Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -427,7 +309,7 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ 0.6f * 165.f , 0.6f * 165.f });
 
-	// create an empty Player component for our character
+	// Create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
 	// Initialize health and ammo
 	player.health = 3;
@@ -437,14 +319,19 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos)
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 100;
 
+	// Add a bounding box to the player entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	// Add the render request for the player entity
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::PLAYER_1,
-		//		{
-		//			PLAYER_TEXTURE_ASSET_ID::PLAYER_1,
-					// PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT,
-					EFFECT_ASSET_ID::TEXTURED,
-					GEOMETRY_BUFFER_ID::SPRITE });
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
 }
@@ -558,3 +445,4 @@ void GameScene::handle_collisions() {
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
+

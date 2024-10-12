@@ -103,30 +103,25 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		}
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::COLOURED)
-	{
-	 GLint in_position_loc = glGetAttribLocation(program, "in_position");
-    GLint in_color_loc = glGetAttribLocation(program, "in_color");
+{
+    GLint in_position_loc = glGetAttribLocation(program, "in_position");
     gl_has_errors();
 
+    
     glEnableVertexAttribArray(in_position_loc);
     glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
                           sizeof(ColoredVertex), (void *)0);
     gl_has_errors();
 
-    glEnableVertexAttribArray(in_color_loc);
-    glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-                          sizeof(ColoredVertex), (void *)sizeof(vec3));
-    gl_has_errors();
-
-    // setticng the color
+    // Setting the color using a uniform
     if (registry.colors.has(entity)) {
         const vec3 color = registry.colors.get(entity);
-        glUniform3fv(glGetUniformLocation(program, "fcolor"), 1, (float *)&color);
+        glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&color);
     } else {
-        vec3 default_color = vec3(0.f, 0.f, 0.f);  // Default to black
-        glUniform3fv(glGetUniformLocation(program, "fcolor"), 1, (float *)&default_color);
+        vec3 default_color = vec3(1.f, 1.f, 1.f);  // Default to white
+        glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&default_color);
     }
-	}
+}
 	
 	else
 	{

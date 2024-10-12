@@ -148,6 +148,12 @@ struct Mesh
 	std::vector<uint16_t> vertex_indices;
 };
 
+// Bounding box component used for collision detection
+struct BoundingBox {
+	vec2 min; // Minimum x, y coordinates of the bounding box
+	vec2 max; // Maximum x, y coordinates of the bounding box
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

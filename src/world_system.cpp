@@ -155,16 +155,16 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
     restart_game();
 
 	//initialize the maze
-	    for (int y = 0; y < MAZE_HEIGHT; ++y) {
-        for (int x = 0; x < MAZE_WIDTH; ++x) {
-            if (maze[y][x] == 1) {
-                // Create a wall at this grid position
-                vec2 wall_position = vec2(x * cell_size, y * cell_size);
-				vec2 wall_size = vec2(cell_size, cell_size); // this is a dummy value for now
-                createWall(renderer, wall_position, wall_size); //create wall function needs to be implemented
-            }
-        }
-    }
+	   // for (int y = 0; y < MAZE_HEIGHT; ++y) {
+    //    for (int x = 0; x < MAZE_WIDTH; ++x) {
+    //        if (maze[y][x] == 1) {
+    //            // Create a wall at this grid position
+    //            vec2 wall_position = vec2(x * cell_size, y * cell_size);
+				//vec2 wall_size = vec2(cell_size, cell_size); // this is a dummy value for now
+    //            createWall(renderer, wall_position, wall_size); //create wall function needs to be implemented
+    //        }
+    //    }
+    //}
 
 
   //restart_game();
@@ -191,7 +191,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		LightUp& counter = registry.lightUps.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
 
-		std::cout << "LightUp timer: " << counter.counter_ms << " ms" << std::endl;
+		/*std::cout << "LightUp timer: " << counter.counter_ms << " ms" << std::endl;*/
 
 		if (counter.counter_ms < 0) {
 			registry.lightUps.remove(entity); // remove the light up effect when timer ends
@@ -205,7 +205,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		DamageCoolDown& counter = registry.damageCoolDowns.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
 
-		std::cout << "Damage timer: " << counter.counter_ms << " ms" << std::endl;
+		/*std::cout << "Damage timer: " << counter.counter_ms << " ms" << std::endl;*/
 
 		if (counter.counter_ms < 0) {
 			registry.damageCoolDowns.remove(entity); 

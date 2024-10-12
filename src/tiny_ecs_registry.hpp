@@ -36,6 +36,9 @@ public:
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Enemy> enemies;
 
+	// Bounding box
+	ComponentContainer<BoundingBox> boundingBoxes;
+
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()

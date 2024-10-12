@@ -1,9 +1,15 @@
 #include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "maze.hpp" // Access box_testing_environment
+#include "physics_system.hpp" // to check_player_wall_collision
+#include "render_system.hpp"
 #include <iostream>
 
 
 void GameScene::initialize(RenderSystem* renderer) {
+	// *Render the maze before initializing player and enemy entities*
+	render_maze(renderer);
+
 	player = createPlayer(renderer, { 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 
@@ -11,6 +17,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
 	current_speed = 5.0f;
+
 
 	(RenderSystem*)renderer;
 }
@@ -134,8 +141,15 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
 
+	// Backup current position in case we need to revert
+	vec2 old_position = motion.position;
+
+	// Declare new_position outside the block to make it accessible throughout the function
+	vec2 new_position = motion.position;
+
 	// Handle movement keys (W, A, S, D)
 	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+		vec2 new_position = motion.position;
 		if (action == GLFW_PRESS) {
 			// Reset frame and counter when a new key is pressed
 			frame = 0;
@@ -171,6 +185,46 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 			}
 			break;
 		}
+
+		//Added new collision detection ---------------------------------//
+		// Calculate the player's bounding box for the new position
+		vec2 player_min = new_position - (motion.scale / 2.0f);
+		vec2 player_max = new_position + (motion.scale / 2.0f);
+
+		// Check collisions with nearby wall tiles
+		bool collision_detected = false;
+
+		const int TILE_SIZE = 48;
+		int tile_x_min = static_cast<int>(player_min.x) / TILE_SIZE;
+		int tile_x_max = static_cast<int>(player_max.x) / TILE_SIZE;
+		int tile_y_min = static_cast<int>(player_min.y) / TILE_SIZE;
+		int tile_y_max = static_cast<int>(player_max.y) / TILE_SIZE;
+
+		for (int row = tile_y_min; row <= tile_y_max; ++row) {
+			for (int col = tile_x_min; col <= tile_x_max; ++col) {
+				if (row >= 0 && row < MAZE_HEIGHT && col >= 0 && col < MAZE_WIDTH) {
+					if (box_testing_environment[row][col] == 1) {
+						// Calculate the bounding box of the wall tile
+						vec2 wall_min = vec2(col * TILE_SIZE, row * TILE_SIZE);
+						vec2 wall_max = wall_min + vec2(TILE_SIZE, TILE_SIZE);
+
+						// Check for collision with the wall tile
+						if (check_aabb_collision(player_min, player_max, wall_min, wall_max)) {
+							collision_detected = true;
+							break;
+						}
+					}
+				}
+			}
+			if (collision_detected) break;
+		}
+
+		// If no collision, update the player's position
+		if (!collision_detected) {
+			motion.position = new_position;
+		}
+		//Ended new collision detection//
+
 	}
 	else if (action == GLFW_RELEASE) {
 		switch (key) {
@@ -242,11 +296,121 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		}
 	}
 
+	// Check for collision with walls
+	if (!check_player_wall_collision(motion)) {
+		// If no collision, update the player's position
+		motion.position = new_position;
+	}
+
 	(int)key;
 	(int)action;
 	(int)mod;
 	(RenderSystem*)renderer;
 }
+
+// Function to check if two bounding boxes overlap
+bool GameScene::check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max) {
+	return (box1_min.x < box2_max.x &&
+		box1_max.x > box2_min.x &&
+		box1_min.y < box2_max.y &&
+		box1_max.y > box2_min.y);
+}
+
+// TODO: Remove this grid collision detection when aabb_collision is finished
+bool GameScene::check_player_wall_collision(const Motion& player_motion) {
+    // Calculate the player's bounding box for the new position
+    vec2 player_min = player_motion.position - (player_motion.scale / 2.0f);
+    vec2 player_max = player_motion.position + (player_motion.scale / 2.0f);
+
+    // Loop through all entities with bounding boxes (walls)
+    for (uint i = 0; i < registry.boundingBoxes.components.size(); i++) {
+        BoundingBox& bounding_box = registry.boundingBoxes.components[i];
+        vec2 wall_min = bounding_box.min;
+        vec2 wall_max = bounding_box.max;
+
+        // Use AABB collision check
+        if (check_aabb_collision(player_min, player_max, wall_min, wall_max)) {
+            return true; // Collision detected
+        }
+    }
+
+    return false; // No collision detected
+}
+
+
+// Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze
+void GameScene::render_maze(RenderSystem* renderer) {
+	// Tile dimensions
+	const int TILE_SIZE = 48;
+
+	// Loop through each row and column of the maze
+	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
+		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
+			// Determine the texture to use and create an entity for the tile
+			TEXTURE_ASSET_ID texture_id;
+			if (box_testing_environment[row][col] == 1) {
+				texture_id = TEXTURE_ASSET_ID::WALL_6;
+
+				// Calculate position for the tile
+				float x = col * TILE_SIZE;
+				float y = row * TILE_SIZE;
+
+				// Create an entity for the wall tile
+				Entity wall_entity = Entity();
+
+				// Store a reference to the potentially re-used mesh object
+				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+				registry.meshPtrs.emplace(wall_entity, &mesh);
+
+				// Setting initial motion values
+				Motion& motion = registry.motions.emplace(wall_entity);
+				motion.position = { x, y };
+				motion.angle = 0;
+				motion.scale = { TILE_SIZE, TILE_SIZE };
+
+				// Add a bounding box component for wall tiles
+				vec2 min = vec2(x, y);
+				vec2 max = vec2(x + TILE_SIZE, y + TILE_SIZE);
+				registry.boundingBoxes.emplace(wall_entity, BoundingBox{ min, max });
+
+				// Add the render request for the wall entity
+				registry.renderRequests.insert(
+					wall_entity,
+					{ texture_id,
+					  EFFECT_ASSET_ID::TEXTURED,
+					  GEOMETRY_BUFFER_ID::SPRITE });
+			}
+			else {
+				texture_id = TEXTURE_ASSET_ID::FLOOR_5;
+
+				// Calculate position for the tile
+				float x = col * TILE_SIZE;
+				float y = row * TILE_SIZE;
+
+				// Create an entity for the floor tile
+				Entity floor_entity = Entity();
+
+				// Store a reference to the potentially re-used mesh object
+				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+				registry.meshPtrs.emplace(floor_entity, &mesh);
+
+				// Setting initial motion values
+				Motion& motion = registry.motions.emplace(floor_entity);
+				motion.position = { x, y };
+				motion.angle = 0;
+				motion.scale = { TILE_SIZE, TILE_SIZE };
+
+				// Add the render request for the floor entity
+				registry.renderRequests.insert(
+					floor_entity,
+					{ texture_id,
+					  EFFECT_ASSET_ID::TEXTURED,
+					  GEOMETRY_BUFFER_ID::SPRITE });
+			}
+		}
+	}
+}
+
 
 Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos)
 {
@@ -351,6 +515,7 @@ void GameScene::handle_collisions() {
 							registry.deathTimers.emplace(entity, DeathTimer{ 2000.f });
 							// TODO: play death animation and restart the game
 						}
+						
 					}
 				}
 			}

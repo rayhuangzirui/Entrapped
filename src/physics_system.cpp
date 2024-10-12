@@ -1,6 +1,7 @@
 // internal
 #include "physics_system.hpp"
 #include "world_init.hpp"
+#include "maze.hpp"
 
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)
@@ -25,6 +26,23 @@ bool collides(const Motion& motion1, const Motion& motion2)
 		return true;
 	return false;
 }
+
+
+//bool PhysicsSystem::check_player_wall_collision(const Motion& player_motion) {
+//    // Get the player's position in the grid
+//    int tile_x = static_cast<int>(player_motion.position.x) / TILE_SIZE;
+//    int tile_y = static_cast<int>(player_motion.position.y) / TILE_SIZE;
+//
+//    // Make sure we're within bounds of the maze
+//    if (tile_x >= 0 && tile_x < MAZE_WIDTH && tile_y >= 0 && tile_y < MAZE_HEIGHT) {
+//        // Check if the player is trying to move into a wall
+//        if (box_testing_environment[tile_y][tile_x] == 1) {
+//            printf("wall collision detected");
+//            return true; // Collision detected with wall
+//        }
+//    }
+//    return false;
+//}
 
 const float DASH_MULTIPLIER = 5.0f;
 

@@ -30,6 +30,13 @@ void SceneSystem::popScene() {
 
 void SceneSystem::on_key(int key, int action, int mod) {
 	current_scene->on_key(this->renderer, key, action, mod);
+
+	std::string next_scene = current_scene->get_next_scene();
+	if (next_scene.compare("") != 0) {
+		changeScene(next_scene);
+		//std::cout << "err here" << std::endl;
+		pushScene();
+	}
 }
 
 void SceneSystem::handle_collisions() {

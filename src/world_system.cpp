@@ -164,7 +164,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-  this->scene_system.step();
+	this->scene_system.step();
+	this->scene_system.handle_collisions();
   
 	// Updating window title: Entrapped
 	std::stringstream title_ss;
@@ -474,13 +475,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	if (action == GLFW_RELEASE && key == GLFW_KEY_G) {
-		scene_system.changeScene("game_scene");
-		//std::cout << "err here" << std::endl;
-		scene_system.pushScene();
-		draw_maze();
-		return;
-	}
 	scene_system.on_key(key, action, mod);
 }
 

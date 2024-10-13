@@ -24,7 +24,7 @@ int main()
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
-	BaseScene* game_scene = new GameScene();
+	//BaseScene* game_scene = new GameScene();
 	AISystem ai_system;
 
 
@@ -56,7 +56,7 @@ int main()
 		world.step(elapsed_ms);
 		ai_system.step(elapsed_ms);
 		physics.step(elapsed_ms);
-		game_scene->handle_collisions();
+		//game_scene->handle_collisions();
 
 		renderer.draw();
 	}

@@ -7,7 +7,6 @@
 
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
-
 	// *Render the maze before initializing player and enemy entities*
 	render_maze(renderer);
 
@@ -22,6 +21,22 @@ void GameScene::initialize(RenderSystem* renderer) {
 	//	render_bounding_boxes(renderer);
 	//}
 
+	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
+	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
+	if (background_music == nullptr) {
+		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
+			audio_path("bgm.wav").c_str());
+		return;
+	}
+	if (player_dead_sound == nullptr) {
+		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
+			audio_path("death_sound.wav").c_str());
+		return;
+	}
+
+	// Playing background music indefinitely
+	Mix_PlayMusic(background_music, -1);
+
 	current_speed = 5.0f;
 
 
@@ -35,8 +50,15 @@ void GameScene::step(RenderSystem* renderer) {
 void GameScene::destroy(RenderSystem* renderer) {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
+	Mix_FreeMusic(background_music);
+	Mix_FreeChunk(player_dead_sound);
 	(RenderSystem*)renderer;
 }
+
+std::string GameScene::get_next_scene() {
+	return this->next_scene;
+}
+
 
 void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	static int frame = 0;
@@ -181,8 +203,8 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		BoundingBox& bounding_box = registry.boundingBoxes.get(player);
 		bounding_box.min = motion.position - (motion.scale / 2.0f);
 		bounding_box.max = motion.position + (motion.scale / 2.0f);
-		printf("Bounding box min: (%f, %f)\n", bounding_box.min.x, bounding_box.min.y);
-		printf("Bounding box max: (%f, %f)\n", bounding_box.max.x, bounding_box.max.y);
+		//printf("Bounding box min: (%f, %f)\n", bounding_box.min.x, bounding_box.min.y);
+		//printf("Bounding box max: (%f, %f)\n", bounding_box.max.x, bounding_box.max.y);
 	}
 
 	(int)key;
@@ -389,11 +411,15 @@ void GameScene::handle_collisions() {
 				Enemy& enemy = registry.enemies.get(entity_other);
 
 				// Reduce player health
-				printf("Player health: %d\n", player.health);
+				//printf("Player health: %d\n", player.health);
 
 				if (!registry.damageCoolDowns.has(entity)) {
 					registry.damageCoolDowns.emplace(entity);
 					player.health -= enemy.damage;
+
+					Mix_PlayChannel(-1, player_dead_sound, 0);
+					std::cout << "player is hit " << std::endl;
+					Mix_PlayChannel(-1, player_dead_sound, 0);
 
 
 					if (!registry.lightUps.has(entity)) {

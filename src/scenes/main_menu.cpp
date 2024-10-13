@@ -3,10 +3,8 @@
 
 
 void MainMenu::initialize(RenderSystem* renderer) {
-	renderer->text_renderer.createText("Main Menu", { 50.f, window_height_px - 200.f }, 40.f, { 1.f, 1.f, 1.f });
-	renderer->text_renderer.createText("New Game", { 50.f, window_height_px - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-	renderer->text_renderer.createText("Upgrades", { 50.f, window_height_px - 110.f }, 20.f, { 1.f, 1.f, 1.f });
-	renderer->text_renderer.createText("Quit", { 50.f, window_height_px - 80.f }, 20.f, { 1.f, 1.f, 1.f });
+	renderer->text_renderer.createText("Entrapped", { 50.f, window_height_px - 200.f }, 40.f, { 1.f, 1.f, 1.f });
+	renderer->text_renderer.createText("Press any key to start the game", { 40.f, window_height_px - 140.f }, 20.f, { 1.f, 1.f, 1.f });
 	//(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
@@ -24,6 +22,14 @@ void MainMenu::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	(int)key;
 	(int)action;
 	(int)mod;
+	if (action == GLFW_RELEASE) {
+		next_scene = "game_scene";
+		return;
+	}
+}
+
+std::string MainMenu::get_next_scene() {
+	return this->next_scene;
 }
 
 

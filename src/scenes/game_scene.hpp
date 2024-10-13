@@ -2,6 +2,8 @@
 
 #include "base_scene.hpp"
 #include "render_system.hpp"
+#include <SDL.h>
+#include <SDL_mixer.h>
 
 class GameScene : public BaseScene {
 public:
@@ -9,6 +11,7 @@ public:
 	void step(RenderSystem* renderer);
 	void destroy(RenderSystem* renderer);
 	void on_key(RenderSystem* renderer, int key, int action, int mod);
+	std::string get_next_scene();
 	void handle_collisions();
 
 
@@ -25,5 +28,9 @@ private:
 
 	float PLAYER_SPEED = 100.0f;
 	const int TILE_SIZE = 48;
+	Mix_Music* background_music;
+	Mix_Chunk* player_dead_sound;
+
+	std::string next_scene = "";
 
 };

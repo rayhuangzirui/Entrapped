@@ -22,7 +22,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 			vec2 random_direction = normalize(vec2(random_x, random_y));
 			// Adjust speed
 			motion.velocity = random_direction * 50.f; 
-			std::cout << "Enemy velocity: (" << motion.velocity.x << ", " << motion.velocity.y << ")" << std::endl;
+			//std::cout << "Enemy velocity: (" << motion.velocity.x << ", " << motion.velocity.y << ")" << std::endl;
 		}
 		motion.position += motion.velocity * (elapsed_ms_since_last_update)/1000.f;
 	}

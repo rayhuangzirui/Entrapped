@@ -5,6 +5,8 @@
 #include "render_system.hpp"
 #include <iostream>
 
+const int cell_size = 48;
+
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
 	// *Render the maze before initializing player and enemy entities*
@@ -197,16 +199,6 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		}
 	}
 
-	// After updating player position:
-	if (registry.boundingBoxes.has(player)) {
-		Motion& motion = registry.motions.get(player);
-		BoundingBox& bounding_box = registry.boundingBoxes.get(player);
-		bounding_box.min = motion.position - (motion.scale / 2.0f);
-		bounding_box.max = motion.position + (motion.scale / 2.0f);
-		//printf("Bounding box min: (%f, %f)\n", bounding_box.min.x, bounding_box.min.y);
-		//printf("Bounding box max: (%f, %f)\n", bounding_box.max.x, bounding_box.max.y);
-	}
-
 	(int)key;
 	(int)action;
 	(int)mod;
@@ -257,8 +249,8 @@ void GameScene::render_maze(RenderSystem* renderer) {
 				texture_id = TEXTURE_ASSET_ID::WALL_6;
 
 				// Calculate position for the tile
-				float x = col * TILE_SIZE;
-				float y = row * TILE_SIZE;
+				float x = (col+0.5) * TILE_SIZE;
+				float y = (row + 0.5)* TILE_SIZE;
 
 				// Create an entity for the wall tile
 				Entity wall_entity = Entity();
@@ -276,7 +268,7 @@ void GameScene::render_maze(RenderSystem* renderer) {
 				// Add a bounding box component for wall tiles
 				vec2 min = vec2(x, y);
 				vec2 max = vec2(x + TILE_SIZE, y + TILE_SIZE);
-				registry.boundingBoxes.emplace(wall_entity, BoundingBox{ min, max });
+				//registry.boundingBoxes.emplace(wall_entity, BoundingBox{ min, max });
 
 				// Add the render request for the wall entity
 				registry.renderRequests.insert(
@@ -289,8 +281,8 @@ void GameScene::render_maze(RenderSystem* renderer) {
 				texture_id = TEXTURE_ASSET_ID::FLOOR_5;
 
 				// Calculate position for the tile
-				float x = col * TILE_SIZE;
-				float y = row * TILE_SIZE;
+				float x = (col + 0.5) * TILE_SIZE;
+				float y = (row + 0.5) * TILE_SIZE;
 
 				// Create an entity for the floor tile
 				Entity floor_entity = Entity();
@@ -314,6 +306,50 @@ void GameScene::render_maze(RenderSystem* renderer) {
 			}
 		}
 	}
+	for (int y = 0; y < MAZE_HEIGHT; ++y) {
+		for (int x = 0; x < MAZE_WIDTH; ++x) {
+			if (maze[y][x] == 1) {
+				// Create a wall at this grid position
+				vec2 wall_position = vec2((x+0.5) * cell_size, (y+0.5) * cell_size);
+				vec2 wall_size = vec2(cell_size, cell_size);
+				createWall(renderer, wall_position, wall_size);
+			}
+		}
+	}
+}
+
+Entity GameScene::createWall(RenderSystem* renderer, vec2 position, vec2 size)
+{
+	auto entity = Entity();
+
+	// Motion component
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = size;
+
+
+	// RenderRequest component
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::WALL_6,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		});
+
+
+	// Color component
+
+	   // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));  // Black color (RGB)
+
+	registry.colors.emplace(entity, vec3(1.f, 1.f, 1.f));  // White color (RGB)
+
+
+	return entity;
 }
 
 
@@ -383,6 +419,13 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
 	aiTimer.interval = 1000.f;
 	aiTimer.counter_ms = 0.f;
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
 
 	registry.renderRequests.insert(

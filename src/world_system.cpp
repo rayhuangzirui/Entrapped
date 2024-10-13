@@ -366,7 +366,6 @@ bool WorldSystem::is_over() const {
 }
 
 void WorldSystem::draw_maze() {
-   
     for (int y = 0; y < MAZE_HEIGHT; ++y) {
         for (int x = 0; x < MAZE_WIDTH; ++x) {
             if (maze[y][x] == 1) {

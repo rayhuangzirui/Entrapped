@@ -25,6 +25,7 @@ private:
 	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);
 	Entity createPlayer(RenderSystem* renderer, vec2 pos);
 	Entity createEnemy(RenderSystem* renderer, vec2 pos);
+	Entity createWall(RenderSystem* renderer, vec2 position, vec2 size);
 
 	float PLAYER_SPEED = 100.0f;
 	const int TILE_SIZE = 48;

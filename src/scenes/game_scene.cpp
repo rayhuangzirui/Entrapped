@@ -40,6 +40,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	Mix_PlayMusic(background_music, -1);
 
 	current_speed = 5.0f;
+	player_velocity = { 0.0, 0.0 };
 
 
 	(RenderSystem*)renderer;
@@ -90,30 +91,29 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	static bool isSprinting = false;
 
 	// Handle movement keys (W, A, S, D)
-	if (action == GLFW_PRESS || action == GLFW_REPEAT) {
+	if (action == GLFW_PRESS) {
 		vec2 new_position = motion.position;
 		if (action == GLFW_PRESS) {
 			// Reset frame and counter when a new key is pressed
 			frame = 0;
 			frame_counter = 0;
 		}
-
 		switch (key) {
 		case GLFW_KEY_W:
-			motion.velocity.y = -PLAYER_SPEED;
+			player_velocity.y += -PLAYER_SPEED;
 			texture.used_texture = walking_back[frame];
 			break;
 		case GLFW_KEY_S:
-			motion.velocity.y = PLAYER_SPEED;
+			player_velocity.y += PLAYER_SPEED;
 			texture.used_texture = walking_front[frame];
 			break;
 		case GLFW_KEY_A:
-			motion.velocity.x = -PLAYER_SPEED;
+			player_velocity.x += -PLAYER_SPEED;
 			texture.used_texture = walking_sideways[frame];
 			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 			break;
 		case GLFW_KEY_D:
-			motion.velocity.x = PLAYER_SPEED;
+			player_velocity.x += PLAYER_SPEED;
 			texture.used_texture = walking_sideways[frame];
 			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 			break;
@@ -130,20 +130,40 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 
 	}
 	else if (action == GLFW_RELEASE) {
+		//switch (key) {
+		//case GLFW_KEY_W:
+		//case GLFW_KEY_S:
+		//	motion.velocity.y = 0.f;
+		//	break;
+		//case GLFW_KEY_A:
+		//case GLFW_KEY_D:
+		//	motion.velocity.x = 0.f;
+		//	break;
+		//case GLFW_KEY_LEFT_SHIFT:
+		//	isSprinting = false;
+		//	break;
+		//}
 		switch (key) {
 		case GLFW_KEY_W:
+			player_velocity.y -= -PLAYER_SPEED;
+			break;
 		case GLFW_KEY_S:
-			motion.velocity.y = 0.f;
+			player_velocity.y -= PLAYER_SPEED;
 			break;
 		case GLFW_KEY_A:
+			player_velocity.x -= -PLAYER_SPEED;
+			break;
 		case GLFW_KEY_D:
-			motion.velocity.x = 0.f;
+			player_velocity.x -= PLAYER_SPEED;
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
 			isSprinting = false;
 			break;
 		}
+
 	}
+
+	motion.velocity = player_velocity;
 
 	// Apply sprint effect if active
 	if (isSprinting) {

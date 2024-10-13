@@ -31,6 +31,7 @@ private:
 	const int TILE_SIZE = 48;
 	Mix_Music* background_music;
 	Mix_Chunk* player_dead_sound;
+	vec2 player_velocity;
 
 	std::string next_scene = "";
 

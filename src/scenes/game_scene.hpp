@@ -32,7 +32,7 @@ private:
 	Mix_Music* background_music;
 	Mix_Chunk* player_dead_sound;
 	vec2 player_velocity;
-
+	int music_volume = 10;  // Default max volume
 	std::string next_scene = "";
 
 };

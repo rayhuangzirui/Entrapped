@@ -37,6 +37,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	}
 
 	// Playing background music indefinitely
+	Mix_VolumeMusic(music_volume);  // Set volume for music
 	Mix_PlayMusic(background_music, -1);
 
 	current_speed = 5.0f;

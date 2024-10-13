@@ -8,18 +8,22 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/ai_system.cpp" "CMakeFiles/salmon.dir/src/ai_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/ai_system.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/common.cpp" "CMakeFiles/salmon.dir/src/common.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/common.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/components.cpp" "CMakeFiles/salmon.dir/src/components.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/components.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/main.cpp" "CMakeFiles/salmon.dir/src/main.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/main.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/maze.cpp" "CMakeFiles/salmon.dir/src/maze.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/maze.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/physics_system.cpp" "CMakeFiles/salmon.dir/src/physics_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/physics_system.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/render_system.cpp" "CMakeFiles/salmon.dir/src/render_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/render_system.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/render_system_init.cpp" "CMakeFiles/salmon.dir/src/render_system_init.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/render_system_init.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/tiny_ecs.cpp" "CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/tiny_ecs_registry.cpp" "CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/world_init.cpp" "CMakeFiles/salmon.dir/src/world_init.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/world_init.cpp.o.d"
-  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/src/world_system.cpp" "CMakeFiles/salmon.dir/src/world_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/world_system.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/ai_system.cpp" "CMakeFiles/salmon.dir/src/ai_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/ai_system.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/common.cpp" "CMakeFiles/salmon.dir/src/common.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/common.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/components.cpp" "CMakeFiles/salmon.dir/src/components.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/components.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/main.cpp" "CMakeFiles/salmon.dir/src/main.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/main.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/maze.cpp" "CMakeFiles/salmon.dir/src/maze.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/maze.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/physics_system.cpp" "CMakeFiles/salmon.dir/src/physics_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/physics_system.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/render_system.cpp" "CMakeFiles/salmon.dir/src/render_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/render_system.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/render_system_init.cpp" "CMakeFiles/salmon.dir/src/render_system_init.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/render_system_init.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/scenes/game_scene.cpp" "CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/scenes/main_menu.cpp" "CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/scenes/scene_system.cpp" "CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/text_renderer.cpp" "CMakeFiles/salmon.dir/src/text_renderer.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/text_renderer.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/tiny_ecs.cpp" "CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/tiny_ecs_registry.cpp" "CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/world_init.cpp" "CMakeFiles/salmon.dir/src/world_init.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/world_init.cpp.o.d"
+  "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/world_system.cpp" "CMakeFiles/salmon.dir/src/world_system.cpp.o" "gcc" "CMakeFiles/salmon.dir/src/world_system.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

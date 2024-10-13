@@ -3,3 +3,6 @@
 
 # Ignore output folder
 out/
+
+#ignore cmake build folder
+build/

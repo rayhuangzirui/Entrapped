@@ -242,7 +242,9 @@ Entity createWall(RenderSystem* renderer, vec2 position, vec2 size)
 
     // Color component
    
-        registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));  // Black color (RGB)
+       // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));  // Black color (RGB)
+
+	   registry.colors.emplace(entity, vec3(1.f, 1.f, 1.f));  // White color (RGB)
     
 
     return entity;

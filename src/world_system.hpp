@@ -46,6 +46,8 @@ public:
 	// Should the game be over ?
 	bool is_over()const;
 
+	void draw_maze();
+
 
 private:
 	// Input callback functions

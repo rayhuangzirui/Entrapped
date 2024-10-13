@@ -155,17 +155,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
     restart_game();
 
 	//initialize the maze
-	   // for (int y = 0; y < MAZE_HEIGHT; ++y) {
-    //    for (int x = 0; x < MAZE_WIDTH; ++x) {
-    //        if (maze[y][x] == 1) {
-    //            // Create a wall at this grid position
-    //            vec2 wall_position = vec2(x * cell_size, y * cell_size);
-				//vec2 wall_size = vec2(cell_size, cell_size); // this is a dummy value for now
-    //            createWall(renderer, wall_position, wall_size); //create wall function needs to be implemented
-    //        }
-    //    }
-    //}
-
 
   //restart_game();
 	this->scene_system.initialize(this->renderer);
@@ -375,6 +364,20 @@ bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));
 }
 
+void WorldSystem::draw_maze() {
+   
+    for (int y = 0; y < MAZE_HEIGHT; ++y) {
+        for (int x = 0; x < MAZE_WIDTH; ++x) {
+            if (maze[y][x] == 1) {
+                // Create a wall at this grid position
+                vec2 wall_position = vec2(x * cell_size, y * cell_size);
+                vec2 wall_size = vec2(cell_size, cell_size);
+                createWall(renderer, wall_position, wall_size);
+            }
+        }
+    }
+}
+
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 // MERGE TODO
@@ -475,6 +478,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		scene_system.changeScene("game_scene");
 		//std::cout << "err here" << std::endl;
 		scene_system.pushScene();
+		draw_maze();
 		return;
 	}
 	scene_system.on_key(key, action, mod);

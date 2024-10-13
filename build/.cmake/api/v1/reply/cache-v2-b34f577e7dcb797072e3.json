@@ -67,7 +67,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/build"
+			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -167,10 +167,10 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "CXX compiler"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
-			"type" : "STRING",
+			"type" : "FILEPATH",
 			"value" : "/usr/bin/clang++"
 		},
 		{
@@ -263,10 +263,10 @@
 				},
 				{
 					"name" : "HELPSTRING",
-					"value" : "C compiler"
+					"value" : "No help, variable specified on the command line."
 				}
 			],
-			"type" : "STRING",
+			"type" : "FILEPATH",
 			"value" : "/usr/bin/clang"
 		},
 		{
@@ -503,7 +503,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/build/CMakeFiles/pkgRedirects"
+			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles/pkgRedirects"
 		},
 		{
 			"name" : "CMAKE_GENERATOR",
@@ -563,7 +563,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1"
+			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16"
 		},
 		{
 			"name" : "CMAKE_INSTALL_NAME_TOOL",
@@ -1180,6 +1180,30 @@
 			],
 			"type" : "INTERNAL",
 			"value" : "[/opt/homebrew/bin/pkg-config][v0.29.2()]"
+		},
+		{
+			"name" : "FREETYPE_INCLUDE_DIR",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a file."
+				}
+			],
+			"type" : "PATH",
+			"value" : "/opt/homebrew/Cellar/freetype/2.13.3/include/freetype2"
+		},
+		{
+			"name" : "FREETYPE_LIBRARY",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "Path to a library."
+				}
+			],
+			"type" : "FILEPATH",
+			"value" : "/opt/homebrew/lib/libfreetype.dylib"
 		},
 		{
 			"name" : "GLFW_CFLAGS",
@@ -2675,7 +2699,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1/build"
+			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build"
 		},
 		{
 			"name" : "salmon_IS_TOP_LEVEL",
@@ -2699,7 +2723,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16-1"
+			"value" : "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16"
 		}
 	],
 	"kind" : "cache",

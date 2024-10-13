@@ -3,6 +3,33 @@
 #include "world_init.hpp"
 #include "maze.hpp"
 
+
+// Helper function to calculate bounding box of an entity
+BoundingBox calculate_bounding_box(const Motion& motion) {
+    vec2 min = motion.position - (motion.scale / 2.0f);
+    vec2 max = motion.position + (motion.scale / 2.0f);
+    return BoundingBox{ min, max };
+}
+
+// Function to check if two bounding boxes overlap (AABB collision detection)
+bool check_aabb_collision(const BoundingBox& box1, const BoundingBox& box2) {
+    return (box1.min.x < box2.max.x &&
+        box1.max.x > box2.min.x &&
+        box1.min.y < box2.max.y &&
+        box1.max.y > box2.min.y);
+}
+
+// Function to check collision between player and walls (tiles)
+bool check_player_tile_collision(const Motion& player_motion, const std::vector<BoundingBox>& tile_bounding_boxes) {
+    BoundingBox player_box = calculate_bounding_box(player_motion);
+    for (const BoundingBox& tile_box : tile_bounding_boxes) {
+        if (check_aabb_collision(player_box, tile_box)) {
+            return true;  // Collision detected
+        }
+    }
+    return false;  // No collision detected
+}
+
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)
 {

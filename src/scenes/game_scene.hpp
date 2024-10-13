@@ -18,10 +18,12 @@ private:
 	Entity player;
 	Entity enemy;
 	void render_maze(RenderSystem* renderer);
-	bool check_player_wall_collision(const Motion& player_motion);
-	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);
+
 	Entity createPlayer(RenderSystem* renderer, vec2 pos);
 	Entity createEnemy(RenderSystem* renderer, vec2 pos);
+
+	bool check_collision(const BoundingBox& box1, const BoundingBox& box2);
+	bool is_player_colliding_with_wall();
 
 	float PLAYER_SPEED = 100.0f;
 	const int TILE_SIZE = 48;

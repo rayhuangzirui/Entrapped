@@ -44,21 +44,21 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	static int first_round_frame_counter = 0;
 	const int frame_delay = 2;
 	TEXTURE_ASSET_ID walking_sideways[3] = {
-	TEXTURE_ASSET_ID::PLAYER_1,
-	TEXTURE_ASSET_ID::PLAYER_2,
-	TEXTURE_ASSET_ID::PLAYER_3
+		TEXTURE_ASSET_ID::PLAYER_1,
+		TEXTURE_ASSET_ID::PLAYER_2,
+		TEXTURE_ASSET_ID::PLAYER_3
 	};
 
 	TEXTURE_ASSET_ID walking_front[3] = {
-	TEXTURE_ASSET_ID::PLAYER_FRONT_1,
-	TEXTURE_ASSET_ID::PLAYER_FRONT_2,
-	TEXTURE_ASSET_ID::PLAYER_FRONT_3
+		TEXTURE_ASSET_ID::PLAYER_FRONT_1,
+		TEXTURE_ASSET_ID::PLAYER_FRONT_2,
+		TEXTURE_ASSET_ID::PLAYER_FRONT_3
 	};
 
 	TEXTURE_ASSET_ID walking_back[3] = {
-	TEXTURE_ASSET_ID::PLAYER_BACK_1,
-	TEXTURE_ASSET_ID::PLAYER_BACK_2,
-	TEXTURE_ASSET_ID::PLAYER_BACK_3
+		TEXTURE_ASSET_ID::PLAYER_BACK_1,
+		TEXTURE_ASSET_ID::PLAYER_BACK_2,
+		TEXTURE_ASSET_ID::PLAYER_BACK_3
 	};
 
 	Motion& motion = registry.motions.get(player);
@@ -103,8 +103,37 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 			}
 			break;
 		}
-
 	}
+
+	// Player and wall boundary box collision detection --------------------------------------------
+	for (size_t i = 0; i < registry.boundingBoxes.components.size(); ++i) {
+		BoundingBox& wall_bounding_box = registry.boundingBoxes.components[i];
+		Entity wall_entity = registry.boundingBoxes.entities[i];
+
+		// Skip if the entity is the player itself
+		if (wall_entity == player)
+			continue;
+
+		// Check for collision with wall bounding box
+		BoundingBox player_bounding_box = calculate_bounding_box(motion.position, motion.scale);
+		if (player_bounding_box.min.x < wall_bounding_box.max.x &&
+			player_bounding_box.max.x > wall_bounding_box.min.x &&
+			player_bounding_box.min.y < wall_bounding_box.max.y &&
+			player_bounding_box.max.y > wall_bounding_box.min.y) {
+			// If collision detected, stop movement in that direction
+			if (motion.velocity.x > 0) // Moving right
+				motion.velocity.x = 0;
+			else if (motion.velocity.x < 0) // Moving left
+				motion.velocity.x = 0;
+
+			if (motion.velocity.y > 0) // Moving down
+				motion.velocity.y = 0;
+			else if (motion.velocity.y < 0) // Moving up
+				motion.velocity.y = 0;
+		}
+	}
+	// End detection --------------------------------------------------------
+
 	else if (action == GLFW_RELEASE) {
 		switch (key) {
 		case GLFW_KEY_W:
@@ -179,8 +208,7 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	if (registry.boundingBoxes.has(player)) {
 		Motion& motion = registry.motions.get(player);
 		BoundingBox& bounding_box = registry.boundingBoxes.get(player);
-		bounding_box.min = motion.position - (motion.scale / 2.0f);
-		bounding_box.max = motion.position + (motion.scale / 2.0f);
+		bounding_box = calculate_bounding_box(motion.position, motion.scale);
 		printf("Bounding box min: (%f, %f)\n", bounding_box.min.x, bounding_box.min.y);
 		printf("Bounding box max: (%f, %f)\n", bounding_box.max.x, bounding_box.max.y);
 	}
@@ -191,35 +219,33 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	(RenderSystem*)renderer;
 }
 
-// Function to check if two bounding boxes overlap
-bool GameScene::check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max) {
-	return (box1_min.x < box2_max.x &&
-		box1_max.x > box2_min.x &&
-		box1_min.y < box2_max.y &&
-		box1_max.y > box2_min.y);
+
+
+
+bool GameScene::check_collision(const BoundingBox& box1, const BoundingBox& box2) {
+	// Check for overlap between two bounding boxes (AABB collision detection)
+	return !(box1.max.x < box2.min.x || box1.min.x > box2.max.x ||
+		box1.max.y < box2.min.y || box1.min.y > box2.max.y);
 }
 
-// TODO: Remove this grid collision detection when aabb_collision is finished
-bool GameScene::check_player_wall_collision(const Motion& player_motion) {
-    // Calculate the player's bounding box for the new position
-    vec2 player_min = player_motion.position - (player_motion.scale / 2.0f);
-    vec2 player_max = player_motion.position + (player_motion.scale / 2.0f);
+bool GameScene::is_player_colliding_with_wall() {
+	if (registry.boundingBoxes.has(player)) {
+		BoundingBox& player_box = registry.boundingBoxes.get(player);
 
-    // Loop through all entities with bounding boxes (walls)
-    for (uint i = 0; i < registry.boundingBoxes.components.size(); i++) {
-        BoundingBox& bounding_box = registry.boundingBoxes.components[i];
-        vec2 wall_min = bounding_box.min;
-        vec2 wall_max = bounding_box.max;
+		for (size_t i = 0; i < registry.boundingBoxes.components.size(); ++i) {
+			Entity entity = registry.boundingBoxes.entities[i];
+			// Skip collision with itself
+			if (entity == player) continue;
 
-        // Use AABB collision check
-        if (check_aabb_collision(player_min, player_max, wall_min, wall_max)) {
-            return true; // Collision detected
-        }
-    }
-
-    return false; // No collision detected
+			BoundingBox& wall_box = registry.boundingBoxes.components[i];
+			if (check_collision(player_box, wall_box)) {
+				// Collision detected with a wall
+				return true;
+			}
+		}
+	}
+	return false;
 }
-
 
 // Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze
 void GameScene::render_maze(RenderSystem* renderer) {

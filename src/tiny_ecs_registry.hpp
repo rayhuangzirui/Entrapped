@@ -14,6 +14,11 @@ public:
 	// TODO: A1 add a LightUp component
 	ComponentContainer<LightUp> lightUps;
 
+	ComponentContainer<DamageCoolDown> damageCoolDowns;
+	ComponentContainer<Opacity> opacities;
+	ComponentContainer<AITimer> aiTimers;
+	
+
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
@@ -30,9 +35,13 @@ public:
 	ComponentContainer<DashTimer> dashTimers;
 	ComponentContainer<LightUp> lightups;
 
+
 	// Add bullet container and enemy container
 	ComponentContainer<Bullet> bullets;
 	ComponentContainer<Enemy> enemies;
+
+	// Bounding box
+	ComponentContainer<BoundingBox> boundingBoxes;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -40,6 +49,9 @@ public:
 	{
 		// TODO: A1 add a LightUp component
 		registry_list.push_back(&lightUps);
+		registry_list.push_back(&damageCoolDowns);
+		registry_list.push_back(&opacities);
+		registry_list.push_back(&aiTimers);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

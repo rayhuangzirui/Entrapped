@@ -26,3 +26,8 @@ void MainMenu::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	(int)mod;
 }
 
+
+void MainMenu::handle_collisions() {
+	// dummy to avoid compiler warning
+}
+

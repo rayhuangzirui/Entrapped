@@ -10,6 +10,9 @@ struct Player
 	// Player's health
 	int health = 5;
 
+	// Hit cooldown
+	float hit_cooldown = 0.f;
+
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
 
@@ -25,6 +28,7 @@ struct Bullet
 
 	// Initializer of the bullet
 	//Bullet(int dmg) : damage(dmg) {};
+
 };
 
 // Enemy component
@@ -103,10 +107,31 @@ struct DeathTimer
 	float counter_ms = 3000;
 };
 
-// Added LightUp component: A timer that will be associated with the salmon lighting up after eating a fish
+// Added LightUp component: A timer that will be associated with the player lighting up after getting attacked by an enemy
 struct LightUp
 {
 	float counter_ms = 500; // light up for 0.5 second
+	float blink_timer = 0.0f; // timer for blinking effect
+	bool active = false; // flag to indicate if the light up effect is active
+};
+
+// AI timer component
+struct AITimer
+{
+	float interval = 2000.0f; // 2 second, period of time before the enemy changes direction
+	float counter_ms = 0.0f; // 1 second
+};
+
+// A timer that will be associated with the damage cooldown of the player
+struct DamageCoolDown
+{
+	float counter_ms = 500; // damage cooldown for 0.5 second
+};
+
+// Opacity component
+struct Opacity
+{
+	float opacity = 1.0f;
 };
 
 // A timer that will be associated with the knockback of the enemy
@@ -136,6 +161,12 @@ struct Mesh
 	vec2 original_size = {1,1};
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
+};
+
+// Bounding box component used for collision detection
+struct BoundingBox {
+	vec2 min; // Minimum x, y coordinates of the bounding box
+	vec2 max; // Maximum x, y coordinates of the bounding box
 };
 
 /**

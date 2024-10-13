@@ -74,6 +74,36 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
+		// Handle light up effect for the player
+		// Light up?
+		GLint light_up_uloc = glGetUniformLocation(program, "light_up");
+		assert(light_up_uloc >= 0);
+
+		// !!! TODO A1: set the light_up shader variable using glUniform1i,
+		// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+		/*if (registry.lightUps.has(entity)) {
+			glUniform1i(light_up_uloc, 1);
+		}
+		else {
+			glUniform1i(light_up_uloc, 0);
+		}*/
+		bool is_light_up = registry.lightups.has(entity);
+		glUniform1i(light_up_uloc, is_light_up ? 1 : 0);
+		gl_has_errors();
+
+
+		if (registry.opacities.has(entity)) {
+			// Set the opacity
+			GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+			assert(opacity_uloc >= 0);
+			glUniform1f(opacity_uloc, registry.opacities.get(entity).opacity);
+		}
+		else {
+			// Set the opacity
+			GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+			assert(opacity_uloc >= 0);
+			glUniform1f(opacity_uloc, 1.0f);
+		}
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::EGG)
 	{

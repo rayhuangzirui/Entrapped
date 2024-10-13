@@ -12,6 +12,7 @@
 #include <iostream>
 #include <scenes/scene_system.hpp>
 #include <text_renderer.hpp>
+#include <ai_system.hpp>
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -23,6 +24,8 @@ int main()
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
+	BaseScene* game_scene = new GameScene();
+	AISystem ai_system;
 
 
 	// Initializing window
@@ -51,8 +54,9 @@ int main()
 			(float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
 		t = now;
 		world.step(elapsed_ms);
+		ai_system.step(elapsed_ms);
 		physics.step(elapsed_ms);
-		world.handle_collisions();
+		game_scene->handle_collisions();
 
 		renderer.draw();
 	}

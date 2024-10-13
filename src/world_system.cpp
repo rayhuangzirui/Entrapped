@@ -155,12 +155,11 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
     restart_game();
 
 	//initialize the maze
-	
 
   //restart_game();
 	this->scene_system.initialize(this->renderer);
 	this->scene_system.pushScene();
-
+	this->scene_system.handle_collisions();
 }
 
 // Update our game world
@@ -175,6 +174,54 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
 	registry.remove_all_components_of(registry.debugComponents.entities.back());
+	// update LightUp timers and remove if time drops below zero, similar to the death counter
+	for (Entity entity : registry.lightUps.entities) {
+		// progress timer
+		LightUp& lightup = registry.lightUps.get(entity);
+		lightup.counter_ms -= elapsed_ms_since_last_update;
+
+		/*std::cout << "LightUp timer: " << counter.counter_ms << " ms" << std::endl;*/
+
+		// Interpolate the color and opacity using LERP: https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/a-brief-introduction-to-lerp-r4954/
+		// function lerp(start, end, t)
+		//    return start * (1 - t) + end * t;
+		float t = (sin(lightup.blink_timer * 10) + 1) / 2;
+
+		// Color shift: interpolate between the original color and the light up red color
+		vec3 original_color = { 1.f, 1.f, 1.f }; // white
+		vec3 lightup_color = { 1.f, 0.f, 0.f }; // red
+		vec3 new_color = original_color * (1 - t) + lightup_color * t;	// lerp
+
+		// Opacity shift: interpolate between the original opacity and 0.5
+		float original_opacity = 1.f;
+		float hit_opacity = 0.5f;
+		float new_opacity = original_opacity * (1 - t) + hit_opacity * t;	// lerp
+
+		// Update the color and opacity
+		registry.colors.get(entity) = new_color;
+		registry.opacities.get(entity).opacity = new_opacity;
+
+
+		if (lightup.counter_ms < 0) {
+			registry.lightUps.remove(entity); // remove the light up effect when timer ends
+		}
+
+		lightup.blink_timer += elapsed_ms_since_last_update / 1000.f; // update the blink timer
+	}
+	
+	// Damage cool down timer drop 
+	for (Entity entity : registry.damageCoolDowns.entities) {
+		// progress timer
+		DamageCoolDown& counter = registry.damageCoolDowns.get(entity);
+		counter.counter_ms -= elapsed_ms_since_last_update;
+
+		/*std::cout << "Damage timer: " << counter.counter_ms << " ms" << std::endl;*/
+
+		if (counter.counter_ms < 0) {
+			registry.damageCoolDowns.remove(entity); 
+		}
+
+	}
 	return true;
 }
 
@@ -198,96 +245,99 @@ void WorldSystem::restart_game() {
 }
 
 // Compute collisions between entities
-void WorldSystem::handle_collisions() {
-	// Loop over all collisions detected by the physics system
-	auto& collisionsRegistry = registry.collisions;
-	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
-		// The entity and its collider
-		Entity entity = collisionsRegistry.entities[i];
-		Entity entity_other = collisionsRegistry.components[i].other;
-
-    // MERGE TODO
-		// Player & Enemy collision: Enemy attacks the player, player loses 1 health, if health is 0, player dies
-		if (registry.players.has(entity)) {
-			if (registry.enemies.has(entity_other)) {
-
-				// Player and enemy components
-				Player& player = registry.players.get(entity);
-				Enemy& enemy = registry.enemies.get(entity_other);
-
-				// Reduce player health
-				player.health -= enemy.damage;
-				printf("Player health: %d\n", player.health);
-
-				// Red tint light up effect on player
-				registry.lightUps.emplace(entity); 
-				//registry.colors.get(entity) = { 1.f, 0.f, 0.f }; // Red tint
-				
-				// TODO: change the light up color in the render system and shader
-
-				// Play the enemy hit sound
-				Mix_PlayChannel(-1, enemy_hit_sound, 0);
-
-				// Check if the player is dead
-				if (player.health <= 0) {
-					// If the player is already dying, don't do anything
-					if (registry.deathTimers.has(entity))
-						continue;
-
-					// initiate death unless already dying
-					if (!registry.deathTimers.has(entity)) {
-						// Scream, reset timer, and play the dead animation
-						registry.deathTimers.emplace(entity);
-						Mix_PlayChannel(-1, player_dead_sound, 0);
-
-						// Player death animation
-						Motion& player_entity_motion = registry.motions.get(entity);
-
-						// Change the player's color, make it red on death
-						registry.colors.get(entity) = { 1.f, 0.f, 0.f };
-					}
-					
-				}
-			}
-		}
-
-		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
-		if (registry.bullets.has(entity)) {
-			if (registry.enemies.has(entity_other)) {
-				// Bullet and enemy components
-				Bullet& bullet = registry.bullets.get(entity);
-				Enemy& enemy = registry.enemies.get(entity_other);
-
-				// Reduce enemy health
-				enemy.health -= bullet.damage;
-
-				// Red tint light up effect on enemy
-				registry.lightUps.emplace(entity_other);
-				//registry.colors.get(entity_other) = { 1.f, 0.f, 0.f }; // Red tint
-
-				// Play the bullet hit sound
-				Mix_PlayChannel(-1, bullet_hit_sound, 0);
-
-				// Check if the enemy is dead
-				if (enemy.health <= 0) {
-					// TODO: play the enemy dead animation
-
-					// Play the enemy dead sound
-					Mix_PlayChannel(-1, enemy_dead_sound, 0);
-
-					// Remove the enemy
-					registry.remove_all_components_of(entity_other);
-				}
-
-				// Remove the bullet
-				registry.remove_all_components_of(entity);
-			}
-		}
-	}
-
-	// Remove all collisions from this simulation step
-	registry.collisions.clear();
-}
+//void WorldSystem::handle_collisions() {
+//	// Loop over all collisions detected by the physics system
+//	auto& collisionsRegistry = registry.collisions;
+//	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+//		// The entity and its collider
+//		Entity entity = collisionsRegistry.entities[i];
+//		Entity entity_other = collisionsRegistry.components[i].other;
+//
+//    // MERGE TODO
+//		// Player & Enemy collision: Enemy attacks the player, player loses 1 health, if health is 0, player dies
+//		if (registry.players.has(entity)) {
+//			if (registry.enemies.has(entity_other)) {
+//
+//				// Player and enemy components
+//				//Player& player = registry.players.get(entity);
+//				//Enemy& enemy = registry.enemies.get(entity_other);
+//
+//				// Reduce player health
+//				//player.health -= enemy.damage;
+//				//printf("Player health: %d\n", player.health);
+//
+//				// Red tint light up effect on player
+//				if (!registry.lightUps.has(entity)) {
+//					registry.lightUps.emplace(entity); 
+//					//registry.colors.get(entity) = { 1.f, 0.f, 0.f }; // Red tint
+//				}
+//				
+//				// TODO: change the light up color in the render system and shader
+//
+//				// Play the enemy hit sound
+//				//Mix_PlayChannel(-1, enemy_hit_sound, 0);
+//				// initiate death unless already dying
+//				if (!registry.deathTimers.has(entity)) {
+//					// Scream, reset timer, and play the dead animation
+//					registry.deathTimers.emplace(entity);
+//					//Mix_PlayChannel(-1, player_dead_sound, 0);
+//
+//					// Player death animation
+//					//Motion& player_entity_motion = registry.motions.get(entity);
+//
+//					//// Change the player's color, make it red on death
+//					//registry.colors.get(entity) = { 1.f, 0.f, 0.f };
+//
+//					// remove the player after death timer is done
+//					registry.remove_all_components_of(entity);
+//					break;
+//				}
+//				// Check if the player is dead
+//				/*if (player.health <= 0) {
+//					
+//
+//					
+//				}*/
+//			}
+//		}
+//
+//		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
+//		if (registry.bullets.has(entity)) {
+//			if (registry.enemies.has(entity_other)) {
+//				// Bullet and enemy components
+//				Bullet& bullet = registry.bullets.get(entity);
+//				Enemy& enemy = registry.enemies.get(entity_other);
+//
+//				// Reduce enemy health
+//				enemy.health -= bullet.damage;
+//
+//				// Red tint light up effect on enemy
+//				registry.lightUps.emplace(entity_other);
+//				//registry.colors.get(entity_other) = { 1.f, 0.f, 0.f }; // Red tint
+//
+//				// Play the bullet hit sound
+//				Mix_PlayChannel(-1, bullet_hit_sound, 0);
+//
+//				// Check if the enemy is dead
+//				if (enemy.health <= 0) {
+//					// TODO: play the enemy dead animation
+//
+//					// Play the enemy dead sound
+//					Mix_PlayChannel(-1, enemy_dead_sound, 0);
+//
+//					// Remove the enemy
+//					registry.remove_all_components_of(entity_other);
+//				}
+//
+//				// Remove the bullet
+//				registry.remove_all_components_of(entity);
+//			}
+//		}
+//	}
+//
+//	// Remove all collisions from this simulation step
+//	registry.collisions.clear();
+//}
 
 // Add bullet creation
 void WorldSystem::shoot_bullet() {

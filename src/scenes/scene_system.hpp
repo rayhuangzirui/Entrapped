@@ -19,6 +19,8 @@ public:
 	void on_key(int key, int action, int mod);
 	void popScene();
 	void changeScene(std::string name);
+	void handle_collisions();
+
 private:
 	RenderSystem* renderer;
 };

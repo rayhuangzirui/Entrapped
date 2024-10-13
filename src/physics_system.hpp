@@ -9,9 +9,12 @@
 class PhysicsSystem
 {
 public:
+	//bool check_player_wall_collision(const Motion& player_motion);
 	void step(float elapsed_ms);
 
 	PhysicsSystem()
 	{
 	}
+private:
+	//const int TILE_SIZE = 48;
 };

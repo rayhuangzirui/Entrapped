@@ -73,7 +73,7 @@ vec4 check_wall_collision(const BoundingBox& bb) {
     }
 
     // check in box
-    for (uint i = x_left; i < x_right; i++) {
+    for (uint i = x_left+1; i < x_right; i++) {
         if (box_testing_environment[y_top][i] == 1) {
             result.x = (y_top + 1) * TILE_SIZE - bb.min.y;
         }
@@ -128,34 +128,47 @@ void PhysicsSystem::step(float elapsed_ms)
 
             bb.min = motion.position - (abs(motion.scale) / 2.0f);
             bb.max = motion.position + (abs(motion.scale) / 2.0f);
+
+            // position correction
             vec4 v1 = check_wall_collision(bb);
             //vec2 final_velocity = { motion.velocity.x, motion.velocity.y }
-            if (v1.x != 0) {
-                if (motion.velocity.y < 0) {
-                    motion.velocity.y = 0;
+            int max_attempts = 3;
+            int i = 0;
+            while (v1.x != 0 || v1.y != 0 || v1.z != 0 || v1.w != 0) {
+                if (v1.x != 0) {
+                    if (motion.velocity.y < 0) {
+                        motion.velocity.y = 0;
+                    }
                 }
-            }
-            if (v1.y != 0) {
-                if (motion.velocity.y > 0) {
-                    motion.velocity.y = 0;
+                if (v1.y != 0) {
+                    if (motion.velocity.y > 0) {
+                        motion.velocity.y = 0;
+                    }
                 }
-            }
-            if (v1.z != 0) {
-                if (motion.velocity.x < 0) {
-                    motion.velocity.x = 0;
+                if (v1.z != 0) {
+                    if (motion.velocity.x < 0) {
+                        motion.velocity.x = 0;
+                    }
                 }
-            }
-            if (v1.w != 0) {
-                if (motion.velocity.x > 0) {
-                    motion.velocity.x = 0;
+                if (v1.w != 0) {
+                    if (motion.velocity.x > 0) {
+                        motion.velocity.x = 0;
+                    }
                 }
-            }
-            if (v1.x == 0 || v1.y == 0) {
-                motion.position.y = motion.position.y + (v1.x - v1.y);
-            }
+                if (v1.x == 0 || v1.y == 0) {
+                    motion.position.y = motion.position.y + (v1.x - v1.y);
+                }
 
-            if (v1.z == 0 || v1.w == 0) {
-                motion.position.x = motion.position.x + (v1.z - v1.w);
+                if (v1.z == 0 || v1.w == 0) {
+                    motion.position.x = motion.position.x + (v1.z - v1.w);
+                }
+                bb.min = motion.position - (abs(motion.scale) / 2.0f);
+                bb.max = motion.position + (abs(motion.scale) / 2.0f);
+                v1 = check_wall_collision(bb);
+                i++;
+                if (i >= max_attempts) {
+                    break;
+                }
             }
             //motion.position = motion.position + vec2(v1.z - v1.w, v1.x - v1.y);
         }

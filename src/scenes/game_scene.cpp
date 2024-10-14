@@ -400,8 +400,8 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	// Add a bounding box to the player entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
 	vec2 max = motion.position + (motion.scale / 2.0f);
-	printf("Bounding box min: (%f, %f)\n", min.x, min.y);
-	printf("Bounding box max: (%f, %f)\n", max.x, max.y);
+	printf("Player bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Player bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
 	// Add the render request for the player entity
@@ -443,8 +443,8 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
 	vec2 max = motion.position + (motion.scale / 2.0f);
-	printf("Bounding box min: (%f, %f)\n", min.x, min.y);
-	printf("Bounding box max: (%f, %f)\n", max.x, max.y);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
 

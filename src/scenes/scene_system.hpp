@@ -20,6 +20,8 @@ public:
 	void popScene();
 	void changeScene(std::string name);
 	void handle_collisions();
+	void on_mouse_move(vec2 mouse_position);
+	void on_mouse_click(int button, int action, int mod);
 
 private:
 	RenderSystem* renderer;

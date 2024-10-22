@@ -2,6 +2,7 @@
 #include <iostream>
 #include "main_menu.hpp"
 #include "game_scene.hpp"
+#include "death_scene.hpp"
 
 SceneSystem::SceneSystem() {
 	this->current_scene = new MainMenu();
@@ -53,6 +54,11 @@ void SceneSystem::changeScene(std::string name) {
 		this->popScene();
 		delete this->current_scene;
 		this->current_scene = new GameScene();
+	}
+	else if (name.compare("death_scene") == 0) {
+		this->popScene();
+		delete this->current_scene;
+		this->current_scene = new DeathScene();
 	}
 	else {
 		std::cout << "Error: Unknow Scene Name" << std::endl;

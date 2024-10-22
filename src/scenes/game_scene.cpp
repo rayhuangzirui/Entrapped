@@ -219,6 +219,11 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		}
 	}
 
+	if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
+		next_scene = "death_scene";
+		return;
+	}
+
 	(int)key;
 	(int)action;
 	(int)mod;

@@ -18,8 +18,8 @@ public:
 	ComponentContainer<Opacity> opacities;
 	ComponentContainer<AITimer> aiTimers;
 	ComponentContainer<Gun> guns;
-
 	ComponentContainer<Parent> parents;
+	ComponentContainer<FPS> fps;
 	
 
 	ComponentContainer<DeathTimer> deathTimers;
@@ -57,6 +57,7 @@ public:
 		registry_list.push_back(&aiTimers);
 		registry_list.push_back(&guns);
 		registry_list.push_back(&parents);
+		registry_list.push_back(&fps);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

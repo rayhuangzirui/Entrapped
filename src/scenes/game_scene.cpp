@@ -134,6 +134,15 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 				motion.velocity *= 2.5f;
 			}
 			break;
+		case GLFW_KEY_F:
+			// get the fps entity
+			Entity fps_entity = registry.fps.entities[0];
+			FPS& fps_counter = registry.fps.get(fps_entity);
+			// visialize fps
+			fps_counter.visible = !fps_counter.visible;
+			printf("FPS counter visibility: %d\n", fps_counter.visible);
+			printf("FPS: %f\n", fps_counter.fps);
+			break;
 		}
 
 	}
@@ -442,7 +451,7 @@ Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
 	// Create an empty Gun component for the gun
 	Gun& gun = registry.guns.emplace(entity);
 	gun.angle = 0.f;
-	gun.offset = { 20.f, 0.f };
+	//gun.offset = { 20.f, 0.f };
 
 	// Setting initial motion values
 	Motion& gun_motion = registry.motions.emplace(entity);
@@ -712,6 +721,22 @@ void GameScene::on_mouse_click(RenderSystem* renderer, int button, int action, i
 	(int)action;
 	(int)mod;
 	(RenderSystem*)renderer;
+}
+
+void GameScene::draw_fps(RenderSystem* renderer) {
+	if (registry.texts.entities.size() > 0) {
+		registry.remove_all_components_of(registry.texts.entities.back());
+	}
+	Entity fps_entity = registry.fps.entities[0];
+	FPS& fps_counter = registry.fps.get(fps_entity);
+	if (fps_counter.visible) {
+		std::string fps_string = "FPS: " + std::to_string(static_cast<int> (fps_counter.fps));
+
+		// Update the text content
+		//fps_text.content = fps_string;
+		vec2 fps_position = vec2(10.f, 10.f);
+		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
+	}
 }
 
 // TODO: Reloading logic

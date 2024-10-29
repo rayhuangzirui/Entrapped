@@ -47,3 +47,7 @@ void MainMenu::on_mouse_click(RenderSystem* renderer, int button, int action, in
 	(int)action;
 	(int)mod;
 }
+
+void MainMenu::draw_fps(RenderSystem* renderer) {
+	(RenderSystem*)renderer;
+}

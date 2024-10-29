@@ -54,7 +54,8 @@ struct Gun
 	float angle = 0.f;
 
 	// Position offset of the gun from the player
-	vec2 offset = { 20.f, 0 };
+	//vec2 offset = { 20.f, 0 };
+	vec2 offset = { 0, 0 };
 };
 
 // Bullet component
@@ -67,6 +68,15 @@ struct Bullet
 	float speed = 500.f;
 	vec2 direction = { 0, 0 };
 
+};
+
+// FPS counter component
+struct FPS
+{
+	bool visible = false;
+	float fps = 0.f;
+	float elapsed_time = 0.f;
+	int frame_count = 0;
 };
 
 // Enemy component

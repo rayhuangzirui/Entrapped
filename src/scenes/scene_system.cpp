@@ -51,6 +51,10 @@ void SceneSystem::on_mouse_click(int button, int action, int mod) {
 	current_scene->on_mouse_click(this->renderer, button, action, mod);
 }
 
+void SceneSystem::draw_fps() {
+	current_scene->draw_fps(this->renderer);
+}
+
 void SceneSystem::changeScene(std::string name) {
 	if (name.compare("main_menu") == 0) {
 		this->popScene();

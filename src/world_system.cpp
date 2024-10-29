@@ -227,6 +227,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 
 	}
+
+	// FPS counter
+	if (registry.fps.entities.size() == 0) {
+		registry.fps.emplace(FPS_entity);
+	}
+	
+	FPS& fps_counter = registry.fps.get(FPS_entity);
+	
+	fps_counter.elapsed_time += elapsed_ms_since_last_update;
+	fps_counter.frame_count++;
+
+	if (fps_counter.elapsed_time >= 1000) {
+		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
+		fps_counter.frame_count = 0;
+		fps_counter.elapsed_time = 0.0;
+	}
+
+	draw_fps();
+
+	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	return true;
 }
 
@@ -379,4 +399,8 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 void WorldSystem::on_mouse_click(int button, int action, int mod) {
 	scene_system.on_mouse_click(button, action, mod);
+}
+
+void WorldSystem::draw_fps() {
+	scene_system.draw_fps();
 }

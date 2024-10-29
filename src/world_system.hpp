@@ -48,6 +48,7 @@ public:
 
 	void draw_maze();
 
+	void draw_fps();
 
 private:
 	// Input callback functions
@@ -70,6 +71,8 @@ private:
 	float next_enemy_spawn;
 	
 	Entity player_entity;
+	Entity FPS_entity;
+	Entity fps_text_entity;
 
 	// Sprint flag to check if sprinting
 	bool isSprinting;

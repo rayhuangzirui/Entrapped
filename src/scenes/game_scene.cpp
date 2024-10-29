@@ -328,7 +328,7 @@ void GameScene::render_maze(RenderSystem* renderer) {
 	}
 	for (int y = 0; y < MAZE_HEIGHT; ++y) {
 		for (int x = 0; x < MAZE_WIDTH; ++x) {
-			if (maze[y][x] == 1) {
+			if (tutorial_maze[y][x] == 1) {
 				// Create a wall at this grid position
 				vec2 wall_position = vec2((x+0.5) * cell_size, (y+0.5) * cell_size);
 				vec2 wall_size = vec2(cell_size, cell_size);

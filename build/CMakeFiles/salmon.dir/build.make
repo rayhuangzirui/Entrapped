@@ -139,10 +139,24 @@ CMakeFiles/salmon.dir/src/maze.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/salmon.dir/src/maze.cpp.s"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/maze.cpp" -o CMakeFiles/salmon.dir/src/maze.cpp.s
 
+CMakeFiles/salmon.dir/src/maze_generator.cpp.o: CMakeFiles/salmon.dir/flags.make
+CMakeFiles/salmon.dir/src/maze_generator.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/maze_generator.cpp
+CMakeFiles/salmon.dir/src/maze_generator.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/salmon.dir/src/maze_generator.cpp.o"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/maze_generator.cpp.o -MF CMakeFiles/salmon.dir/src/maze_generator.cpp.o.d -o CMakeFiles/salmon.dir/src/maze_generator.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/maze_generator.cpp"
+
+CMakeFiles/salmon.dir/src/maze_generator.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/salmon.dir/src/maze_generator.cpp.i"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/maze_generator.cpp" > CMakeFiles/salmon.dir/src/maze_generator.cpp.i
+
+CMakeFiles/salmon.dir/src/maze_generator.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/salmon.dir/src/maze_generator.cpp.s"
+	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/maze_generator.cpp" -o CMakeFiles/salmon.dir/src/maze_generator.cpp.s
+
 CMakeFiles/salmon.dir/src/physics_system.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/physics_system.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/physics_system.cpp
 CMakeFiles/salmon.dir/src/physics_system.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/salmon.dir/src/physics_system.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/salmon.dir/src/physics_system.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/physics_system.cpp.o -MF CMakeFiles/salmon.dir/src/physics_system.cpp.o.d -o CMakeFiles/salmon.dir/src/physics_system.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/physics_system.cpp"
 
 CMakeFiles/salmon.dir/src/physics_system.cpp.i: cmake_force
@@ -156,7 +170,7 @@ CMakeFiles/salmon.dir/src/physics_system.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/render_system.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/render_system.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/render_system.cpp
 CMakeFiles/salmon.dir/src/render_system.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/salmon.dir/src/render_system.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/salmon.dir/src/render_system.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/render_system.cpp.o -MF CMakeFiles/salmon.dir/src/render_system.cpp.o.d -o CMakeFiles/salmon.dir/src/render_system.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/render_system.cpp"
 
 CMakeFiles/salmon.dir/src/render_system.cpp.i: cmake_force
@@ -170,7 +184,7 @@ CMakeFiles/salmon.dir/src/render_system.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/render_system_init.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/render_system_init.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/render_system_init.cpp
 CMakeFiles/salmon.dir/src/render_system_init.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/salmon.dir/src/render_system_init.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/salmon.dir/src/render_system_init.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/render_system_init.cpp.o -MF CMakeFiles/salmon.dir/src/render_system_init.cpp.o.d -o CMakeFiles/salmon.dir/src/render_system_init.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/render_system_init.cpp"
 
 CMakeFiles/salmon.dir/src/render_system_init.cpp.i: cmake_force
@@ -184,7 +198,7 @@ CMakeFiles/salmon.dir/src/render_system_init.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/scenes/game_scene.cpp
 CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o -MF CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o.d -o CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/scenes/game_scene.cpp"
 
 CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.i: cmake_force
@@ -198,7 +212,7 @@ CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/scenes/main_menu.cpp
 CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o -MF CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o.d -o CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/scenes/main_menu.cpp"
 
 CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.i: cmake_force
@@ -212,7 +226,7 @@ CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/scenes/scene_system.cpp
 CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o -MF CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o.d -o CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/scenes/scene_system.cpp"
 
 CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.i: cmake_force
@@ -226,7 +240,7 @@ CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/text_renderer.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/text_renderer.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/text_renderer.cpp
 CMakeFiles/salmon.dir/src/text_renderer.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/salmon.dir/src/text_renderer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/salmon.dir/src/text_renderer.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/text_renderer.cpp.o -MF CMakeFiles/salmon.dir/src/text_renderer.cpp.o.d -o CMakeFiles/salmon.dir/src/text_renderer.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/text_renderer.cpp"
 
 CMakeFiles/salmon.dir/src/text_renderer.cpp.i: cmake_force
@@ -240,7 +254,7 @@ CMakeFiles/salmon.dir/src/text_renderer.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/tiny_ecs.cpp
 CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o -MF CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o.d -o CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/tiny_ecs.cpp"
 
 CMakeFiles/salmon.dir/src/tiny_ecs.cpp.i: cmake_force
@@ -254,7 +268,7 @@ CMakeFiles/salmon.dir/src/tiny_ecs.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/tiny_ecs_registry.cpp
 CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o -MF CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o.d -o CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/tiny_ecs_registry.cpp"
 
 CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.i: cmake_force
@@ -268,7 +282,7 @@ CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/world_init.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/world_init.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/world_init.cpp
 CMakeFiles/salmon.dir/src/world_init.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/salmon.dir/src/world_init.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/salmon.dir/src/world_init.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/world_init.cpp.o -MF CMakeFiles/salmon.dir/src/world_init.cpp.o.d -o CMakeFiles/salmon.dir/src/world_init.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/world_init.cpp"
 
 CMakeFiles/salmon.dir/src/world_init.cpp.i: cmake_force
@@ -282,7 +296,7 @@ CMakeFiles/salmon.dir/src/world_init.cpp.s: cmake_force
 CMakeFiles/salmon.dir/src/world_system.cpp.o: CMakeFiles/salmon.dir/flags.make
 CMakeFiles/salmon.dir/src/world_system.cpp.o: /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/world_system.cpp
 CMakeFiles/salmon.dir/src/world_system.cpp.o: CMakeFiles/salmon.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/salmon.dir/src/world_system.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/salmon.dir/src/world_system.cpp.o"
 	/usr/bin/clang++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/salmon.dir/src/world_system.cpp.o -MF CMakeFiles/salmon.dir/src/world_system.cpp.o.d -o CMakeFiles/salmon.dir/src/world_system.cpp.o -c "/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/src/world_system.cpp"
 
 CMakeFiles/salmon.dir/src/world_system.cpp.i: cmake_force
@@ -300,6 +314,7 @@ salmon_OBJECTS = \
 "CMakeFiles/salmon.dir/src/components.cpp.o" \
 "CMakeFiles/salmon.dir/src/main.cpp.o" \
 "CMakeFiles/salmon.dir/src/maze.cpp.o" \
+"CMakeFiles/salmon.dir/src/maze_generator.cpp.o" \
 "CMakeFiles/salmon.dir/src/physics_system.cpp.o" \
 "CMakeFiles/salmon.dir/src/render_system.cpp.o" \
 "CMakeFiles/salmon.dir/src/render_system_init.cpp.o" \
@@ -320,6 +335,7 @@ salmon: CMakeFiles/salmon.dir/src/common.cpp.o
 salmon: CMakeFiles/salmon.dir/src/components.cpp.o
 salmon: CMakeFiles/salmon.dir/src/main.cpp.o
 salmon: CMakeFiles/salmon.dir/src/maze.cpp.o
+salmon: CMakeFiles/salmon.dir/src/maze_generator.cpp.o
 salmon: CMakeFiles/salmon.dir/src/physics_system.cpp.o
 salmon: CMakeFiles/salmon.dir/src/render_system.cpp.o
 salmon: CMakeFiles/salmon.dir/src/render_system_init.cpp.o
@@ -334,7 +350,7 @@ salmon: CMakeFiles/salmon.dir/src/world_system.cpp.o
 salmon: CMakeFiles/salmon.dir/build.make
 salmon: /opt/homebrew/lib/libfreetype.dylib
 salmon: CMakeFiles/salmon.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_17) "Linking CXX executable salmon"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/Users/murtazadibbo/Documents/CPSC 427/M1/Team16/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_18) "Linking CXX executable salmon"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/salmon.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

@@ -9,6 +9,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/salmon.dir/src/main.cpp.o.d"
   "CMakeFiles/salmon.dir/src/maze.cpp.o"
   "CMakeFiles/salmon.dir/src/maze.cpp.o.d"
+  "CMakeFiles/salmon.dir/src/maze_generator.cpp.o"
+  "CMakeFiles/salmon.dir/src/maze_generator.cpp.o.d"
   "CMakeFiles/salmon.dir/src/physics_system.cpp.o"
   "CMakeFiles/salmon.dir/src/physics_system.cpp.o.d"
   "CMakeFiles/salmon.dir/src/render_system.cpp.o"

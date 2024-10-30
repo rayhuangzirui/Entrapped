@@ -915,6 +915,85 @@ CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o: \
   /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/ext/glm/glm/detail/func_integer.inl \
   /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/scenes/main_menu.hpp \
   /Users/murtazadibbo/Documents/CPSC\ 427/M1/Team16/src/scenes/game_scene.hpp \
+  /opt/homebrew/include/SDL2/SDL.h /opt/homebrew/include/SDL2/SDL_main.h \
+  /opt/homebrew/include/SDL2/SDL_stdinc.h \
+  /opt/homebrew/include/SDL2/SDL_config.h \
+  /opt/homebrew/include/SDL2/SDL_platform.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/AvailabilityMacros.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/TargetConditionals.h \
+  /opt/homebrew/include/SDL2/begin_code.h \
+  /opt/homebrew/include/SDL2/close_code.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/types.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_u_char.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_u_short.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_u_int.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_caddr_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_blkcnt_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_blksize_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_gid_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_in_addr_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_in_port_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_ino_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_ino64_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_key_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_nlink_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_useconds_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_suseconds_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_def.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_setsize.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_set.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_clr.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_zero.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_isset.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_copy.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fsblkcnt_t.h \
+  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fsfilcnt_t.h \
+  /opt/homebrew/include/SDL2/SDL_assert.h \
+  /opt/homebrew/include/SDL2/SDL_atomic.h \
+  /opt/homebrew/include/SDL2/SDL_audio.h \
+  /opt/homebrew/include/SDL2/SDL_error.h \
+  /opt/homebrew/include/SDL2/SDL_endian.h \
+  /opt/homebrew/include/SDL2/SDL_mutex.h \
+  /opt/homebrew/include/SDL2/SDL_thread.h \
+  /opt/homebrew/include/SDL2/SDL_rwops.h \
+  /opt/homebrew/include/SDL2/SDL_clipboard.h \
+  /opt/homebrew/include/SDL2/SDL_cpuinfo.h \
+  /Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include/arm_neon.h \
+  /Library/Developer/CommandLineTools/usr/lib/clang/15.0.0/include/arm_bf16.h \
+  /opt/homebrew/include/SDL2/SDL_events.h \
+  /opt/homebrew/include/SDL2/SDL_video.h \
+  /opt/homebrew/include/SDL2/SDL_pixels.h \
+  /opt/homebrew/include/SDL2/SDL_rect.h \
+  /opt/homebrew/include/SDL2/SDL_surface.h \
+  /opt/homebrew/include/SDL2/SDL_blendmode.h \
+  /opt/homebrew/include/SDL2/SDL_keyboard.h \
+  /opt/homebrew/include/SDL2/SDL_keycode.h \
+  /opt/homebrew/include/SDL2/SDL_scancode.h \
+  /opt/homebrew/include/SDL2/SDL_mouse.h \
+  /opt/homebrew/include/SDL2/SDL_joystick.h \
+  /opt/homebrew/include/SDL2/SDL_guid.h \
+  /opt/homebrew/include/SDL2/SDL_gamecontroller.h \
+  /opt/homebrew/include/SDL2/SDL_sensor.h \
+  /opt/homebrew/include/SDL2/SDL_quit.h \
+  /opt/homebrew/include/SDL2/SDL_gesture.h \
+  /opt/homebrew/include/SDL2/SDL_touch.h \
+  /opt/homebrew/include/SDL2/SDL_filesystem.h \
+  /opt/homebrew/include/SDL2/SDL_haptic.h \
+  /opt/homebrew/include/SDL2/SDL_hidapi.h \
+  /opt/homebrew/include/SDL2/SDL_hints.h \
+  /opt/homebrew/include/SDL2/SDL_loadso.h \
+  /opt/homebrew/include/SDL2/SDL_log.h \
+  /opt/homebrew/include/SDL2/SDL_messagebox.h \
+  /opt/homebrew/include/SDL2/SDL_metal.h \
+  /opt/homebrew/include/SDL2/SDL_power.h \
+  /opt/homebrew/include/SDL2/SDL_render.h \
+  /opt/homebrew/include/SDL2/SDL_shape.h \
+  /opt/homebrew/include/SDL2/SDL_system.h \
+  /opt/homebrew/include/SDL2/SDL_timer.h \
+  /opt/homebrew/include/SDL2/SDL_version.h \
+  /opt/homebrew/include/SDL2/SDL_locale.h \
+  /opt/homebrew/include/SDL2/SDL_misc.h \
+  /opt/homebrew/include/SDL2/SDL_mixer.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/iostream \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/ios \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/__locale \
@@ -943,31 +1022,6 @@ CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/locale \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/streambuf \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/nl_types.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/types.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_u_char.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_u_short.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_u_int.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_caddr_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_blkcnt_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_blksize_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_gid_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_in_addr_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_in_port_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_ino_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_ino64_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_key_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_nlink_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_useconds_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_suseconds_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_def.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_setsize.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_set.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_clr.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_zero.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_isset.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fd_copy.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fsblkcnt_t.h \
-  /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/sys/_types/_fsfilcnt_t.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/_types/_nl_item.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/__bsd_locale_defaults.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX14.2.sdk/usr/include/c++/v1/cstdarg

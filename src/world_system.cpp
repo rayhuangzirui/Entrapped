@@ -2,6 +2,7 @@
 #include "world_system.hpp"
 #include "world_init.hpp"
 #include "maze.hpp"
+#include "maze_generator.hpp"
 
 
 // stlib

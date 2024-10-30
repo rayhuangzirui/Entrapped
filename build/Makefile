@@ -249,6 +249,30 @@ src/maze.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze.cpp.s
 .PHONY : src/maze.cpp.s
 
+src/maze_generator.o: src/maze_generator.cpp.o
+.PHONY : src/maze_generator.o
+
+# target to build an object file
+src/maze_generator.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze_generator.cpp.o
+.PHONY : src/maze_generator.cpp.o
+
+src/maze_generator.i: src/maze_generator.cpp.i
+.PHONY : src/maze_generator.i
+
+# target to preprocess a source file
+src/maze_generator.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze_generator.cpp.i
+.PHONY : src/maze_generator.cpp.i
+
+src/maze_generator.s: src/maze_generator.cpp.s
+.PHONY : src/maze_generator.s
+
+# target to generate assembly for a file
+src/maze_generator.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze_generator.cpp.s
+.PHONY : src/maze_generator.cpp.s
+
 src/physics_system.o: src/physics_system.cpp.o
 .PHONY : src/physics_system.o
 
@@ -537,6 +561,9 @@ help:
 	@echo "... src/maze.o"
 	@echo "... src/maze.i"
 	@echo "... src/maze.s"
+	@echo "... src/maze_generator.o"
+	@echo "... src/maze_generator.i"
+	@echo "... src/maze_generator.s"
 	@echo "... src/physics_system.o"
 	@echo "... src/physics_system.i"
 	@echo "... src/physics_system.s"

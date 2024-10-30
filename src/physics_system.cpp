@@ -54,23 +54,23 @@ vec4 check_wall_collision(const BoundingBox& bb) {
 
     vec4 result = { 0, 0, 0, 0 };
     // check in maze
-    for (uint i = x_left+1; i < x_right; i++) {
-        if (maze[y_top][i] == 1) {
-            result.x = (y_top+1) * TILE_SIZE - bb.min.y;
-        }
-        if (maze[y_bot][i] == 1) {
-            result.y = bb.max.y - y_bot * TILE_SIZE;
-        }
-    }
+    //for (uint i = x_left+1; i < x_right; i++) {
+    //    if (maze[y_top][i] == 1) {
+    //        result.x = (y_top+1) * TILE_SIZE - bb.min.y;
+    //    }
+    //    if (maze[y_bot][i] == 1) {
+    //        result.y = bb.max.y - y_bot * TILE_SIZE;
+    //    }
+    //}
 
-    for (uint i = y_top+1; i < y_bot; i++) {
-        if (maze[i][x_left] == 1) {
-            result.z = (x_left+1) * TILE_SIZE - bb.min.x;
-        }
-        if (maze[i][x_right] == 1) {
-            result.w = bb.max.x - x_right * TILE_SIZE;
-        }
-    }
+    //for (uint i = y_top+1; i < y_bot; i++) {
+    //    if (maze[i][x_left] == 1) {
+    //        result.z = (x_left+1) * TILE_SIZE - bb.min.x;
+    //    }
+    //    if (maze[i][x_right] == 1) {
+    //        result.w = bb.max.x - x_right * TILE_SIZE;
+    //    }
+    //}
 
     // check in box
     for (uint i = x_left+1; i < x_right; i++) {

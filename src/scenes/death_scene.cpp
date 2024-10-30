@@ -34,3 +34,19 @@ void DeathScene::handle_collisions() {
 	// dummy to avoid compiler warning
 }
 
+void DeathScene::on_mouse_move(vec2 mouse_position) {
+	(vec2)mouse_position;
+}
+
+void DeathScene::on_mouse_click(RenderSystem* renderer, int button, int action, int mod) {
+	(RenderSystem*)renderer;
+	(int)button;
+	(int)action;
+	(int)mod;
+}
+
+void DeathScene::draw_fps(RenderSystem* renderer) {
+	(RenderSystem*)renderer;
+}
+
+

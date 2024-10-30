@@ -241,8 +241,11 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		Entity gun = registry.guns.entities[0];
 		update_gun_position(player, gun);
 	}
-
-
+  
+	if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
+		next_scene = "death_scene";
+		return;
+	}
 	(int)key;
 	(int)action;
 	(int)mod;

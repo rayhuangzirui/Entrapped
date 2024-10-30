@@ -38,6 +38,9 @@ public:
 	ComponentContainer<DashTimer> dashTimers;
 	ComponentContainer<LightUp> lightups;
 
+	// AI related
+	ComponentContainer<EnemyAI> enemyAIs;
+
 
 	// Add bullet container and enemy container
 	ComponentContainer<Bullet> bullets;
@@ -77,6 +80,9 @@ public:
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&lightups);
+
+		// AI related
+		registry_list.push_back(&enemyAIs);
 	}
 
 	void clear_all_components() {

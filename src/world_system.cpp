@@ -178,8 +178,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// Remove debug info from the last step
-	while (registry.debugComponents.entities.size() > 0)
-	registry.remove_all_components_of(registry.debugComponents.entities.back());
+	//while (registry.debugComponents.entities.size() > 0)
+	//registry.remove_all_components_of(registry.debugComponents.entities.back());
 	// update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.lightUps.entities) {
 		// progress timer

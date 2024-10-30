@@ -89,6 +89,14 @@ struct Enemy
 	int damage = 1;
 };
 
+// Enemy AI component
+struct EnemyAI {
+	float detection_radius = 175;
+	float chase_timer = 3000;
+	float wander_timer = 0;
+	int state = 0;
+};
+
 struct Health {
 	int current_health;  // Health points of an entity
 };
@@ -326,7 +334,8 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	WATER = TEXTURED + 1,
 	TEXT = WATER + 1,
-	EFFECT_COUNT = TEXT + 1,
+	RING = TEXT + 1,
+	EFFECT_COUNT = RING + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

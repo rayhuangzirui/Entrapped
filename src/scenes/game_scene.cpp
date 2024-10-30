@@ -7,6 +7,31 @@
 
 const int cell_size = 48;
 
+// Debug Component
+Entity createRing(vec2 position, vec2 scale)
+{
+	Entity entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	// Create motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.debugComponents.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::RING,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+	return entity;
+}
+
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
 	// *Render the maze before initializing player and enemy entities*
@@ -55,6 +80,25 @@ void GameScene::initialize(RenderSystem* renderer) {
 }
 
 void GameScene::step(RenderSystem* renderer) {
+
+	// remove all debug component
+	while (registry.debugComponents.entities.size() > 0)
+		registry.remove_all_components_of(registry.debugComponents.entities.back());
+
+	if (debugging.in_debug_mode) {
+		auto& enemyAI_container = registry.enemyAIs;
+		auto& motion_container = registry.motions;
+		for (uint i = 0; i < enemyAI_container.components.size(); i++) {
+			EnemyAI enemyAI = enemyAI_container.components[i];
+			Entity entity = enemyAI_container.entities[i];
+			Motion motion = motion_container.get(entity);
+			
+			if (enemyAI.state == 0) {
+				//std::cout << "here" << std::endl;
+				createRing(motion.position, vec2(enemyAI.detection_radius*2, enemyAI.detection_radius * 2));
+			}
+		}
+	}
 	(RenderSystem*)renderer;
 }
 
@@ -244,7 +288,13 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
   
 	if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
 		next_scene = "death_scene";
-		return;
+	}
+
+	if (key == GLFW_KEY_SEMICOLON) {
+		if (action == GLFW_RELEASE)
+			debugging.in_debug_mode = false;
+		else
+			debugging.in_debug_mode = true;
 	}
 	(int)key;
 	(int)action;
@@ -280,7 +330,6 @@ bool GameScene::check_player_wall_collision(const Motion& player_motion) {
 
     return false; // No collision detected
 }
-
 
 // Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze
 void GameScene::render_maze(RenderSystem* renderer) {
@@ -398,7 +447,6 @@ Entity GameScene::createWall(RenderSystem* renderer, vec2 position, vec2 size)
 
 	return entity;
 }
-
 
 Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	auto entity = Entity();
@@ -530,6 +578,9 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
 	aiTimer.interval = 1000.f;
 	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);

@@ -426,3 +426,10 @@ mat3 RenderSystem::createProjectionMatrix()
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 }
+
+void RenderSystem::setTextPosition(Entity textEntity, vec2 newPosition) {
+	if (registry.motions.has(textEntity)) {
+		Motion& motion = registry.motions.get(textEntity);
+		motion.position = newPosition;
+	}
+}

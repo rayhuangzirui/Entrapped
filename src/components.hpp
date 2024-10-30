@@ -138,6 +138,11 @@ struct Collision
 	Collision(Entity& other) { this->other = other; };
 };
 
+struct DamageText {
+	float duration_ms;  // Time left for the damage text to stay on screen
+	vec2 position;      // Position of the damage text
+};
+
 // Data structure for toggling debug mode
 struct Debug {
 	bool in_debug_mode = 0;

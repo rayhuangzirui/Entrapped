@@ -85,6 +85,26 @@ void GameScene::step(RenderSystem* renderer) {
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
+	// Update damage texts
+	auto& damage_texts = registry.damageTexts;
+	for (uint i = 0; i < damage_texts.components.size(); i++) {
+		Entity entity = damage_texts.entities[i];
+		DamageText& damage_text = damage_texts.components[i];
+
+		// Decrease the duration
+		damage_text.duration_ms -= 16.67f;  // Assuming 60 FPS
+
+		// If the duration is over, remove the text entity
+		if (damage_text.duration_ms <= 0) {
+			registry.remove_all_components_of(entity);
+		}
+		else {
+			// Adjust the position for effects if needed
+			vec2 new_position = damage_text.position;
+			renderer->setTextPosition(entity, new_position);
+		}
+	}
+
 	if (debugging.in_debug_mode) {
 		auto& enemyAI_container = registry.enemyAIs;
 		auto& motion_container = registry.motions;
@@ -649,6 +669,19 @@ void GameScene::handle_collisions() {
 			}
 		}
 
+		if (registry.bullets.has(entity)) {
+			if (registry.enemies.has(entity_other)) {
+				// Bullet and enemy components
+				Bullet& bullet = registry.bullets.get(entity);
+
+				// Apply damage to the enemy
+				apply_damage(entity_other, bullet.damage);
+
+				// Remove the bullet after collision
+				registry.remove_all_components_of(entity);
+			}
+		}
+
 		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
 		//if (registry.bullets.has(entity)) {
 		//	if (registry.enemies.has(entity_other)) {
@@ -704,6 +737,15 @@ void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 directi
 
 	// Create an empty Bullet component for the bullet
 	Bullet& bullet = registry.bullets.emplace(entity);
+
+	// TODO: For bullet damage, we probably want to associate it with the gun, right now i kept it 1 for testing
+	// //Associate bullet to gun
+	//Entity gun = registry.guns.entities[0];
+	//Gun& gun_component = registry.guns.get(gun);
+
+	// //Set the bullet damage from the gun's bullet damage property
+	//bullet.damage = gun_component.bullet_damage;
+
 	bullet.damage = 1;
 	bullet.speed = 100.f;
 	bullet.direction = direction;
@@ -726,6 +768,51 @@ void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 directi
 		{ TEXTURE_ASSET_ID::BULLET_1,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
+}
+
+void GameScene::apply_damage(Entity& target, int damage) {
+    // Check if the target has a Health component
+    if (registry.healths.has(target)) {
+        Health& health = registry.healths.get(target);
+        health.current_health -= damage;  // Apply the damage
+        std::cout << "Enemy lost " << damage << " health. Current health: " << health.current_health << std::endl;
+
+        // Get the target position for the damage number display
+        vec2 position = registry.motions.get(target).position;
+
+        // Show the damage number at the target's position
+        /*show_damage_number(renderer, position, damage);*/
+
+        // If health falls to 0 or below, remove the entity
+        if (health.current_health <= 0) {
+            registry.remove_all_components_of(target);
+            std::cout << "Enemy is dead!" << std::endl;
+        }
+    }
+}
+
+void GameScene::show_damage_number(RenderSystem* renderer, vec2 position, int damage) {
+	// Create a text entity for the damage number
+	auto entity = Entity();
+
+	// Convert damage to string
+	std::string damage_str = std::to_string(damage);
+
+	// Create text component
+	Text& damage_text = registry.texts.emplace(entity);
+	damage_text.content = damage_str;
+
+	// Set the initial position of the damage text
+	DamageText& damage_text_component = registry.damageTexts.emplace(entity);
+	damage_text_component.position = position;
+	damage_text_component.duration_ms = 1000.f;  // Display for 1 second
+
+	// Render the damage number
+	vec2 text_position = position;  // You can modify this for effects, maybe damage text floats up in all other games
+	Entity text_entity = renderer->text_renderer.createText(damage_str, text_position, 20.f, { 1.f, 0.f, 0.f });
+
+	// Store the text entity in the registry
+	registry.texts.emplace(entity, damage_text);
 }
 
 void GameScene::on_mouse_move(vec2 mouse_position) {

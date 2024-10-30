@@ -4,6 +4,13 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+// Parent-Child relationship
+struct Parent
+{
+	Entity parent; 
+};
+
+
 // Player component
 struct Player
 {
@@ -20,15 +27,56 @@ struct Player
 	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
 };
 
+// Gun component
+struct Gun
+{
+	// Gun's damage for each bullet hit
+	int damage = 1;
+
+	// Gun's fire rate in bullets per second
+	float fire_rate = 0.5f;
+
+	// Gun's reload time in seconds
+	float reload_time = 0.5f;
+
+	// Gun's ammo capacity
+	int ammo_capacity = 30;
+	int current_ammo = 30;
+	float bullet_speed = 500.f;
+
+	// Gun's bullet direction
+	vec2 direction = { 0, 0 };
+
+	// Gun's bullet damage
+	int bullet_damage = 1;
+
+	// Gun's rotation angle
+	float angle = 0.f;
+
+	// Position offset of the gun from the player
+	//vec2 offset = { 20.f, 0 };
+	vec2 offset = { 0, 0 };
+};
+
 // Bullet component
 struct Bullet
 {
 	// Bullet's damage
 	int damage = 1;
 
-	// Initializer of the bullet
-	//Bullet(int dmg) : damage(dmg) {};
+	// Bullet's speed
+	float speed = 500.f;
+	vec2 direction = { 0, 0 };
 
+};
+
+// FPS counter component
+struct FPS
+{
+	bool visible = false;
+	float fps = 0.f;
+	float elapsed_time = 0.f;
+	int frame_count = 0;
 };
 
 // Enemy component
@@ -228,7 +276,10 @@ enum class TEXTURE_ASSET_ID {
 	WOMAN_WALK_3 = WOMAN_WALK_2 + 1,
 	WOMAN_WALK_4 = WOMAN_WALK_3 + 1,
 
-	TEXTURE_COUNT = WOMAN_WALK_4 + 1
+	BULLET_1 = WOMAN_WALK_4 + 1,
+	GUN = BULLET_1 + 1,
+
+	TEXTURE_COUNT = GUN + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

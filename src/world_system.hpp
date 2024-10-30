@@ -48,11 +48,13 @@ public:
 
 	void draw_maze();
 
+	void draw_fps();
 
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+	void on_mouse_click(int button, int action, int mod);
 	SceneSystem scene_system;
 	// restart level
 	void restart_game();
@@ -69,6 +71,8 @@ private:
 	float next_enemy_spawn;
 	
 	Entity player_entity;
+	Entity FPS_entity;
+	Entity fps_text_entity;
 
 	// Sprint flag to check if sprinting
 	bool isSprinting;

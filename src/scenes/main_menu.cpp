@@ -37,3 +37,17 @@ void MainMenu::handle_collisions() {
 	// dummy to avoid compiler warning
 }
 
+void MainMenu::on_mouse_move(vec2 mouse_position) {
+	(vec2)mouse_position;
+}
+
+void MainMenu::on_mouse_click(RenderSystem* renderer, int button, int action, int mod) {
+	(RenderSystem*)renderer;
+	(int)button;
+	(int)action;
+	(int)mod;
+}
+
+void MainMenu::draw_fps(RenderSystem* renderer) {
+	(RenderSystem*)renderer;
+}

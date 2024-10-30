@@ -18,6 +18,14 @@ void GameScene::initialize(RenderSystem* renderer) {
 	enemy = createEnemy(renderer, { 700, 300 });
 	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
+	if (registry.guns.entities.size() > 0) {
+		Entity gun = registry.guns.entities[0];
+		update_gun_position(player, gun);
+	}
+	
+	// TODO: remove bullets when hitting wall, enemy, or out of the screen
+
+
 	// Render bounding boxes for debugging (if enabled)
 	//if (show_bounding_boxes) {
 	//	render_bounding_boxes(renderer);
@@ -126,6 +134,15 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 				motion.velocity *= 2.5f;
 			}
 			break;
+		case GLFW_KEY_F:
+			// get the fps entity
+			Entity fps_entity = registry.fps.entities[0];
+			FPS& fps_counter = registry.fps.get(fps_entity);
+			// visialize fps
+			fps_counter.visible = !fps_counter.visible;
+			printf("FPS counter visibility: %d\n", fps_counter.visible);
+			printf("FPS: %f\n", fps_counter.fps);
+			break;
 		}
 
 	}
@@ -219,11 +236,16 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		}
 	}
 
+	// Update the player's gun position based on player's position
+	if (registry.guns.entities.size() > 0) {
+		Entity gun = registry.guns.entities[0];
+		update_gun_position(player, gun);
+	}
+  
 	if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
 		next_scene = "death_scene";
 		return;
 	}
-
 	(int)key;
 	(int)action;
 	(int)mod;
@@ -402,6 +424,9 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 100;
 
+	// Attach a gun to the player entity
+	createGun(renderer, entity);
+
 	// Add a bounding box to the player entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
 	vec2 max = motion.position + (motion.scale / 2.0f);
@@ -417,6 +442,67 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 		  GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
+}
+
+Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+	
+	// Create an empty Gun component for the gun
+	Gun& gun = registry.guns.emplace(entity);
+	gun.angle = 0.f;
+	//gun.offset = { 20.f, 0.f };
+
+	// Setting initial motion values
+	Motion& gun_motion = registry.motions.emplace(entity);
+	Motion& player_motion = registry.motions.get(player);
+	gun_motion.position = player_motion.position + gun.offset;
+	gun_motion.angle = 0;
+	gun_motion.velocity = {0,0};
+	gun_motion.scale = player_motion.scale;
+	
+	// gun's states
+	gun.ammo_capacity = 30;
+	gun.current_ammo = gun.ammo_capacity;
+	gun.bullet_damage = 1;
+	gun.bullet_speed = 100.f;
+	gun.reload_time = 0.5f;
+	gun.fire_rate = 0.5f;
+	gun.direction = { 0.f, 0.f };
+
+	// Add the parent component to the gun entity, linking it to the player
+	registry.parents.emplace(entity, Parent{ player });
+
+
+	// Add a bounding box to the gun entity, sync with player's bounding box size
+	vec2 min = player_motion.position - (player_motion.scale / 2.0f);
+	vec2 max = player_motion.position + (player_motion.scale / 2.0f);
+	printf("Gun bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Gun bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	// Render request
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::GUN,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+// Update gun position based on player position
+void GameScene::update_gun_position(Entity player, Entity gun) {
+	Motion& player_motion = registry.motions.get(player);
+	Motion& gun_motion = registry.motions.get(gun);
+
+	// Update gun position based on player's velocity
+	//gun_motion.position = player_motion.position + registry.guns.get(gun).offset;
+
+	gun_motion.velocity = player_velocity;
 }
 
 Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
@@ -550,3 +636,110 @@ void GameScene::handle_collisions() {
 	registry.collisions.clear();
 }
 
+// Add bullet creation
+void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 direction) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.velocity = direction * 300.f;
+	motion.angle = atan2(direction.y, direction.x); // Calculate angle from direction, in radians for sprite rotation
+	motion.scale = vec2({ 50.f, 50.f });
+
+	// Create an empty Bullet component for the bullet
+	Bullet& bullet = registry.bullets.emplace(entity);
+	bullet.damage = 1;
+	bullet.speed = 100.f;
+	bullet.direction = direction;
+
+	// Associate bullet to gun
+	Entity gun = registry.guns.entities[0];
+	registry.parents.emplace(entity, Parent{ gun });
+
+	// Gun's ammo - 1
+	Gun& gun_component = registry.guns.get(gun);
+	gun_component.current_ammo -= 1;
+
+	// Add a bounding box to the bullet entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BULLET_1,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+}
+
+void GameScene::on_mouse_move(vec2 mouse_position) {
+	/*if (registry.guns.entities.size() == 0) {
+		return;
+	}*/
+	// Get the gun entity
+	Entity entity = registry.guns.entities[0];
+
+	// Handling gun rotation
+	Motion& gun_motion = registry.motions.get(entity);
+
+	// Calculate the direction vector from the gun to the mouse/cursor
+	vec2 direction = mouse_position - gun_motion.position;
+
+	// Calculate the rotation angle using atan2(y,x)
+	gun_motion.angle = atan2(direction.y, direction.x);
+}
+
+void GameScene::on_mouse_click(RenderSystem* renderer, int button, int action, int mod) {
+	if (registry.guns.entities.size() == 0) {
+		return;
+	}
+
+	// Return if no ammo left
+	Entity gun = registry.guns.entities[0];
+	Gun& gun_component = registry.guns.get(gun);
+	if (gun_component.current_ammo <= 0) {
+		// TODO: reload logic
+		return;
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+		Motion& gun_motion = registry.motions.get(gun);
+
+		// get the gun facing direction
+		vec2 direction = { cos(gun_motion.angle), sin(gun_motion.angle) };
+
+		// Normalize the direction vector, to ensure consistent bullet speed
+		direction = normalize(direction);
+
+		// Shoot a bullet
+		shoot_bullet(renderer, gun_motion.position, direction);
+	}
+
+	(int)button;
+	(int)action;
+	(int)mod;
+	(RenderSystem*)renderer;
+}
+
+void GameScene::draw_fps(RenderSystem* renderer) {
+	if (registry.texts.entities.size() > 0) {
+		registry.remove_all_components_of(registry.texts.entities.back());
+	}
+	Entity fps_entity = registry.fps.entities[0];
+	FPS& fps_counter = registry.fps.get(fps_entity);
+	if (fps_counter.visible) {
+		std::string fps_string = "FPS: " + std::to_string(static_cast<int> (fps_counter.fps));
+
+		// Update the text content
+		//fps_text.content = fps_string;
+		vec2 fps_position = vec2(10.f, 10.f);
+		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
+	}
+}
+
+// TODO: Reloading logic

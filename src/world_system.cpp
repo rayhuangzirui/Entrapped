@@ -106,6 +106,10 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
 
+	// Added mouse click input
+	auto button_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	glfwSetMouseButtonCallback(window, button_redirect);
+
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
   // MERGE TODO: move this part to game scene
@@ -224,6 +228,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 
 	}
+
+	// FPS counter
+	if (registry.fps.entities.size() == 0) {
+		registry.fps.emplace(FPS_entity);
+	}
+	
+	FPS& fps_counter = registry.fps.get(FPS_entity);
+	
+	fps_counter.elapsed_time += elapsed_ms_since_last_update;
+	fps_counter.frame_count++;
+
+	if (fps_counter.elapsed_time >= 1000) {
+		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
+		fps_counter.frame_count = 0;
+		fps_counter.elapsed_time = 0.0;
+	}
+
+	draw_fps();
+
+	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	return true;
 }
 
@@ -244,121 +268,6 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-}
-
-// Compute collisions between entities
-//void WorldSystem::handle_collisions() {
-//	// Loop over all collisions detected by the physics system
-//	auto& collisionsRegistry = registry.collisions;
-//	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
-//		// The entity and its collider
-//		Entity entity = collisionsRegistry.entities[i];
-//		Entity entity_other = collisionsRegistry.components[i].other;
-//
-//    // MERGE TODO
-//		// Player & Enemy collision: Enemy attacks the player, player loses 1 health, if health is 0, player dies
-//		if (registry.players.has(entity)) {
-//			if (registry.enemies.has(entity_other)) {
-//
-//				// Player and enemy components
-//				//Player& player = registry.players.get(entity);
-//				//Enemy& enemy = registry.enemies.get(entity_other);
-//
-//				// Reduce player health
-//				//player.health -= enemy.damage;
-//				//printf("Player health: %d\n", player.health);
-//
-//				// Red tint light up effect on player
-//				if (!registry.lightUps.has(entity)) {
-//					registry.lightUps.emplace(entity); 
-//					//registry.colors.get(entity) = { 1.f, 0.f, 0.f }; // Red tint
-//				}
-//				
-//				// TODO: change the light up color in the render system and shader
-//
-//				// Play the enemy hit sound
-//				//Mix_PlayChannel(-1, enemy_hit_sound, 0);
-//				// initiate death unless already dying
-//				if (!registry.deathTimers.has(entity)) {
-//					// Scream, reset timer, and play the dead animation
-//					registry.deathTimers.emplace(entity);
-//					//Mix_PlayChannel(-1, player_dead_sound, 0);
-//
-//					// Player death animation
-//					//Motion& player_entity_motion = registry.motions.get(entity);
-//
-//					//// Change the player's color, make it red on death
-//					//registry.colors.get(entity) = { 1.f, 0.f, 0.f };
-//
-//					// remove the player after death timer is done
-//					registry.remove_all_components_of(entity);
-//					break;
-//				}
-//				// Check if the player is dead
-//				/*if (player.health <= 0) {
-//					
-//
-//					
-//				}*/
-//			}
-//		}
-//
-//		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
-//		if (registry.bullets.has(entity)) {
-//			if (registry.enemies.has(entity_other)) {
-//				// Bullet and enemy components
-//				Bullet& bullet = registry.bullets.get(entity);
-//				Enemy& enemy = registry.enemies.get(entity_other);
-//
-//				// Reduce enemy health
-//				enemy.health -= bullet.damage;
-//
-//				// Red tint light up effect on enemy
-//				registry.lightUps.emplace(entity_other);
-//				//registry.colors.get(entity_other) = { 1.f, 0.f, 0.f }; // Red tint
-//
-//				// Play the bullet hit sound
-//				Mix_PlayChannel(-1, bullet_hit_sound, 0);
-//
-//				// Check if the enemy is dead
-//				if (enemy.health <= 0) {
-//					// TODO: play the enemy dead animation
-//
-//					// Play the enemy dead sound
-//					Mix_PlayChannel(-1, enemy_dead_sound, 0);
-//
-//					// Remove the enemy
-//					registry.remove_all_components_of(entity_other);
-//				}
-//
-//				// Remove the bullet
-//				registry.remove_all_components_of(entity);
-//			}
-//		}
-//	}
-//
-//	// Remove all collisions from this simulation step
-//	registry.collisions.clear();
-//}
-
-// Add bullet creation
-void WorldSystem::shoot_bullet() {
-	// get the player's position
-	Motion& player_motion = registry.motions.get(player_entity);
-
-	// create a bullet moving in the direction the player is facing
-	// calculated using the player's angle
-	vec2 bullet_velocity = { cos(player_motion.angle) * 300.f, sin(player_motion.angle) * 300.f };
-
-	// Create a bullet entity
-	Entity bullet_entity = createBullet(renderer, player_motion.position, bullet_velocity);
-
-	// player decrease 1 ammo
-	Player& player = registry.players.get(player_entity);
-	player.ammo--;
-
-	// Play the bullet fire sound
-	Mix_PlayChannel(-1, bullet_fire_sound, 0);
 }
 
 // Should the game be over ?
@@ -485,5 +394,14 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	
-	(vec2)mouse_position; // dummy to avoid compiler warning
+	//(vec2)mouse_position; // dummy to avoid compiler warning
+	scene_system.on_mouse_move(mouse_position);
+}
+
+void WorldSystem::on_mouse_click(int button, int action, int mod) {
+	scene_system.on_mouse_click(button, action, mod);
+}
+
+void WorldSystem::draw_fps() {
+	scene_system.draw_fps();
 }

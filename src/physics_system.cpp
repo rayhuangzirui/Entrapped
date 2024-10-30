@@ -134,6 +134,7 @@ void PhysicsSystem::step(float elapsed_ms)
             //vec2 final_velocity = { motion.velocity.x, motion.velocity.y }
             int max_attempts = 3;
             int i = 0;
+
             while (v1.x != 0 || v1.y != 0 || v1.z != 0 || v1.w != 0) {
                 if (v1.x != 0) {
                     if (motion.velocity.y < 0) {
@@ -162,6 +163,7 @@ void PhysicsSystem::step(float elapsed_ms)
                 if (v1.z == 0 || v1.w == 0) {
                     motion.position.x = motion.position.x + (v1.z - v1.w);
                 }
+
                 bb.min = motion.position - (abs(motion.scale) / 2.0f);
                 bb.max = motion.position + (abs(motion.scale) / 2.0f);
                 v1 = check_wall_collision(bb);

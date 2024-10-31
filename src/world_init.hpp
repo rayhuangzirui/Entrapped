@@ -13,7 +13,6 @@ const float ENEMY_BB_HEIGHT = 0.6f * 165.f;
 const float BULLET_BB_WIDTH = 10.f;
 const float BULLET_BB_HEIGHT = 10.f;
 
-
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 
@@ -25,11 +24,6 @@ Entity createEnemy(RenderSystem* renderer, vec2 position);
 
 // a bullet
 Entity createBullet(RenderSystem* renderer, vec2 position, vec2 velocity);
-
-
-
-// a egg
-Entity createEgg(vec2 pos, vec2 size);
 
 //a wall
 Entity createWall(RenderSystem* renderer, vec2 position, vec2 size);

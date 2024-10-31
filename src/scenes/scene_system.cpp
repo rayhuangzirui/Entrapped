@@ -5,6 +5,7 @@
 #include "death_scene.hpp"
 
 SceneSystem::SceneSystem() {
+	this->renderer = nullptr;
 	this->current_scene = new MainMenu();
 	std::cout << ">>> Scene System Initialized" << std::endl;
 }
@@ -21,16 +22,16 @@ void SceneSystem::pushScene() {
 	current_scene->initialize(this->renderer);
 }
 
-void SceneSystem::step() {
-	current_scene->step(this->renderer);
+void SceneSystem::step(float elapsed_ms) {
+	current_scene->step(elapsed_ms);
 }
 
 void SceneSystem::popScene() {
-	current_scene->destroy(this->renderer);
+	current_scene->destroy();
 }
 
 void SceneSystem::on_key(int key, int action, int mod) {
-	current_scene->on_key(this->renderer, key, action, mod);
+	current_scene->on_key(key, action, mod);
 
 	std::string next_scene = current_scene->get_next_scene();
 	if (next_scene.compare("") != 0) {
@@ -49,11 +50,11 @@ void SceneSystem::on_mouse_move(vec2 mouse_position) {
 }
 
 void SceneSystem::on_mouse_click(int button, int action, int mod) {
-	current_scene->on_mouse_click(this->renderer, button, action, mod);
+	current_scene->on_mouse_click(button, action, mod);
 }
 
 void SceneSystem::draw_fps() {
-	current_scene->draw_fps(this->renderer);
+	current_scene->draw_fps();
 }
 
 void SceneSystem::changeScene(std::string name) {

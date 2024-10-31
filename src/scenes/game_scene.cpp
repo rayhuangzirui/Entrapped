@@ -34,13 +34,15 @@ Entity createRing(vec2 position, vec2 scale)
 
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
-	// *Render the maze before initializing player and enemy entities*
-	render_maze(renderer);
+	this->renderer = renderer;
 
-	player = createPlayer(renderer, { 300, 300 });
+	// *Render the maze before initializing player and enemy entities*
+	render_maze();
+
+	player = createPlayer({ 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 
-	enemy = createEnemy(renderer, { 700, 300 });
+	enemy = createEnemy({ 700, 300 });
 	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
 	if (registry.guns.entities.size() > 0) {
@@ -48,13 +50,8 @@ void GameScene::initialize(RenderSystem* renderer) {
 		update_gun_position(player, gun);
 	}
 	
-	// TODO: remove bullets when hitting wall, enemy, or out of the screen
-
-
-	// Render bounding boxes for debugging (if enabled)
-	//if (show_bounding_boxes) {
-	//	render_bounding_boxes(renderer);
-	//}
+	// fps entity
+	FPS_entity = Entity();
 
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
@@ -80,8 +77,8 @@ void GameScene::initialize(RenderSystem* renderer) {
 	(RenderSystem*)renderer;
 }
 
-void GameScene::step(RenderSystem* renderer) {
-
+void GameScene::step(float elapsed_ms) {
+	RenderSystem* renderer = this->renderer;
 	// remove all debug component
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
@@ -120,15 +117,83 @@ void GameScene::step(RenderSystem* renderer) {
 			}
 		}
 	}
+
+	// update LightUp timers and remove if time drops below zero, similar to the death counter
+	for (Entity entity : registry.lightUps.entities) {
+		// progress timer
+		LightUp& lightup = registry.lightUps.get(entity);
+		lightup.counter_ms -= elapsed_ms;
+
+		/*std::cout << "LightUp timer: " << counter.counter_ms << " ms" << std::endl;*/
+
+		// Interpolate the color and opacity using LERP: https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/a-brief-introduction-to-lerp-r4954/
+		// function lerp(start, end, t)
+		//    return start * (1 - t) + end * t;
+		float t = (sin(lightup.blink_timer * 10) + 1) / 2;
+
+		// Color shift: interpolate between the original color and the light up red color
+		vec3 original_color = { 1.f, 1.f, 1.f }; // white
+		vec3 lightup_color = { 1.f, 0.f, 0.f }; // red
+		vec3 new_color = original_color * (1 - t) + lightup_color * t;	// lerp
+
+		// Opacity shift: interpolate between the original opacity and 0.5
+		float original_opacity = 1.f;
+		float hit_opacity = 0.5f;
+		float new_opacity = original_opacity * (1 - t) + hit_opacity * t;	// lerp
+
+		// Update the color and opacity
+		registry.colors.get(entity) = new_color;
+		registry.opacities.get(entity).opacity = new_opacity;
+
+
+		if (lightup.counter_ms < 0) {
+			registry.lightUps.remove(entity); // remove the light up effect when timer ends
+		}
+
+		lightup.blink_timer += elapsed_ms / 1000.f; // update the blink timer
+	}
+
+	// Damage cool down timer drop 
+	for (Entity entity : registry.damageCoolDowns.entities) {
+		// progress timer
+		DamageCoolDown& counter = registry.damageCoolDowns.get(entity);
+		counter.counter_ms -= elapsed_ms;
+
+		/*std::cout << "Damage timer: " << counter.counter_ms << " ms" << std::endl;*/
+
+		if (counter.counter_ms < 0) {
+			registry.damageCoolDowns.remove(entity);
+		}
+
+	}
+
+	// FPS counter
+	if (registry.fps.entities.size() == 0) {
+		registry.fps.emplace(FPS_entity);
+	}
+
+	FPS& fps_counter = registry.fps.get(FPS_entity);
+
+	fps_counter.elapsed_time += elapsed_ms;
+	fps_counter.frame_count++;
+
+	if (fps_counter.elapsed_time >= 1000) {
+		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
+		fps_counter.frame_count = 0;
+		fps_counter.elapsed_time = 0.0;
+	}
+
+	draw_fps();
+
+	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 }
 
-void GameScene::destroy(RenderSystem* renderer) {
+void GameScene::destroy() {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 	Mix_FreeMusic(background_music);
 	Mix_FreeChunk(player_dead_sound);
-	(RenderSystem*)renderer;
 }
 
 std::string GameScene::get_next_scene() {
@@ -136,7 +201,7 @@ std::string GameScene::get_next_scene() {
 }
 
 
-void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
+void GameScene::on_key(int key, int action, int mod) {
 	static int frame = 0;
 	static int frame_counter = 0;
 	static int first_round_frame_counter = 0;
@@ -336,7 +401,6 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	(int)key;
 	(int)action;
 	(int)mod;
-	(RenderSystem*)renderer;
 }
 
 // Function to check if two bounding boxes overlap
@@ -369,7 +433,8 @@ bool GameScene::check_player_wall_collision(const Motion& player_motion) {
 }
 
 // Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze
-void GameScene::render_maze(RenderSystem* renderer) {
+void GameScene::render_maze() {
+	RenderSystem* renderer = this->renderer;
 	// Tile dimensions
 	const int TILE_SIZE = 48;
 
@@ -451,7 +516,7 @@ void GameScene::render_maze(RenderSystem* renderer) {
 	//}
 }
 
-Entity GameScene::createWall(RenderSystem* renderer, vec2 position, vec2 size)
+Entity GameScene::createWall(vec2 position, vec2 size)
 {
 	auto entity = Entity();
 
@@ -485,7 +550,8 @@ Entity GameScene::createWall(RenderSystem* renderer, vec2 position, vec2 size)
 	return entity;
 }
 
-Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
+Entity GameScene::createPlayer(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -526,12 +592,13 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 		  GEOMETRY_BUFFER_ID::SPRITE });
 
 	// Attach a gun to the player entity
-	createGun(renderer, entity);
+	createGun(entity);
 
 	return entity;
 }
 
-Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
+Entity GameScene::createGun(Entity player) {
+	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -592,7 +659,8 @@ void GameScene::update_gun_position(Entity player, Entity gun) {
 	gun_motion.velocity = player_velocity;
 }
 
-Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
+Entity GameScene::createEnemy(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -740,7 +808,8 @@ void GameScene::handle_collisions() {
 }
 
 // Add bullet creation
-void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 direction) {
+void GameScene::shoot_bullet(vec2 position, vec2 direction) {
+	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -810,7 +879,8 @@ void GameScene::apply_damage(Entity& target, int damage) {
     }
 }
 
-void GameScene::show_damage_number(RenderSystem* renderer, vec2 position, int damage) {
+void GameScene::show_damage_number(vec2 position, int damage) {
+	RenderSystem* renderer = this->renderer;
 	// Create a text entity for the damage number
 	auto entity = Entity();
 
@@ -851,7 +921,8 @@ void GameScene::on_mouse_move(vec2 mouse_position) {
 	gun_motion.angle = atan2(direction.y, direction.x);
 }
 
-void GameScene::on_mouse_click(RenderSystem* renderer, int button, int action, int mod) {
+void GameScene::on_mouse_click(int button, int action, int mod) {
+	RenderSystem* renderer = this->renderer;
 	if (registry.guns.entities.size() == 0) {
 		return;
 	}
@@ -874,7 +945,7 @@ void GameScene::on_mouse_click(RenderSystem* renderer, int button, int action, i
 		direction = normalize(direction);
 
 		// Shoot a bullet
-		shoot_bullet(renderer, gun_motion.position, direction);
+		shoot_bullet(gun_motion.position, direction);
 	}
 
 	(int)button;
@@ -883,7 +954,8 @@ void GameScene::on_mouse_click(RenderSystem* renderer, int button, int action, i
 	(RenderSystem*)renderer;
 }
 
-void GameScene::draw_fps(RenderSystem* renderer) {
+void GameScene::draw_fps() {
+	RenderSystem* renderer = this->renderer;
 	if (registry.texts.entities.size() > 0) {
 		registry.remove_all_components_of(registry.texts.entities.back());
 	}

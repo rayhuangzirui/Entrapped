@@ -105,17 +105,6 @@ struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
 };
 
-// anything that is deadly to the player
-struct Deadly
-{
-	// A1 code
-};
-
-// anything the player can eat
-struct Eatable
-{
-	// A1 code
-};
 
 // component used to render text
 struct Text {
@@ -299,65 +288,25 @@ enum class TEXTURE_ASSET_ID {
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-//enum class PLAYER_BACK_TEXTURE_ASSET_ID {
-//	PLAYER_BACK_1 = 0,
-//	PLAYER_BACK_2 = PLAYER_BACK_1 + 1,
-//	PLAYER_BACK_3 = PLAYER_BACK_2 + 1,
-//	TEXTURE_BACK_COUNT = PLAYER_BACK_3 + 1
-//};
-//const int texture_back_count = (int)PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT;
-//
-//enum class FLOOR_TEXTURE_ASSET_ID {
-//	FLOOR = 0,
-//	FLOOR_1 = FLOOR + 1,
-//	FLOOR_2 = FLOOR_1 + 1,
-//	FLOOR_3 = FLOOR_2 + 1,
-//	FLOOR_4 = FLOOR_3 + 1,
-//	FLOOR_TEXTURE_COUNT = FLOOR_4 + 1
-//};
-//const int floor_texture_count = (int)FLOOR_TEXTURE_ASSET_ID::FLOOR_TEXTURE_COUNT;
-//
-//enum class DOOR_TEXTURE_ASSET_ID {
-//	DOOR_OPEN = 0,
-//	DOOR_CLOSED = DOOR_OPEN + 1,
-//	DOOR_TEXTURE_COUNT = DOOR_CLOSED + 1
-//};
-//const int door_texture_count = (int)DOOR_TEXTURE_ASSET_ID::DOOR_TEXTURE_COUNT;
-//
-//enum class WALL_TEXTURE_ASSET_ID {
-//	WALL = 0,
-//	WALL_1 = WALL + 1,
-//	WALL_2 = WALL_1 + 1,
-//	WALL_3 = WALL_2 + 1,
-//	WALL_4 = WALL_3 + 1,
-//	WALL_5 = WALL_4 + 1,
-//	WALL_TEXTURE_COUNT = WALL_5 + 1
-//};
-//const int wall_texture_count = (int)WALL_TEXTURE_ASSET_ID::WALL_TEXTURE_COUNT;
-
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	EGG = COLOURED + 1,
-	SALMON = EGG + 1,
-	TEXTURED = SALMON + 1,
-	WATER = TEXTURED + 1,
-	TEXT = WATER + 1,
+	TEXTURED = COLOURED + 1,
+	TEXT = TEXTURED + 1,
 	RING = TEXT + 1,
-	EFFECT_COUNT = RING + 1,
+	GLOBAL = RING+1,
+	EFFECT_COUNT = GLOBAL + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	SALMON = 0,
-	SPRITE = SALMON + 1,
-	EGG = SPRITE + 1,
-	DEBUG_LINE = EGG + 1,
+	SPRITE = 0,
+	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	PLAYER = SCREEN_TRIANGLE + 1,
-	  TEXT = PLAYER + 1,
-	  BULLET = TEXT + 1,
-	  MAZE = BULLET + 1,
-	  SQUARE = MAZE + 1,
+	TEXT = PLAYER + 1,
+	BULLET = TEXT + 1,
+	MAZE = BULLET + 1,
+	SQUARE = MAZE + 1,
 	GEOMETRY_COUNT = SQUARE + 1
 
 };

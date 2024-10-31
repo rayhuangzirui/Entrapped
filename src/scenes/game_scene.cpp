@@ -69,6 +69,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 		return;
 	}
 
+	Mix_VolumeMusic(10);
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 

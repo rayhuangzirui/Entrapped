@@ -32,12 +32,37 @@ Entity createRing(vec2 position, vec2 scale)
 	return entity;
 }
 
+// Debug Component
+Entity createBox(vec2 position, vec2 scale)
+{
+	Entity entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	// Create motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.debugComponents.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+	return entity;
+}
+
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 
 	// *Render the maze before initializing player and enemy entities*
-	render_maze();
+	render_maze(); 
 
 	player = createPlayer({ 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
@@ -115,6 +140,15 @@ void GameScene::step(float elapsed_ms) {
 				//std::cout << "here" << std::endl;
 				createRing(motion.position, vec2(enemyAI.detection_radius*2, enemyAI.detection_radius * 2));
 			}
+		}
+
+		auto& bbox_container = registry.boundingBoxes;
+		for (uint i = 0; i < bbox_container.components.size(); i++) {
+			BoundingBox bbox = bbox_container.components[i];
+			Entity entity = bbox_container.entities[i];
+			Motion motion = motion_container.get(entity);
+
+			createBox(motion.position, motion.scale);
 		}
 	}
 

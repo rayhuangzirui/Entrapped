@@ -293,7 +293,8 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = COLOURED + 1,
 	TEXT = TEXTURED + 1,
 	RING = TEXT + 1,
-	GLOBAL = RING+1,
+	BOX = RING + 1,
+	GLOBAL = BOX+1,
 	EFFECT_COUNT = GLOBAL + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;

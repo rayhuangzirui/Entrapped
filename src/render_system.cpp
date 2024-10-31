@@ -107,7 +107,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			glUniform1f(opacity_uloc, 1.0f);
 		}
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::RING)
+	else if (render_request.used_effect == EFFECT_ASSET_ID::RING || render_request.used_effect == EFFECT_ASSET_ID::BOX)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");

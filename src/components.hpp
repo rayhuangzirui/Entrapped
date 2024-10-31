@@ -138,6 +138,11 @@ struct Collision
 	Collision(Entity& other) { this->other = other; };
 };
 
+struct DamageText {
+	float duration_ms;  // Time left for the damage text to stay on screen
+	vec2 position;      // Position of the damage text
+};
+
 // Data structure for toggling debug mode
 struct Debug {
 	bool in_debug_mode = 0;
@@ -255,15 +260,15 @@ enum class TEXTURE_ASSET_ID {
 	PLAYER_2 = PLAYER_1 + 1,
 	PLAYER_3 = PLAYER_2 + 1,
 
-	PLAYER_BACK_1 = PLAYER_3 + 1,
+	/*PLAYER_BACK_1 = PLAYER_3 + 1,
 	PLAYER_BACK_2 = PLAYER_BACK_1 + 1,
 	PLAYER_BACK_3 = PLAYER_BACK_2 + 1,
 
 	PLAYER_FRONT_1 = PLAYER_BACK_3 + 1,
 	PLAYER_FRONT_2 = PLAYER_FRONT_1 + 1,
-	PLAYER_FRONT_3 = PLAYER_FRONT_2 + 1,
+	PLAYER_FRONT_3 = PLAYER_FRONT_2 + 1,*/
 
-	DOOR_OPEN = PLAYER_FRONT_3 + 1,
+	DOOR_OPEN = PLAYER_3 + 1,
 	DOOR_CLOSED = DOOR_OPEN + 1,
 
 	WALL_1 = DOOR_CLOSED + 1,
@@ -285,9 +290,12 @@ enum class TEXTURE_ASSET_ID {
 	WOMAN_WALK_4 = WOMAN_WALK_3 + 1,
 
 	BULLET_1 = WOMAN_WALK_4 + 1,
-	GUN = BULLET_1 + 1,
 
-	TEXTURE_COUNT = GUN + 1
+	PISTOL = BULLET_1 + 1,
+	SMG = PISTOL + 1,
+	RIFLE = SMG + 1,
+
+	TEXTURE_COUNT = RIFLE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

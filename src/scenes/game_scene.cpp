@@ -69,6 +69,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 		return;
 	}
 
+	Mix_VolumeMusic(10);
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 
@@ -84,6 +85,26 @@ void GameScene::step(RenderSystem* renderer) {
 	// remove all debug component
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
+
+	// Update damage texts
+	auto& damage_texts = registry.damageTexts;
+	for (uint i = 0; i < damage_texts.components.size(); i++) {
+		Entity entity = damage_texts.entities[i];
+		DamageText& damage_text = damage_texts.components[i];
+
+		// Decrease the duration
+		damage_text.duration_ms -= 16.67f;  // Assuming 60 FPS
+
+		// If the duration is over, remove the text entity
+		if (damage_text.duration_ms <= 0) {
+			registry.remove_all_components_of(entity);
+		}
+		else {
+			// Adjust the position for effects if needed
+			vec2 new_position = damage_text.position;
+			renderer->setTextPosition(entity, new_position);
+		}
+	}
 
 	if (debugging.in_debug_mode) {
 		auto& enemyAI_container = registry.enemyAIs;
@@ -126,7 +147,7 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_3
 	};
 
-	TEXTURE_ASSET_ID walking_front[3] = {
+	/*TEXTURE_ASSET_ID walking_front[3] = {
 	TEXTURE_ASSET_ID::PLAYER_FRONT_1,
 	TEXTURE_ASSET_ID::PLAYER_FRONT_2,
 	TEXTURE_ASSET_ID::PLAYER_FRONT_3
@@ -136,7 +157,7 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_BACK_1,
 	TEXTURE_ASSET_ID::PLAYER_BACK_2,
 	TEXTURE_ASSET_ID::PLAYER_BACK_3
-	};
+	};*/
 
 	Motion& motion = registry.motions.get(player);
 	auto& texture = registry.renderRequests.get(player);
@@ -153,11 +174,11 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		switch (key) {
 		case GLFW_KEY_W:
 			player_velocity.y += -PLAYER_SPEED;
-			texture.used_texture = walking_back[frame];
+			texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_S:
 			player_velocity.y += PLAYER_SPEED;
-			texture.used_texture = walking_front[frame];
+			texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_A:
 			player_velocity.x += -PLAYER_SPEED;
@@ -259,11 +280,11 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 			// Loop through the frames for the current direction
 			if (key == GLFW_KEY_W) {
 				frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
-				texture.used_texture = walking_back[frame];  // Set texture for walking back
+				texture.used_texture = walking_sideways[frame];  // Set texture for walking back
 			}
 			else if (key == GLFW_KEY_S) {
 				frame = (frame + 1) % 3;
-				texture.used_texture = walking_front[frame];  // Set texture for walking front
+				texture.used_texture = walking_sideways[frame];  // Set texture for walking front
 			}
 			else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
 				frame = (frame + 1) % 3;
@@ -285,7 +306,23 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		Entity gun = registry.guns.entities[0];
 		update_gun_position(player, gun);
 	}
-  
+	
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_EQUAL:  // "+" key to zoom in
+			camera.adjustZoom(0.1f);
+			break;
+		case GLFW_KEY_MINUS:  // "-" key to zoom out
+			camera.adjustZoom(-0.1f);
+			break;
+		default:
+			break;
+		}
+	}
+
+	// Update the camera after input
+	updateCamera(registry.motions.get(player).position);
+
 	if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
 		next_scene = "death_scene";
 	}
@@ -472,8 +509,7 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 100;
 
-	// Attach a gun to the player entity
-	createGun(renderer, entity);
+	
 
 	// Add a bounding box to the player entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -488,6 +524,9 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 		{ TEXTURE_ASSET_ID::PLAYER_1,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	// Attach a gun to the player entity
+	createGun(renderer, entity);
 
 	return entity;
 }
@@ -510,7 +549,7 @@ Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
 	gun_motion.position = player_motion.position + gun.offset;
 	gun_motion.angle = 0;
 	gun_motion.velocity = {0,0};
-	gun_motion.scale = player_motion.scale;
+	gun_motion.scale = {50, 50};
 	
 	// gun's states
 	gun.ammo_capacity = 30;
@@ -535,7 +574,7 @@ Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
 	// Render request
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::GUN,
+		{ TEXTURE_ASSET_ID::PISTOL,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -649,6 +688,19 @@ void GameScene::handle_collisions() {
 			}
 		}
 
+		if (registry.bullets.has(entity)) {
+			if (registry.enemies.has(entity_other)) {
+				// Bullet and enemy components
+				Bullet& bullet = registry.bullets.get(entity);
+
+				// Apply damage to the enemy
+				apply_damage(entity_other, bullet.damage);
+
+				// Remove the bullet after collision
+				registry.remove_all_components_of(entity);
+			}
+		}
+
 		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
 		//if (registry.bullets.has(entity)) {
 		//	if (registry.enemies.has(entity_other)) {
@@ -704,6 +756,15 @@ void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 directi
 
 	// Create an empty Bullet component for the bullet
 	Bullet& bullet = registry.bullets.emplace(entity);
+
+	// TODO: For bullet damage, we probably want to associate it with the gun, right now i kept it 1 for testing
+	// //Associate bullet to gun
+	//Entity gun = registry.guns.entities[0];
+	//Gun& gun_component = registry.guns.get(gun);
+
+	// //Set the bullet damage from the gun's bullet damage property
+	//bullet.damage = gun_component.bullet_damage;
+
 	bullet.damage = 1;
 	bullet.speed = 100.f;
 	bullet.direction = direction;
@@ -726,6 +787,51 @@ void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 directi
 		{ TEXTURE_ASSET_ID::BULLET_1,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
+}
+
+void GameScene::apply_damage(Entity& target, int damage) {
+    // Check if the target has a Health component
+    if (registry.healths.has(target)) {
+        Health& health = registry.healths.get(target);
+        health.current_health -= damage;  // Apply the damage
+        std::cout << "Enemy lost " << damage << " health. Current health: " << health.current_health << std::endl;
+
+        // Get the target position for the damage number display
+        vec2 position = registry.motions.get(target).position;
+
+        // Show the damage number at the target's position
+        /*show_damage_number(renderer, position, damage);*/
+
+        // If health falls to 0 or below, remove the entity
+        if (health.current_health <= 0) {
+            registry.remove_all_components_of(target);
+            std::cout << "Enemy is dead!" << std::endl;
+        }
+    }
+}
+
+void GameScene::show_damage_number(RenderSystem* renderer, vec2 position, int damage) {
+	// Create a text entity for the damage number
+	auto entity = Entity();
+
+	// Convert damage to string
+	std::string damage_str = std::to_string(damage);
+
+	// Create text component
+	Text& damage_text = registry.texts.emplace(entity);
+	damage_text.content = damage_str;
+
+	// Set the initial position of the damage text
+	DamageText& damage_text_component = registry.damageTexts.emplace(entity);
+	damage_text_component.position = position;
+	damage_text_component.duration_ms = 1000.f;  // Display for 1 second
+
+	// Render the damage number
+	vec2 text_position = position;  // You can modify this for effects, maybe damage text floats up in all other games
+	Entity text_entity = renderer->text_renderer.createText(damage_str, text_position, 20.f, { 1.f, 0.f, 0.f });
+
+	// Store the text entity in the registry
+	registry.texts.emplace(entity, damage_text);
 }
 
 void GameScene::on_mouse_move(vec2 mouse_position) {
@@ -791,6 +897,10 @@ void GameScene::draw_fps(RenderSystem* renderer) {
 		vec2 fps_position = vec2(10.f, 10.f);
 		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
 	}
+}
+
+void GameScene::updateCamera(const vec2& player_position) {
+	camera.updateCamera(player_position, window_width_px, window_height_px);
 }
 
 // TODO: Reloading logic

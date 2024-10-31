@@ -126,7 +126,7 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_3
 	};
 
-	TEXTURE_ASSET_ID walking_front[3] = {
+	/*TEXTURE_ASSET_ID walking_front[3] = {
 	TEXTURE_ASSET_ID::PLAYER_FRONT_1,
 	TEXTURE_ASSET_ID::PLAYER_FRONT_2,
 	TEXTURE_ASSET_ID::PLAYER_FRONT_3
@@ -136,7 +136,7 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_BACK_1,
 	TEXTURE_ASSET_ID::PLAYER_BACK_2,
 	TEXTURE_ASSET_ID::PLAYER_BACK_3
-	};
+	};*/
 
 	Motion& motion = registry.motions.get(player);
 	auto& texture = registry.renderRequests.get(player);
@@ -153,11 +153,11 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		switch (key) {
 		case GLFW_KEY_W:
 			player_velocity.y += -PLAYER_SPEED;
-			texture.used_texture = walking_back[frame];
+			texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_S:
 			player_velocity.y += PLAYER_SPEED;
-			texture.used_texture = walking_front[frame];
+			texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_A:
 			player_velocity.x += -PLAYER_SPEED;
@@ -259,11 +259,11 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 			// Loop through the frames for the current direction
 			if (key == GLFW_KEY_W) {
 				frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
-				texture.used_texture = walking_back[frame];  // Set texture for walking back
+				texture.used_texture = walking_sideways[frame];  // Set texture for walking back
 			}
 			else if (key == GLFW_KEY_S) {
 				frame = (frame + 1) % 3;
-				texture.used_texture = walking_front[frame];  // Set texture for walking front
+				texture.used_texture = walking_sideways[frame];  // Set texture for walking front
 			}
 			else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
 				frame = (frame + 1) % 3;
@@ -472,8 +472,7 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 100;
 
-	// Attach a gun to the player entity
-	createGun(renderer, entity);
+	
 
 	// Add a bounding box to the player entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -488,6 +487,9 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 		{ TEXTURE_ASSET_ID::PLAYER_1,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	// Attach a gun to the player entity
+	createGun(renderer, entity);
 
 	return entity;
 }
@@ -510,7 +512,7 @@ Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
 	gun_motion.position = player_motion.position + gun.offset;
 	gun_motion.angle = 0;
 	gun_motion.velocity = {0,0};
-	gun_motion.scale = player_motion.scale;
+	gun_motion.scale = {50, 50};
 	
 	// gun's states
 	gun.ammo_capacity = 30;
@@ -535,7 +537,7 @@ Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
 	// Render request
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::GUN,
+		{ TEXTURE_ASSET_ID::PISTOL,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
 

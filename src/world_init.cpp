@@ -68,7 +68,8 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	//Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -76,7 +77,8 @@ Entity createPlayer(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ PLAYER_BB_WIDTH, PLAYER_BB_HEIGHT });
+	//motion.scale = vec2({ PLAYER_BB_WIDTH, PLAYER_BB_HEIGHT });
+	motion.scale = mesh.original_size;
 
 	// create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
@@ -133,7 +135,7 @@ Entity createEnemy(RenderSystem* renderer, vec2 position)
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Initialize the motion
@@ -171,7 +173,7 @@ Entity createLine(vec2 position, vec2 scale)
 	registry.renderRequests.insert(
 		entity, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-			EFFECT_ASSET_ID::TEXTURED,	// BULLET is a simple shader that renders the object in a single color
+			EFFECT_ASSET_ID::DEBUG_LINE,	// BULLET is a simple shader that renders the object in a single color
 			GEOMETRY_BUFFER_ID::DEBUG_LINE // DEBUG_LINE is a 1x1 unit square
 		});
 

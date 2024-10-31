@@ -296,6 +296,8 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		else
 			debugging.in_debug_mode = true;
 	}
+
+	
 	(int)key;
 	(int)action;
 	(int)mod;
@@ -452,8 +454,12 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
 	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009457, 0.017041
+	printf("Player mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+	// Adjusted the position of verticies to match the size of player in Mesh::loadFromOBJFile
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -482,12 +488,21 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 	printf("Player bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	// Add the render request for the player entity
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::PLAYER_1,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
+	// Debug mode: visualize meshes
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1,
+			  EFFECT_ASSET_ID::SALMON,
+			  GEOMETRY_BUFFER_ID::PLAYER });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	return entity;
 }
@@ -557,8 +572,11 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
 	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -589,12 +607,20 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::SALMON,
+			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	return entity;
 }
@@ -692,7 +718,7 @@ void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 directi
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BULLET);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -700,7 +726,7 @@ void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 directi
 	motion.position = position;
 	motion.velocity = direction * 300.f;
 	motion.angle = atan2(direction.y, direction.x); // Calculate angle from direction, in radians for sprite rotation
-	motion.scale = vec2({ 50.f, 50.f });
+	motion.scale = vec2({ 20.f, 20.f });
 
 	// Create an empty Bullet component for the bullet
 	Bullet& bullet = registry.bullets.emplace(entity);
@@ -721,11 +747,20 @@ void GameScene::shoot_bullet(RenderSystem* renderer, vec2 position, vec2 directi
 	vec2 max = motion.position + (motion.scale / 2.0f);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::BULLET_1,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::BULLET_1,
+			  EFFECT_ASSET_ID::SALMON,
+			  GEOMETRY_BUFFER_ID::BULLET });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::BULLET_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
 }
 
 void GameScene::on_mouse_move(vec2 mouse_position) {

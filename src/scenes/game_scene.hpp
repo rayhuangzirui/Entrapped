@@ -30,6 +30,9 @@ private:
 	Entity createEnemy(RenderSystem* renderer, vec2 pos);
 	Entity createWall(RenderSystem* renderer, vec2 position, vec2 size);
 	void shoot_bullet(RenderSystem* renderer, vec2 position, vec2 direction);
+
+	void apply_damage(Entity& target, int damage);
+	void show_damage_number(RenderSystem* renderer, vec2 position, int damage);
 	void update_gun_position(Entity player, Entity gun);
 
 	float PLAYER_SPEED = 100.0f;

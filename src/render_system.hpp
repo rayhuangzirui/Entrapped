@@ -114,7 +114,7 @@ public:
 
 	// Text renderer
 	TextRenderer text_renderer;
-
+	void setTextPosition(Entity textEntity, vec2 newPosition);
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);

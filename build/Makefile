@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named salmon
+# Target rules for targets named Entrapped
 
 # Build rule for target.
-salmon: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 salmon
-.PHONY : salmon
+Entrapped: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Entrapped
+.PHONY : Entrapped
 
 # fast build rule for target.
-salmon/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/build
-.PHONY : salmon/fast
+Entrapped/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/build
+.PHONY : Entrapped/fast
 
 src/ai_system.o: src/ai_system.cpp.o
 .PHONY : src/ai_system.o
 
 # target to build an object file
 src/ai_system.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/ai_system.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/ai_system.cpp.o
 .PHONY : src/ai_system.cpp.o
 
 src/ai_system.i: src/ai_system.cpp.i
@@ -142,7 +142,7 @@ src/ai_system.i: src/ai_system.cpp.i
 
 # target to preprocess a source file
 src/ai_system.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/ai_system.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/ai_system.cpp.i
 .PHONY : src/ai_system.cpp.i
 
 src/ai_system.s: src/ai_system.cpp.s
@@ -150,7 +150,7 @@ src/ai_system.s: src/ai_system.cpp.s
 
 # target to generate assembly for a file
 src/ai_system.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/ai_system.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/ai_system.cpp.s
 .PHONY : src/ai_system.cpp.s
 
 src/common.o: src/common.cpp.o
@@ -158,7 +158,7 @@ src/common.o: src/common.cpp.o
 
 # target to build an object file
 src/common.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/common.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/common.cpp.o
 .PHONY : src/common.cpp.o
 
 src/common.i: src/common.cpp.i
@@ -166,7 +166,7 @@ src/common.i: src/common.cpp.i
 
 # target to preprocess a source file
 src/common.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/common.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/common.cpp.i
 .PHONY : src/common.cpp.i
 
 src/common.s: src/common.cpp.s
@@ -174,7 +174,7 @@ src/common.s: src/common.cpp.s
 
 # target to generate assembly for a file
 src/common.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/common.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/common.cpp.s
 .PHONY : src/common.cpp.s
 
 src/components.o: src/components.cpp.o
@@ -182,7 +182,7 @@ src/components.o: src/components.cpp.o
 
 # target to build an object file
 src/components.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/components.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/components.cpp.o
 .PHONY : src/components.cpp.o
 
 src/components.i: src/components.cpp.i
@@ -190,7 +190,7 @@ src/components.i: src/components.cpp.i
 
 # target to preprocess a source file
 src/components.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/components.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/components.cpp.i
 .PHONY : src/components.cpp.i
 
 src/components.s: src/components.cpp.s
@@ -198,7 +198,7 @@ src/components.s: src/components.cpp.s
 
 # target to generate assembly for a file
 src/components.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/components.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/components.cpp.s
 .PHONY : src/components.cpp.s
 
 src/main.o: src/main.cpp.o
@@ -206,7 +206,7 @@ src/main.o: src/main.cpp.o
 
 # target to build an object file
 src/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/main.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/main.cpp.o
 .PHONY : src/main.cpp.o
 
 src/main.i: src/main.cpp.i
@@ -214,7 +214,7 @@ src/main.i: src/main.cpp.i
 
 # target to preprocess a source file
 src/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/main.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/main.cpp.i
 .PHONY : src/main.cpp.i
 
 src/main.s: src/main.cpp.s
@@ -222,7 +222,7 @@ src/main.s: src/main.cpp.s
 
 # target to generate assembly for a file
 src/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/main.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
 src/maze.o: src/maze.cpp.o
@@ -230,7 +230,7 @@ src/maze.o: src/maze.cpp.o
 
 # target to build an object file
 src/maze.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/maze.cpp.o
 .PHONY : src/maze.cpp.o
 
 src/maze.i: src/maze.cpp.i
@@ -238,7 +238,7 @@ src/maze.i: src/maze.cpp.i
 
 # target to preprocess a source file
 src/maze.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/maze.cpp.i
 .PHONY : src/maze.cpp.i
 
 src/maze.s: src/maze.cpp.s
@@ -246,7 +246,7 @@ src/maze.s: src/maze.cpp.s
 
 # target to generate assembly for a file
 src/maze.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/maze.cpp.s
 .PHONY : src/maze.cpp.s
 
 src/maze_generator.o: src/maze_generator.cpp.o
@@ -254,7 +254,7 @@ src/maze_generator.o: src/maze_generator.cpp.o
 
 # target to build an object file
 src/maze_generator.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze_generator.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/maze_generator.cpp.o
 .PHONY : src/maze_generator.cpp.o
 
 src/maze_generator.i: src/maze_generator.cpp.i
@@ -262,7 +262,7 @@ src/maze_generator.i: src/maze_generator.cpp.i
 
 # target to preprocess a source file
 src/maze_generator.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze_generator.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/maze_generator.cpp.i
 .PHONY : src/maze_generator.cpp.i
 
 src/maze_generator.s: src/maze_generator.cpp.s
@@ -270,7 +270,7 @@ src/maze_generator.s: src/maze_generator.cpp.s
 
 # target to generate assembly for a file
 src/maze_generator.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/maze_generator.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/maze_generator.cpp.s
 .PHONY : src/maze_generator.cpp.s
 
 src/physics_system.o: src/physics_system.cpp.o
@@ -278,7 +278,7 @@ src/physics_system.o: src/physics_system.cpp.o
 
 # target to build an object file
 src/physics_system.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/physics_system.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/physics_system.cpp.o
 .PHONY : src/physics_system.cpp.o
 
 src/physics_system.i: src/physics_system.cpp.i
@@ -286,7 +286,7 @@ src/physics_system.i: src/physics_system.cpp.i
 
 # target to preprocess a source file
 src/physics_system.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/physics_system.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/physics_system.cpp.i
 .PHONY : src/physics_system.cpp.i
 
 src/physics_system.s: src/physics_system.cpp.s
@@ -294,7 +294,7 @@ src/physics_system.s: src/physics_system.cpp.s
 
 # target to generate assembly for a file
 src/physics_system.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/physics_system.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/physics_system.cpp.s
 .PHONY : src/physics_system.cpp.s
 
 src/render_system.o: src/render_system.cpp.o
@@ -302,7 +302,7 @@ src/render_system.o: src/render_system.cpp.o
 
 # target to build an object file
 src/render_system.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/render_system.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/render_system.cpp.o
 .PHONY : src/render_system.cpp.o
 
 src/render_system.i: src/render_system.cpp.i
@@ -310,7 +310,7 @@ src/render_system.i: src/render_system.cpp.i
 
 # target to preprocess a source file
 src/render_system.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/render_system.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/render_system.cpp.i
 .PHONY : src/render_system.cpp.i
 
 src/render_system.s: src/render_system.cpp.s
@@ -318,7 +318,7 @@ src/render_system.s: src/render_system.cpp.s
 
 # target to generate assembly for a file
 src/render_system.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/render_system.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/render_system.cpp.s
 .PHONY : src/render_system.cpp.s
 
 src/render_system_init.o: src/render_system_init.cpp.o
@@ -326,7 +326,7 @@ src/render_system_init.o: src/render_system_init.cpp.o
 
 # target to build an object file
 src/render_system_init.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/render_system_init.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/render_system_init.cpp.o
 .PHONY : src/render_system_init.cpp.o
 
 src/render_system_init.i: src/render_system_init.cpp.i
@@ -334,7 +334,7 @@ src/render_system_init.i: src/render_system_init.cpp.i
 
 # target to preprocess a source file
 src/render_system_init.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/render_system_init.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/render_system_init.cpp.i
 .PHONY : src/render_system_init.cpp.i
 
 src/render_system_init.s: src/render_system_init.cpp.s
@@ -342,15 +342,39 @@ src/render_system_init.s: src/render_system_init.cpp.s
 
 # target to generate assembly for a file
 src/render_system_init.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/render_system_init.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/render_system_init.cpp.s
 .PHONY : src/render_system_init.cpp.s
+
+src/scenes/death_scene.o: src/scenes/death_scene.cpp.o
+.PHONY : src/scenes/death_scene.o
+
+# target to build an object file
+src/scenes/death_scene.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/death_scene.cpp.o
+.PHONY : src/scenes/death_scene.cpp.o
+
+src/scenes/death_scene.i: src/scenes/death_scene.cpp.i
+.PHONY : src/scenes/death_scene.i
+
+# target to preprocess a source file
+src/scenes/death_scene.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/death_scene.cpp.i
+.PHONY : src/scenes/death_scene.cpp.i
+
+src/scenes/death_scene.s: src/scenes/death_scene.cpp.s
+.PHONY : src/scenes/death_scene.s
+
+# target to generate assembly for a file
+src/scenes/death_scene.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/death_scene.cpp.s
+.PHONY : src/scenes/death_scene.cpp.s
 
 src/scenes/game_scene.o: src/scenes/game_scene.cpp.o
 .PHONY : src/scenes/game_scene.o
 
 # target to build an object file
 src/scenes/game_scene.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/game_scene.cpp.o
 .PHONY : src/scenes/game_scene.cpp.o
 
 src/scenes/game_scene.i: src/scenes/game_scene.cpp.i
@@ -358,7 +382,7 @@ src/scenes/game_scene.i: src/scenes/game_scene.cpp.i
 
 # target to preprocess a source file
 src/scenes/game_scene.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/game_scene.cpp.i
 .PHONY : src/scenes/game_scene.cpp.i
 
 src/scenes/game_scene.s: src/scenes/game_scene.cpp.s
@@ -366,7 +390,7 @@ src/scenes/game_scene.s: src/scenes/game_scene.cpp.s
 
 # target to generate assembly for a file
 src/scenes/game_scene.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/game_scene.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/game_scene.cpp.s
 .PHONY : src/scenes/game_scene.cpp.s
 
 src/scenes/main_menu.o: src/scenes/main_menu.cpp.o
@@ -374,7 +398,7 @@ src/scenes/main_menu.o: src/scenes/main_menu.cpp.o
 
 # target to build an object file
 src/scenes/main_menu.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/main_menu.cpp.o
 .PHONY : src/scenes/main_menu.cpp.o
 
 src/scenes/main_menu.i: src/scenes/main_menu.cpp.i
@@ -382,7 +406,7 @@ src/scenes/main_menu.i: src/scenes/main_menu.cpp.i
 
 # target to preprocess a source file
 src/scenes/main_menu.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/main_menu.cpp.i
 .PHONY : src/scenes/main_menu.cpp.i
 
 src/scenes/main_menu.s: src/scenes/main_menu.cpp.s
@@ -390,7 +414,7 @@ src/scenes/main_menu.s: src/scenes/main_menu.cpp.s
 
 # target to generate assembly for a file
 src/scenes/main_menu.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/main_menu.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/main_menu.cpp.s
 .PHONY : src/scenes/main_menu.cpp.s
 
 src/scenes/scene_system.o: src/scenes/scene_system.cpp.o
@@ -398,7 +422,7 @@ src/scenes/scene_system.o: src/scenes/scene_system.cpp.o
 
 # target to build an object file
 src/scenes/scene_system.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/scene_system.cpp.o
 .PHONY : src/scenes/scene_system.cpp.o
 
 src/scenes/scene_system.i: src/scenes/scene_system.cpp.i
@@ -406,7 +430,7 @@ src/scenes/scene_system.i: src/scenes/scene_system.cpp.i
 
 # target to preprocess a source file
 src/scenes/scene_system.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/scene_system.cpp.i
 .PHONY : src/scenes/scene_system.cpp.i
 
 src/scenes/scene_system.s: src/scenes/scene_system.cpp.s
@@ -414,7 +438,7 @@ src/scenes/scene_system.s: src/scenes/scene_system.cpp.s
 
 # target to generate assembly for a file
 src/scenes/scene_system.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/scenes/scene_system.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/scenes/scene_system.cpp.s
 .PHONY : src/scenes/scene_system.cpp.s
 
 src/text_renderer.o: src/text_renderer.cpp.o
@@ -422,7 +446,7 @@ src/text_renderer.o: src/text_renderer.cpp.o
 
 # target to build an object file
 src/text_renderer.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/text_renderer.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/text_renderer.cpp.o
 .PHONY : src/text_renderer.cpp.o
 
 src/text_renderer.i: src/text_renderer.cpp.i
@@ -430,7 +454,7 @@ src/text_renderer.i: src/text_renderer.cpp.i
 
 # target to preprocess a source file
 src/text_renderer.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/text_renderer.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/text_renderer.cpp.i
 .PHONY : src/text_renderer.cpp.i
 
 src/text_renderer.s: src/text_renderer.cpp.s
@@ -438,7 +462,7 @@ src/text_renderer.s: src/text_renderer.cpp.s
 
 # target to generate assembly for a file
 src/text_renderer.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/text_renderer.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/text_renderer.cpp.s
 .PHONY : src/text_renderer.cpp.s
 
 src/tiny_ecs.o: src/tiny_ecs.cpp.o
@@ -446,7 +470,7 @@ src/tiny_ecs.o: src/tiny_ecs.cpp.o
 
 # target to build an object file
 src/tiny_ecs.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/tiny_ecs.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/tiny_ecs.cpp.o
 .PHONY : src/tiny_ecs.cpp.o
 
 src/tiny_ecs.i: src/tiny_ecs.cpp.i
@@ -454,7 +478,7 @@ src/tiny_ecs.i: src/tiny_ecs.cpp.i
 
 # target to preprocess a source file
 src/tiny_ecs.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/tiny_ecs.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/tiny_ecs.cpp.i
 .PHONY : src/tiny_ecs.cpp.i
 
 src/tiny_ecs.s: src/tiny_ecs.cpp.s
@@ -462,7 +486,7 @@ src/tiny_ecs.s: src/tiny_ecs.cpp.s
 
 # target to generate assembly for a file
 src/tiny_ecs.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/tiny_ecs.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/tiny_ecs.cpp.s
 .PHONY : src/tiny_ecs.cpp.s
 
 src/tiny_ecs_registry.o: src/tiny_ecs_registry.cpp.o
@@ -470,7 +494,7 @@ src/tiny_ecs_registry.o: src/tiny_ecs_registry.cpp.o
 
 # target to build an object file
 src/tiny_ecs_registry.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/tiny_ecs_registry.cpp.o
 .PHONY : src/tiny_ecs_registry.cpp.o
 
 src/tiny_ecs_registry.i: src/tiny_ecs_registry.cpp.i
@@ -478,7 +502,7 @@ src/tiny_ecs_registry.i: src/tiny_ecs_registry.cpp.i
 
 # target to preprocess a source file
 src/tiny_ecs_registry.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/tiny_ecs_registry.cpp.i
 .PHONY : src/tiny_ecs_registry.cpp.i
 
 src/tiny_ecs_registry.s: src/tiny_ecs_registry.cpp.s
@@ -486,7 +510,7 @@ src/tiny_ecs_registry.s: src/tiny_ecs_registry.cpp.s
 
 # target to generate assembly for a file
 src/tiny_ecs_registry.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/tiny_ecs_registry.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/tiny_ecs_registry.cpp.s
 .PHONY : src/tiny_ecs_registry.cpp.s
 
 src/world_init.o: src/world_init.cpp.o
@@ -494,7 +518,7 @@ src/world_init.o: src/world_init.cpp.o
 
 # target to build an object file
 src/world_init.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/world_init.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/world_init.cpp.o
 .PHONY : src/world_init.cpp.o
 
 src/world_init.i: src/world_init.cpp.i
@@ -502,7 +526,7 @@ src/world_init.i: src/world_init.cpp.i
 
 # target to preprocess a source file
 src/world_init.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/world_init.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/world_init.cpp.i
 .PHONY : src/world_init.cpp.i
 
 src/world_init.s: src/world_init.cpp.s
@@ -510,7 +534,7 @@ src/world_init.s: src/world_init.cpp.s
 
 # target to generate assembly for a file
 src/world_init.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/world_init.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/world_init.cpp.s
 .PHONY : src/world_init.cpp.s
 
 src/world_system.o: src/world_system.cpp.o
@@ -518,7 +542,7 @@ src/world_system.o: src/world_system.cpp.o
 
 # target to build an object file
 src/world_system.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/world_system.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/world_system.cpp.o
 .PHONY : src/world_system.cpp.o
 
 src/world_system.i: src/world_system.cpp.i
@@ -526,7 +550,7 @@ src/world_system.i: src/world_system.cpp.i
 
 # target to preprocess a source file
 src/world_system.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/world_system.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/world_system.cpp.i
 .PHONY : src/world_system.cpp.i
 
 src/world_system.s: src/world_system.cpp.s
@@ -534,7 +558,7 @@ src/world_system.s: src/world_system.cpp.s
 
 # target to generate assembly for a file
 src/world_system.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/salmon.dir/build.make CMakeFiles/salmon.dir/src/world_system.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Entrapped.dir/build.make CMakeFiles/Entrapped.dir/src/world_system.cpp.s
 .PHONY : src/world_system.cpp.s
 
 # Help Target
@@ -545,7 +569,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... salmon"
+	@echo "... Entrapped"
 	@echo "... src/ai_system.o"
 	@echo "... src/ai_system.i"
 	@echo "... src/ai_system.s"
@@ -573,6 +597,9 @@ help:
 	@echo "... src/render_system_init.o"
 	@echo "... src/render_system_init.i"
 	@echo "... src/render_system_init.s"
+	@echo "... src/scenes/death_scene.o"
+	@echo "... src/scenes/death_scene.i"
+	@echo "... src/scenes/death_scene.s"
 	@echo "... src/scenes/game_scene.o"
 	@echo "... src/scenes/game_scene.i"
 	@echo "... src/scenes/game_scene.s"

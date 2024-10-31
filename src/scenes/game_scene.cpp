@@ -69,6 +69,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 		return;
 	}
 
+	Mix_VolumeMusic(10);
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 
@@ -305,7 +306,23 @@ void GameScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
 		Entity gun = registry.guns.entities[0];
 		update_gun_position(player, gun);
 	}
-  
+	
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_EQUAL:  // "+" key to zoom in
+			camera.adjustZoom(0.1f);
+			break;
+		case GLFW_KEY_MINUS:  // "-" key to zoom out
+			camera.adjustZoom(-0.1f);
+			break;
+		default:
+			break;
+		}
+	}
+
+	// Update the camera after input
+	updateCamera(registry.motions.get(player).position);
+
 	if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
 		next_scene = "death_scene";
 	}
@@ -878,6 +895,10 @@ void GameScene::draw_fps(RenderSystem* renderer) {
 		vec2 fps_position = vec2(10.f, 10.f);
 		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
 	}
+}
+
+void GameScene::updateCamera(const vec2& player_position) {
+	camera.updateCamera(player_position, window_width_px, window_height_px);
 }
 
 // TODO: Reloading logic

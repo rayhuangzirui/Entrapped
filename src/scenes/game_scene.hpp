@@ -2,6 +2,7 @@
 
 #include "base_scene.hpp"
 #include "render_system.hpp"
+#include "camera_system.hpp"
 #include <SDL.h>
 #include <SDL_mixer.h>
 
@@ -42,5 +43,6 @@ private:
 	vec2 player_velocity;
 
 	std::string next_scene = "";
-
+	CameraSystem camera;
+	void updateCamera(const vec2& player_position);
 };

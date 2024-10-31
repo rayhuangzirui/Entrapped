@@ -49,6 +49,10 @@ public:
 	// Bounding box
 	ComponentContainer<BoundingBox> boundingBoxes;
 
+	//For Damage text render purpose
+	ComponentContainer<DamageText> damageTexts;
+
+
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
@@ -80,9 +84,11 @@ public:
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&lightups);
-
 		// AI related
 		registry_list.push_back(&enemyAIs);
+
+		registry_list.push_back(&damageTexts);
+		
 	}
 
 	void clear_all_components() {

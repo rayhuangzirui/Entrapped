@@ -5,12 +5,15 @@
 
 #include "common.hpp"
 #include "components.hpp"
+#include "camera_system.hpp"
 #include "tiny_ecs.hpp"
 #include <text_renderer.hpp>
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
 class RenderSystem {
+	CameraSystem camera_system;
+
 	/**
 	 * The following arrays store the assets the game will use. They are loaded
 	 * at initialization and are assumed to not be modified by the render loop.
@@ -117,7 +120,7 @@ public:
 
 	// Text renderer
 	TextRenderer text_renderer;
-
+	void setTextPosition(Entity textEntity, vec2 newPosition);
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);

@@ -5,7 +5,7 @@
 #include "tiny_ecs_registry.hpp"
 
 
-
+#include "camera_system.hpp"
 #include "text_renderer.hpp"
 #include <iostream>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -372,6 +372,23 @@ void RenderSystem::draw()
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
+
+	//--------------------------Camera--------------------------//
+	// Ensure player entity is valid and retrieve its position
+	if (registry.players.entities.size() > 0) {
+		Entity player = registry.players.entities[0];
+		if (registry.motions.has(player)) {
+			vec2 player_position = registry.motions.get(player).position;
+
+			// Update the camera to center on the player¡¯s position
+			camera_system.updateCamera(player_position, w, h);
+		}
+	}
+
+	// Get the camera matrix after update
+	mat3 camera_matrix = camera_system.getViewportMatrix(w, h);
+	//--------------------------Camera--------------------------//
+
 	// First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 	gl_has_errors();
@@ -389,19 +406,34 @@ void RenderSystem::draw()
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
 	// Draw all textured meshes that have a position and size component
+	//for (Entity entity : registry.renderRequests.entities)
+	//{
+	//	if (!registry.motions.has(entity))
+	//		continue;
+	//	// Note, its not very efficient to access elements indirectly via the entity
+	//	// albeit iterating through all Sprites in sequence. A good point to optimize
+	//	if (!registry.texts.has(entity)) {
+	//		drawTexturedMesh(entity, projection_2D);
+	//	}
+	//	else {
+	//		drawText(entity, projection_2D);
+	//	}
+	//}
+
+	// Use the camera matrix for all entities
 	for (Entity entity : registry.renderRequests.entities)
 	{
 		if (!registry.motions.has(entity))
 			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
 		if (!registry.texts.has(entity)) {
-			drawTexturedMesh(entity, projection_2D);
+			drawTexturedMesh(entity, camera_matrix);
 		}
 		else {
-			drawText(entity, projection_2D);
+			drawText(entity, camera_matrix);
 		}
 	}
+
+
 	// Truely render to the screen
 	drawToScreen();
 
@@ -425,4 +457,11 @@ mat3 RenderSystem::createProjectionMatrix()
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+}
+
+void RenderSystem::setTextPosition(Entity textEntity, vec2 newPosition) {
+	if (registry.motions.has(textEntity)) {
+		Motion& motion = registry.motions.get(textEntity);
+		motion.position = newPosition;
+	}
 }

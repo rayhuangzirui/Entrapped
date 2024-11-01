@@ -399,6 +399,12 @@ void GameScene::render_maze(RenderSystem* renderer) {
                 // Create a chest at this position (yellow square)
                 createChest(renderer, position);
             }
+			
+			else if (box_testing_environment[row][col] == 2) {
+				createEnemy(renderer, position);
+
+			}
+			
         }
     }
 }

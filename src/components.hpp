@@ -318,7 +318,8 @@ enum class EFFECT_ASSET_ID {
 	WATER = TEXTURED + 1,
 	TEXT = WATER + 1,
 	RING = TEXT + 1,
-	EFFECT_COUNT = RING + 1,
+	RECTANGLE = RING + 1,
+	EFFECT_COUNT = RECTANGLE + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

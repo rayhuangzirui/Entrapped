@@ -77,7 +77,8 @@ class RenderSystem {
 		shader_path("textured"),
 		shader_path("water"),
 		shader_path("text"),
-		shader_path("ring")
+		shader_path("ring"),
+		shader_path("rectangle")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;

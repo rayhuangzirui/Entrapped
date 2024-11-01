@@ -82,6 +82,7 @@ class RenderSystem {
 		shader_path("ring"),
 		shader_path("box"),
 		shader_path("global"),
+		//shader_path("textured")
 		shader_path("map")
 	};
 

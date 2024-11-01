@@ -615,10 +615,10 @@ void RenderSystem::draw()
 			drawText(entity, projection_2D);
 		}
 		else if (registry.maps.has(entity)) {
-			drawMapNew(entity, projection_2D);
+			drawMapNew(entity, camera_matrix);
 		}
 		else {
-			drawTexturedMesh(entity, projection_2D);
+			drawTexturedMesh(entity, camera_matrix);
 		}
 	}
 

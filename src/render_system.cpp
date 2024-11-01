@@ -10,6 +10,8 @@
 #include <iostream>
 #include <glm/ext/matrix_clip_space.hpp>
 
+#include <maze.hpp>
+
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
@@ -295,6 +297,201 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 
 	gl_has_errors();
 }
+
+void RenderSystem::drawMap(Entity entity, const mat3& projection)
+{
+	Motion& motion = registry.motions.get(entity);
+	Transform transform;
+	//transform.translate(motion.position);
+	//transform.rotate(motion.angle);
+	//transform.scale(motion.scale);
+	// use program, load variables, bind to VAO, then iterate thru chars
+	assert(registry.renderRequests.has(entity));
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
+
+	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
+	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
+	const GLuint program = (GLuint)effects[used_effect_enum];
+	// activate the shader program
+	glUseProgram(program);
+	gl_has_errors();
+
+	glBindVertexArray(m_map_VAO);
+	gl_has_errors();
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
+	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	// iterate through all characters
+	std::string::const_iterator c;
+	float x = motion.position.x;
+	
+	for (int i = 0; i<2; i++)
+	{
+
+		float xpos = x;
+		float ypos = motion.position.y;
+
+		float w = 48;
+		float h = 48;
+		// update VBO for each character
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos,     ypos,       0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+			{ xpos + w, ypos + h,   1.0f, 0.0f }
+		};
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+		// render glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		// std::cout << "binding texture: " << ch.character << " = " << ch.TextureID << std::endl;
+
+		// update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, m_map_VBO);
+		gl_has_errors();
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		gl_has_errors();
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		gl_has_errors();
+
+		// render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		gl_has_errors();
+		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+		x += 48; // bitshift by 6 to get value in pixels (2^6 = 64)
+	}
+
+	//glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	gl_has_errors();
+}
+
+void RenderSystem::drawMapNew(Entity entity, const mat3& projection) {
+	Motion& motion = registry.motions.get(entity);
+	// Transformation code, see Rendering and Transformation in the template
+	// specification for more info Incrementally updates transformation matrix,
+	// thus ORDER IS IMPORTANT
+	Transform transform;
+	transform.translate(motion.position);
+	transform.scale(motion.scale);
+
+	assert(registry.renderRequests.has(entity));
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
+
+	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
+	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
+	const GLuint program = (GLuint)effects[used_effect_enum];
+
+	// Setting shaders
+	glUseProgram(program);
+	gl_has_errors();
+
+	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
+	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+
+	// Setting vertex and index buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	// Input data location as in the vertex buffer
+	if (render_request.used_effect == EFFECT_ASSET_ID::MAP)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		gl_has_errors();
+
+	}
+	else
+	{
+		assert(false && "Type of render request not supported");
+	}
+
+	// Getting uniform locations for glUniform* calls
+	GLint color_uloc = glGetUniformLocation(program, "fcolor");
+	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+	glUniform3fv(color_uloc, 1, (float*)&color);
+	gl_has_errors();
+
+	// Get number of indices from index buffer, which has elements uint16_t
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+	// GLsizei num_triangles = num_indices / 3;
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
+	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	float x = 0.0;
+	float y = 0.0;
+	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
+		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
+			GLfloat xpos = x;
+			GLfloat ypos = y;
+			GLuint xpos_loc = glGetUniformLocation(currProgram, "xpos");
+			glUniform1f(xpos_loc, (float)xpos);
+			GLuint ypos_loc = glGetUniformLocation(currProgram, "ypos");
+			glUniform1f(ypos_loc, (float)ypos);
+			gl_has_errors();
+			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+			if (box_testing_environment[row][col] == 1) {
+				texture_id =
+					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+			}
+			else if (box_testing_environment[row][col] == 0) {
+				texture_id =
+					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
+			}
+			glBindTexture(GL_TEXTURE_2D, texture_id);
+			gl_has_errors();
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+			x += 48.f;
+		}
+		y += 48.f;
+		x = 0.0f;
+	}
+
+	gl_has_errors();
+}
+
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
 void RenderSystem::drawToScreen()
@@ -414,11 +611,14 @@ void RenderSystem::draw()
 	{
 		if (!registry.motions.has(entity))
 			continue;
-		if (!registry.texts.has(entity)) {
-			drawTexturedMesh(entity, camera_matrix);
+		if (registry.texts.has(entity)) {
+			drawText(entity, projection_2D);
+		}
+		else if (registry.maps.has(entity)) {
+			drawMapNew(entity, projection_2D);
 		}
 		else {
-			drawText(entity, camera_matrix);
+			drawTexturedMesh(entity, projection_2D);
 		}
 	}
 

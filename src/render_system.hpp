@@ -81,7 +81,8 @@ class RenderSystem {
 		shader_path("text"),
 		shader_path("ring"),
 		shader_path("box"),
-		shader_path("global")
+		shader_path("global"),
+		shader_path("map")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -100,9 +101,12 @@ public:
 	void initializeGlEffects();
 
 	void initializeGlMeshes();
+
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
 	void initializeGlGeometryBuffers();
+
+	void initializeMap();
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
@@ -123,6 +127,8 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawText(Entity entity, const mat3& projection);
+	void drawMap(Entity entity, const mat3& projection);
+	void drawMapNew(Entity entity, const mat3& projection);
 	void drawToScreen();
 
 	// Window handle
@@ -135,6 +141,10 @@ private:
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
+
+	// map buffer
+	GLuint m_map_VAO;
+	GLuint m_map_VBO;
 
 	Entity screen_state_entity;
 };

@@ -219,6 +219,13 @@ struct BoundingBox {
 	vec2 max; // Maximum x, y coordinates of the bounding box
 };
 
+// The map
+struct Map {
+	int width;
+	int height;
+	std::vector<std::vector<int>> grid;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -295,7 +302,8 @@ enum class EFFECT_ASSET_ID {
 	RING = TEXT + 1,
 	BOX = RING + 1,
 	GLOBAL = BOX+1,
-	EFFECT_COUNT = GLOBAL + 1,
+	MAP = GLOBAL + 1,
+	EFFECT_COUNT = MAP + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

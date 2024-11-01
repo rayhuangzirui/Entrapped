@@ -58,11 +58,33 @@ bool RenderSystem::init(GLFWwindow* window_arg)
     initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
+	//initializeMap();
 
     // text renderer
 	this->text_renderer.loadFont();
 
 	return true;
+}
+
+void RenderSystem::initializeMap() {
+
+	// font buffer setup
+	glGenVertexArrays(1, &m_map_VAO);
+	glGenBuffers(1, &m_map_VBO);
+	gl_has_errors();
+
+	// bind buffers
+	glBindVertexArray(m_map_VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_map_VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	gl_has_errors();
+
+	// release buffers
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindVertexArray(0);
+	gl_has_errors();
 }
 
 void RenderSystem::initializeGlTextures()

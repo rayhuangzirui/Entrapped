@@ -62,7 +62,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 
 	// *Render the maze before initializing player and enemy entities*
-	render_maze(); 
+	render_maze_new(); 
 
 	player = createPlayer({ 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
@@ -464,6 +464,26 @@ bool GameScene::check_player_wall_collision(const Motion& player_motion) {
     }
 
     return false; // No collision detected
+}
+
+void GameScene::render_maze_new() {
+	const int TILE_SIZE = 48;
+	auto entity = Entity();
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = {24.f, 24.f};
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = {48.f, 48.f};
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::MAP,
+			GEOMETRY_BUFFER_ID::SPRITE
+		});
+	Map& map = registry.maps.emplace(entity);
+
 }
 
 // Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze

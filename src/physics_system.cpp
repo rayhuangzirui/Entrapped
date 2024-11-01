@@ -29,6 +29,10 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
+int clamp_m(int n, int min_v, int max_v) {
+    return min(max(n, min_v), max_v);
+}
+
 //vec4 check_wall_collision(const BoundingBox& bb) {
 //    const int TILE_SIZE = 48;
 //    int y_top = floor(bb.min.y/TILE_SIZE);
@@ -74,16 +78,88 @@ float round_to_digits(float value, int digits)
     return round(value * factor) / factor;
 }
 
+//vec2 check_wall_collision_new(Motion& motion, vec2 initial_position,  int direction) {
+//    vec2 bb_min = motion.position - (abs(motion.scale) / 2.0f);
+//    vec2 bb_max = motion.position + (abs(motion.scale) / 2.0f);
+//    const int TILE_SIZE = 48;
+//    vec2 offset = vec2(0, 0);
+//
+//    int y_top = clamp_m(floor(round_to_digits(bb_min.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT-1);
+//    int y_bot = floor(round_to_digits(bb_max.y / TILE_SIZE, 6));
+//    int x_left = floor(round_to_digits(bb_min.x / TILE_SIZE, 6));
+//    int x_right = floor(round_to_digits(bb_max.x / TILE_SIZE, 6));
+//
+//    vec2 bb_min_init = initial_position - (abs(motion.scale) / 2.0f);
+//    vec2 bb_max_init = initial_position + (abs(motion.scale) / 2.0f);
+//
+//    int y_top_init = floor(round_to_digits(bb_min.y / TILE_SIZE, 6));
+//    int y_bot_init = floor(round_to_digits(bb_max.y / TILE_SIZE, 6));
+//    int x_left_init = floor(round_to_digits(bb_min.x / TILE_SIZE, 6));
+//    int x_right_init = floor(round_to_digits(bb_max.x / TILE_SIZE, 6));
+//
+//    float offset_top = 0.0;
+//    float offset_bottom = 0.0;
+//    float offset_left = 0.0;
+//    float offset_right = 0.0;
+//
+//    bool heading_up = motion.velocity.y < 0;
+//    bool heading_down = motion.velocity.y > 0;
+//    bool heading_left = motion.velocity.x < 0;
+//    bool heading_right = motion.velocity.x > 0;
+//
+//
+//    if (direction == 0) {
+//        for (uint i = x_left; i < x_right; i++) {
+//            if (heading_up && (y_top < 0 || box_testing_environment[y_top][i] == 1)) {
+//                offset_top = max((y_top + 1) * TILE_SIZE - bb.min.y, offset_top);
+//            }
+//            if (heading_down && (y_bot >= BOX_MAZE_HEIGHT || box_testing_environment[y_bot][i] == 1)) {
+//                offset_bottom = max(bb.max.y - y_bot * TILE_SIZE, offset_bottom);
+//            }
+//        }
+//    }
+//    else {
+//        for (uint i = y_top; i < y_bot; i++) {
+//            if (heading_left && (x_left < 0 || box_testing_environment[i][x_left] == 1)) {
+//                offset_left = max((x_left + 1) * TILE_SIZE - bb.min.x, offset_left);
+//            }
+//            if (heading_right && (x_right >= BOX_MAZE_WIDTH || box_testing_environment[i][x_right] == 1)) {
+//                offset_right = max(bb.max.x - x_right * TILE_SIZE, offset_right);
+//            }
+//        }
+//    }
+//
+//    vec2 result = vec2(0, 0);
+//    //if (offset_top <= 0.001 || offset_bottom <= 0.0010) {
+//    //    result.y = offset_top - offset_bottom;
+//    //}
+//    //if (offset_left <= 0.001 || offset_right <= 0.001) {
+//    //    result.x = offset_left - offset_right;
+//    //}
+//    result.y = offset_top - offset_bottom;
+//    result.x = offset_left - offset_right;
+//
+//
+//    //if (offset_top > 0 || offset_bottom > 0 || offset_left > 0 || offset_right > 0) {
+//    //    printf("bbox: %f, %f, %f, %f\n", bb.min.y, bb.max.y, bb.min.x, bb.max.x);
+//    //    printf("collision index: %d, %d, %d, %d\n", y_top, y_bot, x_left, x_right);
+//    //    printf("collision offset: %f, %f, %f, %f\n", offset_top, offset_bottom, offset_left, offset_right);
+//    //    printf("collision vector: %f, %f\n", result.x, result.y);
+//    //}
+//
+//    return result;
+//}
+
 vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
     bb.min = motion.position - (abs(motion.scale) / 2.0f);
     bb.max = motion.position + (abs(motion.scale) / 2.0f);
     const int TILE_SIZE = 48;
     vec2 offset = vec2(0, 0);
 
-    int y_top = floor(round_to_digits(bb.min.y / TILE_SIZE, 6));
-    int y_bot = floor(round_to_digits(bb.max.y / TILE_SIZE, 6));
-    int x_left = floor(round_to_digits(bb.min.x / TILE_SIZE, 6));
-    int x_right = floor(round_to_digits(bb.max.x / TILE_SIZE, 6));
+    int y_top = clamp_m(floor(round_to_digits(bb.min.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
+    int y_bot = clamp_m(floor(round_to_digits(bb.max.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
+    int x_left = clamp_m(floor(round_to_digits(bb.min.x / TILE_SIZE, 6)), 0, BOX_MAZE_WIDTH - 1);
+    int x_right = clamp_m(floor(round_to_digits(bb.max.x / TILE_SIZE, 6)), 0, BOX_MAZE_WIDTH - 1);
 
     float offset_top = 0.0;
     float offset_bottom = 0.0;
@@ -136,6 +212,7 @@ vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
 
     return result;
 }
+
 
 const float DASH_MULTIPLIER = 5.0f;
 

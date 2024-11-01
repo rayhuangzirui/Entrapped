@@ -24,6 +24,7 @@ private:
 	float current_speed;
 	Entity player;
 	Entity enemy;
+	void render_maze_new();
 	void render_maze();
 	bool check_player_wall_collision(const Motion& player_motion);
 	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);

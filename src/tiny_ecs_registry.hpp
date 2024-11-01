@@ -50,6 +50,8 @@ public:
 	//For Damage text render purpose
 	ComponentContainer<DamageText> damageTexts;
 
+	ComponentContainer<Map> maps;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -84,6 +86,8 @@ public:
 		registry_list.push_back(&enemyAIs);
 
 		registry_list.push_back(&damageTexts);
+
+		registry_list.push_back(&maps);
 		
 	}
 

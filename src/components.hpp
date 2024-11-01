@@ -114,6 +114,13 @@ struct Deadly
 	// A1 code
 };
 
+
+struct Chest
+{
+	bool isOpen = false;
+};
+
+
 // anything the player can eat
 struct Eatable
 {

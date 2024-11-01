@@ -335,85 +335,72 @@ bool GameScene::check_player_wall_collision(const Motion& player_motion) {
 
 // Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze
 void GameScene::render_maze(RenderSystem* renderer) {
-	// Tile dimensions
-	const int TILE_SIZE = 48;
+    // Tile dimensions
+    const int TILE_SIZE = 48;
 
-	// Loop through each row and column of the maze
-	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
-		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
-			// Determine the texture to use and create an entity for the tile
-			TEXTURE_ASSET_ID texture_id;
-			if (box_testing_environment[row][col] == 1) {
-				texture_id = TEXTURE_ASSET_ID::WALL_6;
+    // Loop through each row and column of the maze
+    for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
+        for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
+            // Calculate position for the tile
+            float x = (col + 0.5) * TILE_SIZE;
+            float y = (row + 0.5) * TILE_SIZE;
+            vec2 position = { x, y };
 
-				// Calculate position for the tile
-				float x = (col+0.5) * TILE_SIZE;
-				float y = (row + 0.5)* TILE_SIZE;
+            // Determine the type of tile to create based on the map data
+            if (box_testing_environment[row][col] == 1) {
+                // Create a wall tile
+                TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::WALL_6;
 
-				// Create an entity for the wall tile
-				Entity wall_entity = Entity();
+                // Create an entity for the wall tile
+                Entity wall_entity = Entity();
 
-				// Store a reference to the potentially re-used mesh object
-				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-				registry.meshPtrs.emplace(wall_entity, &mesh);
+                // Store a reference to the potentially re-used mesh object
+                Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+                registry.meshPtrs.emplace(wall_entity, &mesh);
 
-				// Setting initial motion values
-				Motion& motion = registry.motions.emplace(wall_entity);
-				motion.position = { x, y };
-				motion.angle = 0;
-				motion.scale = { TILE_SIZE, TILE_SIZE };
+                // Setting initial motion values
+                Motion& motion = registry.motions.emplace(wall_entity);
+                motion.position = position;
+                motion.angle = 0;
+                motion.scale = { TILE_SIZE, TILE_SIZE };
 
-				// Add a bounding box component for wall tiles
-				vec2 min = vec2(x, y);
-				vec2 max = vec2(x + TILE_SIZE, y + TILE_SIZE);
-				//registry.boundingBoxes.emplace(wall_entity, BoundingBox{ min, max });
+                // Add the render request for the wall entity
+                registry.renderRequests.insert(
+                    wall_entity,
+                    { texture_id,
+                      EFFECT_ASSET_ID::TEXTURED,
+                      GEOMETRY_BUFFER_ID::SPRITE });
+            }
+            else if (box_testing_environment[row][col] == 0) {
+                // Create a floor tile
+                TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::FLOOR_5;
 
-				// Add the render request for the wall entity
-				registry.renderRequests.insert(
-					wall_entity,
-					{ texture_id,
-					  EFFECT_ASSET_ID::TEXTURED,
-					  GEOMETRY_BUFFER_ID::SPRITE });
-			}
-			else {
-				texture_id = TEXTURE_ASSET_ID::FLOOR_5;
+                // Create an entity for the floor tile
+                Entity floor_entity = Entity();
 
-				// Calculate position for the tile
-				float x = (col + 0.5) * TILE_SIZE;
-				float y = (row + 0.5) * TILE_SIZE;
+                // Store a reference to the potentially re-used mesh object
+                Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+                registry.meshPtrs.emplace(floor_entity, &mesh);
 
-				// Create an entity for the floor tile
-				Entity floor_entity = Entity();
+                // Setting initial motion values
+                Motion& motion = registry.motions.emplace(floor_entity);
+                motion.position = position;
+                motion.angle = 0;
+                motion.scale = { TILE_SIZE, TILE_SIZE };
 
-				// Store a reference to the potentially re-used mesh object
-				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-				registry.meshPtrs.emplace(floor_entity, &mesh);
-
-				// Setting initial motion values
-				Motion& motion = registry.motions.emplace(floor_entity);
-				motion.position = { x, y };
-				motion.angle = 0;
-				motion.scale = { TILE_SIZE, TILE_SIZE };
-
-				// Add the render request for the floor entity
-				registry.renderRequests.insert(
-					floor_entity,
-					{ texture_id,
-					  EFFECT_ASSET_ID::TEXTURED,
-					  GEOMETRY_BUFFER_ID::SPRITE });
-			}
-		}
-	}
-	//for (int y = 0; y < MAZE_HEIGHT; ++y) {
-	//	for (int x = 0; x < MAZE_WIDTH; ++x) {
-	//		if (tutorial_maze[y][x] == 1) {
-	//			// Create a wall at this grid position
-	//			vec2 wall_position = vec2((x+0.5) * cell_size, (y+0.5) * cell_size);
-	//			vec2 wall_size = vec2(cell_size, cell_size);
-	//			createWall(renderer, wall_position, wall_size);
-	//		}
-	//	}
-	//}
+                // Add the render request for the floor entity
+                registry.renderRequests.insert(
+                    floor_entity,
+                    { texture_id,
+                      EFFECT_ASSET_ID::TEXTURED,
+                      GEOMETRY_BUFFER_ID::SPRITE });
+            }
+            else if (box_testing_environment[row][col] == 3) {
+                // Create a chest at this position (yellow square)
+                createChest(renderer, position);
+            }
+        }
+    }
 }
 
 Entity GameScene::createWall(RenderSystem* renderer, vec2 position, vec2 size)
@@ -493,6 +480,34 @@ Entity GameScene::createPlayer(RenderSystem* renderer, vec2 pos) {
 
 	return entity;
 }
+
+Entity GameScene::createChest(RenderSystem* renderer, vec2 position) {
+    Entity chest_entity = Entity();
+
+    // Store a reference to the potentially re-used mesh object (basic square for a chest)
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(chest_entity, &mesh);
+
+    
+    Motion& motion = registry.motions.emplace(chest_entity);
+    motion.position = position;  
+    motion.angle = 0.f;         
+    motion.scale = vec2(TILE_SIZE, TILE_SIZE);  
+
+    // Add render request for chest using a colored effect
+    registry.renderRequests.insert(
+        chest_entity,
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture, just use a color
+          EFFECT_ASSET_ID::COLOURED,
+          GEOMETRY_BUFFER_ID::SPRITE });
+
+    // Set the color for the chest (yellow)
+    registry.colors.emplace(chest_entity, vec3(1.0f, 1.0f, 0.0f));  // RGB for yellow
+
+    return chest_entity;
+}
+
+
 
 Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
 	auto entity = Entity();

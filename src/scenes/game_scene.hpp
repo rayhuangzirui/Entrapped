@@ -31,6 +31,7 @@ private:
 	Entity createEnemy(RenderSystem* renderer, vec2 pos);
 	Entity createWall(RenderSystem* renderer, vec2 position, vec2 size);
 	Entity createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size);
+	Entity createChest(RenderSystem* renderer, vec2 pos);
 	void shoot_bullet(RenderSystem* renderer, vec2 position, vec2 direction);
 	void update_gun_position(Entity player, Entity gun);
 

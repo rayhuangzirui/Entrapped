@@ -16,6 +16,7 @@ public:
 	void on_mouse_move(vec2 mouse_position);
 	void on_mouse_click(RenderSystem* renderer, int button, int action, int mod);
 	void draw_fps(RenderSystem* renderer);
+	void drawHealthBars(RenderSystem* renderer);
 
 private:
     // Player state
@@ -29,6 +30,7 @@ private:
 	Entity createGun(RenderSystem* renderer, Entity player);
 	Entity createEnemy(RenderSystem* renderer, vec2 pos);
 	Entity createWall(RenderSystem* renderer, vec2 position, vec2 size);
+	Entity createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size);
 	void shoot_bullet(RenderSystem* renderer, vec2 position, vec2 direction);
 	void update_gun_position(Entity player, Entity gun);
 

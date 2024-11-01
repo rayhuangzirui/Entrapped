@@ -4,6 +4,7 @@
 #include "physics_system.hpp" // to check_player_wall_collision
 #include "render_system.hpp"
 #include <iostream>
+#include "components.hpp"
 
 const int cell_size = 48;
 
@@ -99,6 +100,7 @@ void GameScene::step(RenderSystem* renderer) {
 			}
 		}
 	}
+	drawHealthBars(renderer);
 	(RenderSystem*)renderer;
 }
 
@@ -542,6 +544,41 @@ Entity GameScene::createGun(RenderSystem* renderer, Entity player) {
 	return entity;
 }
 
+Entity GameScene::createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size) {
+   auto health_bar_entity = Entity();
+
+    // Store a reference to the potentially re-used mesh object
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(health_bar_entity, &mesh);
+
+    // Get the entity's motion to determine where the health bar should be positioned
+    Motion& entity_motion = registry.motions.get(entity);
+
+    // Set initial motion values for the health bar
+    Motion& health_bar_motion = registry.motions.emplace(health_bar_entity);
+    health_bar_motion.position = entity_motion.position + offset;
+    health_bar_motion.angle = 0.f;
+    health_bar_motion.velocity = {0.f, 0.f};
+    health_bar_motion.scale = size;
+
+    // Add a HealthBar component to keep track of the owner entity
+    HealthBar& health_bar = registry.healthBars.emplace(health_bar_entity);
+    health_bar.owner = entity;
+
+    // Add the render request for the health bar (using a colored effect)
+    registry.renderRequests.insert(
+        health_bar_entity,
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture needed, using a color
+          EFFECT_ASSET_ID::COLOURED,         // Use color to render the health bar
+          GEOMETRY_BUFFER_ID::SPRITE });
+
+    // Set the color of the health bar to red
+    registry.colors.emplace(health_bar_entity, vec3(1.0f, 0.0f, 0.0f));  // Red color
+
+    return health_bar_entity;
+
+}
+
 // Update gun position based on player position
 void GameScene::update_gun_position(Entity player, Entity gun) {
 	Motion& player_motion = registry.motions.get(player);
@@ -573,6 +610,13 @@ Entity GameScene::createEnemy(RenderSystem* renderer, vec2 pos) {
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 10;
+	health.max_health = 10;
+
+
+	// health bar for enemy
+	vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
+    vec2 size = {100.f, 10.f};   // Initial size of the health bar
+    enemy.health_bar_entity = createHealthBar(renderer, entity, offset, size);
 	
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
@@ -792,5 +836,43 @@ void GameScene::draw_fps(RenderSystem* renderer) {
 		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
 	}
 }
+
+
+// void GameScene::drawHealthBars(RenderSystem* renderer) {
+
+
+void GameScene::drawHealthBars(RenderSystem* renderer) {
+    auto& health_container = registry.healths;
+
+    // Iterate over all entities with Health components
+    for (uint i = 0; i < health_container.components.size(); i++) {
+        Entity entity = health_container.entities[i];
+
+        // Only update health bars for enemies
+        if (registry.enemies.has(entity)) {
+            Health& health = health_container.components[i];
+            Motion& enemy_motion = registry.motions.get(entity);
+            Enemy& enemy = registry.enemies.get(entity);
+
+            // Calculate the health percentage
+            float health_percentage = static_cast<float>(health.current_health) / static_cast<float>(health.max_health);
+            vec2 size = {100.f * health_percentage, 10.f};  // Width proportional to health
+            vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
+
+            // Update the health bar's motion component
+            if (enemy.health_bar_entity != Entity()) {
+                Motion& health_bar_motion = registry.motions.get(enemy.health_bar_entity);
+                health_bar_motion.position = enemy_motion.position + offset;
+                health_bar_motion.scale = size;
+            }
+        }
+    }
+}
+
+
+
+
+
+
 
 // TODO: Reloading logic

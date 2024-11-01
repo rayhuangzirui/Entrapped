@@ -87,6 +87,8 @@ struct Enemy
 	
 	// Enemy's damage
 	int damage = 1;
+
+	Entity health_bar_entity;
 };
 
 // Enemy AI component
@@ -99,6 +101,7 @@ struct EnemyAI {
 
 struct Health {
 	int current_health;  // Health points of an entity
+	int max_health; 
 };
 
 struct DashTimer {
@@ -129,6 +132,13 @@ struct Motion {
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
 };
+
+// Health bar component for enemies
+struct HealthBar {
+	Entity owner;  // Entity that the health bar is associated with
+	
+};
+
 
 // Stucture to store collision information
 struct Collision
@@ -286,46 +296,12 @@ enum class TEXTURE_ASSET_ID {
 
 	BULLET_1 = WOMAN_WALK_4 + 1,
 	GUN = BULLET_1 + 1,
+	//HealthBar = GUN + 1,
 
 	TEXTURE_COUNT = GUN + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-//enum class PLAYER_BACK_TEXTURE_ASSET_ID {
-//	PLAYER_BACK_1 = 0,
-//	PLAYER_BACK_2 = PLAYER_BACK_1 + 1,
-//	PLAYER_BACK_3 = PLAYER_BACK_2 + 1,
-//	TEXTURE_BACK_COUNT = PLAYER_BACK_3 + 1
-//};
-//const int texture_back_count = (int)PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT;
-//
-//enum class FLOOR_TEXTURE_ASSET_ID {
-//	FLOOR = 0,
-//	FLOOR_1 = FLOOR + 1,
-//	FLOOR_2 = FLOOR_1 + 1,
-//	FLOOR_3 = FLOOR_2 + 1,
-//	FLOOR_4 = FLOOR_3 + 1,
-//	FLOOR_TEXTURE_COUNT = FLOOR_4 + 1
-//};
-//const int floor_texture_count = (int)FLOOR_TEXTURE_ASSET_ID::FLOOR_TEXTURE_COUNT;
-//
-//enum class DOOR_TEXTURE_ASSET_ID {
-//	DOOR_OPEN = 0,
-//	DOOR_CLOSED = DOOR_OPEN + 1,
-//	DOOR_TEXTURE_COUNT = DOOR_CLOSED + 1
-//};
-//const int door_texture_count = (int)DOOR_TEXTURE_ASSET_ID::DOOR_TEXTURE_COUNT;
-//
-//enum class WALL_TEXTURE_ASSET_ID {
-//	WALL = 0,
-//	WALL_1 = WALL + 1,
-//	WALL_2 = WALL_1 + 1,
-//	WALL_3 = WALL_2 + 1,
-//	WALL_4 = WALL_3 + 1,
-//	WALL_5 = WALL_4 + 1,
-//	WALL_TEXTURE_COUNT = WALL_5 + 1
-//};
-//const int wall_texture_count = (int)WALL_TEXTURE_ASSET_ID::WALL_TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,

@@ -431,20 +431,24 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
 			GLfloat xpos = x;
 			GLfloat ypos = y;
-			GLuint xpos_loc = glGetUniformLocation(currProgram, "xpos");
-			glUniform1f(xpos_loc, (float)xpos);
-			GLuint ypos_loc = glGetUniformLocation(currProgram, "ypos");
-			glUniform1f(ypos_loc, (float)ypos);
-			gl_has_errors();
 			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
 			if (box_testing_environment[row][col] == 1) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
 			}
-			else if (box_testing_environment[row][col] == 0) {
+			else if (box_testing_environment[row][col] == 0 || box_testing_environment[row][col] == 3) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
 			}
+			else {
+				x += 48.f;
+				continue;
+			}
+			GLuint xpos_loc = glGetUniformLocation(currProgram, "xpos");
+			glUniform1f(xpos_loc, (float)xpos);
+			GLuint ypos_loc = glGetUniformLocation(currProgram, "ypos");
+			glUniform1f(ypos_loc, (float)ypos);
+			gl_has_errors();
 			glBindTexture(GL_TEXTURE_2D, texture_id);
 			gl_has_errors();
 			glBindBuffer(GL_ARRAY_BUFFER, 0);

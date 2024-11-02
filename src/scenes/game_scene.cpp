@@ -847,9 +847,9 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 
 	// health bar for enemy
-	vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
-    vec2 size = {100.f, 10.f};   // Initial size of the health bar
-    enemy.health_bar_entity = createHealthBar(renderer, entity, offset, size);
+	//vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
+ //   vec2 size = {100.f, 10.f};   // Initial size of the health bar
+ //   enemy.health_bar_entity = createHealthBar(renderer, entity, offset, size);
 	
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);

@@ -57,6 +57,43 @@ Entity createBox(vec2 position, vec2 scale)
 	return entity;
 }
 
+//Entity createShadowOverlay(vec2 position) {
+//
+//}
+
+// Create player hp bar
+Entity GameScene::createPlayerHPBar(vec2 position) {
+	Entity entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = {200, 30};
+
+	registry.UIs.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+	return entity;
+}
+
+
+void GameScene::initializeUI(Entity player) {
+	Player& player_component = registry.players.get(player);
+
+	createPlayerHPBar({ 120.f, 35.f });
+	renderer->text_renderer.createText(std::to_string(player_component.health)+"/" + std::to_string(player_component.max_health), {35.f, 32.f}, 20.f, {1.f, 1.f, 1.f});
+
+	// create ammo text
+	renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), {35.f, 72.f}, 20.f, {1.f, 1.f, 1.f});
+}
+
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
@@ -98,8 +135,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	current_speed = 5.0f;
 	player_velocity = { 0.0, 0.0 };
 
-
-	(RenderSystem*)renderer;
+	initializeUI(player);
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -151,7 +187,6 @@ void GameScene::step(float elapsed_ms) {
 			createBox(motion.position, motion.scale);
 		}
 	}
-
 	// update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.lightUps.entities) {
 		// progress timer
@@ -233,7 +268,6 @@ void GameScene::destroy() {
 std::string GameScene::get_next_scene() {
 	return this->next_scene;
 }
-
 
 void GameScene::on_key(int key, int action, int mod) {
 	static int frame = 0;
@@ -622,7 +656,7 @@ Entity GameScene::createPlayer(vec2 pos) {
 	// Create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
 	// Initialize health and ammo
-	player.health = 3;
+	player.health = 5;
 	player.ammo = 30;
 
 	// Add the Health component to the player entity with initial health of 100
@@ -1010,8 +1044,8 @@ void GameScene::on_mouse_click(int button, int action, int mod) {
 
 void GameScene::draw_fps() {
 	RenderSystem* renderer = this->renderer;
-	if (registry.texts.entities.size() > 0) {
-		registry.remove_all_components_of(registry.texts.entities.back());
+	if (registry.fpsTexts.entities.size() > 0) {
+		registry.remove_all_components_of(registry.fpsTexts.entities.back());
 	}
 	Entity fps_entity = registry.fps.entities[0];
 	FPS& fps_counter = registry.fps.get(fps_entity);
@@ -1022,6 +1056,7 @@ void GameScene::draw_fps() {
 		//fps_text.content = fps_string;
 		vec2 fps_position = vec2(10.f, 10.f);
 		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
+		registry.fpsTexts.emplace(text);
 	}
 }
 

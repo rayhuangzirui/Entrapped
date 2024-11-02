@@ -298,85 +298,7 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 	gl_has_errors();
 }
 
-void RenderSystem::drawMap(Entity entity, const mat3& projection)
-{
-	Motion& motion = registry.motions.get(entity);
-	Transform transform;
-	//transform.translate(motion.position);
-	//transform.rotate(motion.angle);
-	//transform.scale(motion.scale);
-	// use program, load variables, bind to VAO, then iterate thru chars
-	assert(registry.renderRequests.has(entity));
-	const RenderRequest& render_request = registry.renderRequests.get(entity);
-
-	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
-	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
-	const GLuint program = (GLuint)effects[used_effect_enum];
-	// activate the shader program
-	glUseProgram(program);
-	gl_has_errors();
-
-	glBindVertexArray(m_map_VAO);
-	gl_has_errors();
-
-	GLint currProgram;
-	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-	// Setting uniform values to the currently bound program
-	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
-	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
-	gl_has_errors();
-
-	// iterate through all characters
-	std::string::const_iterator c;
-	float x = motion.position.x;
-	
-	for (int i = 0; i<2; i++)
-	{
-
-		float xpos = x;
-		float ypos = motion.position.y;
-
-		float w = 48;
-		float h = 48;
-		// update VBO for each character
-		float vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0f, 0.0f },
-			{ xpos,     ypos,       0.0f, 1.0f },
-			{ xpos + w, ypos,       1.0f, 1.0f },
-
-			{ xpos,     ypos + h,   0.0f, 0.0f },
-			{ xpos + w, ypos,       1.0f, 1.0f },
-			{ xpos + w, ypos + h,   1.0f, 0.0f }
-		};
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-		// render glyph texture over quad
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-		// std::cout << "binding texture: " << ch.character << " = " << ch.TextureID << std::endl;
-
-		// update content of VBO memory
-		glBindBuffer(GL_ARRAY_BUFFER, m_map_VBO);
-		gl_has_errors();
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		gl_has_errors();
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		gl_has_errors();
-
-		// render quad
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		gl_has_errors();
-		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += 48; // bitshift by 6 to get value in pixels (2^6 = 64)
-	}
-
-	//glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	gl_has_errors();
-}
-
-void RenderSystem::drawMapNew(Entity entity, const mat3& projection) {
+void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 	Motion& motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
@@ -609,13 +531,16 @@ void RenderSystem::draw()
 	// Use the camera matrix for all entities
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity))
-			continue;
+		//if (!registry.motions.has(entity))
+		//	continue;
 		if (registry.texts.has(entity)) {
 			drawText(entity, projection_2D);
 		}
 		else if (registry.maps.has(entity)) {
-			drawMapNew(entity, camera_matrix);
+			drawMap(entity, camera_matrix);
+		}
+		else if (registry.UIs.has(entity)) {
+			drawTexturedMesh(entity, projection_2D);
 		}
 		else {
 			drawTexturedMesh(entity, camera_matrix);

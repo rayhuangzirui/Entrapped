@@ -52,6 +52,11 @@ public:
 
 	ComponentContainer<Map> maps;
 
+	// UI related
+	ComponentContainer<UI> UIs;
+	ComponentContainer<PlayerHPBar> playerHPBars;
+	ComponentContainer<FPSText> fpsTexts;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -64,7 +69,6 @@ public:
 		registry_list.push_back(&aiTimers);
 		registry_list.push_back(&guns);
 		registry_list.push_back(&parents);
-		registry_list.push_back(&fps);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
@@ -88,6 +92,12 @@ public:
 		registry_list.push_back(&damageTexts);
 
 		registry_list.push_back(&maps);
+
+		// UI related
+		registry_list.push_back(&UIs);
+		registry_list.push_back(&playerHPBars);
+		registry_list.push_back(&fps);
+		registry_list.push_back(&fpsTexts);
 		
 	}
 

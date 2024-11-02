@@ -17,6 +17,8 @@ struct Player
 	// Player's health
 	int health = 5;
 
+	int max_health = 5;
+
 	// Hit cooldown
 	float hit_cooldown = 0.f;
 
@@ -188,6 +190,21 @@ struct Opacity
 struct KnockbackTimer
 {
 	float counter_ms = 100.f; // knockback for 0.1 second
+};
+
+// Component to distinguish between UI and game elements
+struct UI {
+
+};
+
+// Text that displays FPS
+struct FPSText {
+
+};
+
+// Component for the Player hp bar
+struct PlayerHPBar {
+	float max_length = 100.f;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)

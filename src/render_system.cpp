@@ -5,10 +5,12 @@
 #include "tiny_ecs_registry.hpp"
 
 
-
+#include "camera_system.hpp"
 #include "text_renderer.hpp"
 #include <iostream>
 #include <glm/ext/matrix_clip_space.hpp>
+
+#include <maze.hpp>
 
 
 void RenderSystem::drawTexturedMesh(Entity entity,
@@ -107,7 +109,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			glUniform1f(opacity_uloc, 1.0f);
 		}
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::EGG || render_request.used_effect == EFFECT_ASSET_ID::RING)
+	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::DEBUG_LINE || render_request.used_effect == EFFECT_ASSET_ID::RING || render_request.used_effect == EFFECT_ASSET_ID::BOX)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
@@ -122,7 +124,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
 							  sizeof(ColoredVertex), (void *)sizeof(vec3));
 		gl_has_errors();
-
 		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
 		{
 			// Light up?
@@ -340,13 +341,130 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 
 	gl_has_errors();
 }
+
+void RenderSystem::drawMap(Entity entity, const mat3& projection) {
+	Motion& motion = registry.motions.get(entity);
+	// Transformation code, see Rendering and Transformation in the template
+	// specification for more info Incrementally updates transformation matrix,
+	// thus ORDER IS IMPORTANT
+	Transform transform;
+	transform.translate(motion.position);
+	transform.scale(motion.scale);
+
+	assert(registry.renderRequests.has(entity));
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
+
+	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
+	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
+	const GLuint program = (GLuint)effects[used_effect_enum];
+
+	// Setting shaders
+	glUseProgram(program);
+	gl_has_errors();
+
+	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
+	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+
+	// Setting vertex and index buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	// Input data location as in the vertex buffer
+	if (render_request.used_effect == EFFECT_ASSET_ID::MAP)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		gl_has_errors();
+
+	}
+	else
+	{
+		assert(false && "Type of render request not supported");
+	}
+
+	// Getting uniform locations for glUniform* calls
+	GLint color_uloc = glGetUniformLocation(program, "fcolor");
+	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+	glUniform3fv(color_uloc, 1, (float*)&color);
+	gl_has_errors();
+
+	// Get number of indices from index buffer, which has elements uint16_t
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+	// GLsizei num_triangles = num_indices / 3;
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
+	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	gl_has_errors();
+
+	float x = 0.0;
+	float y = 0.0;
+	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
+		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
+			GLfloat xpos = x;
+			GLfloat ypos = y;
+			GLuint xpos_loc = glGetUniformLocation(currProgram, "xpos");
+			glUniform1f(xpos_loc, (float)xpos);
+			GLuint ypos_loc = glGetUniformLocation(currProgram, "ypos");
+			glUniform1f(ypos_loc, (float)ypos);
+			gl_has_errors();
+			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+			if (box_testing_environment[row][col] == 1) {
+				texture_id =
+					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+			}
+			else if (box_testing_environment[row][col] == 0) {
+				texture_id =
+					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
+			}
+			glBindTexture(GL_TEXTURE_2D, texture_id);
+			gl_has_errors();
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+			x += 48.f;
+		}
+		y += 48.f;
+		x = 0.0f;
+	}
+
+	gl_has_errors();
+}
+
 // draw the intermediate texture to the screen, with some distortion to simulate
 // water
 void RenderSystem::drawToScreen()
 {
 	// Setting shaders
 	// get the water texture, sprite mesh, and program
-	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::WATER]);
+	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::GLOBAL ]);
 	gl_has_errors();
 	// Clearing backbuffer
 	int w, h;
@@ -370,7 +488,7 @@ void RenderSystem::drawToScreen()
 		index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); // Note, GL_ELEMENT_ARRAY_BUFFER associates
 																	 // indices to the bound GL_ARRAY_BUFFER
 	gl_has_errors();
-	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::WATER];
+	const GLuint water_program = effects[(GLuint)EFFECT_ASSET_ID::GLOBAL];
 	// Set clock
 	GLuint time_uloc = glGetUniformLocation(water_program, "time");
 	GLuint dead_timer_uloc = glGetUniformLocation(water_program, "darken_screen_factor");
@@ -406,6 +524,23 @@ void RenderSystem::draw()
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
+
+	//--------------------------Camera--------------------------//
+	// Ensure player entity is valid and retrieve its position
+	if (registry.players.entities.size() > 0) {
+		Entity player = registry.players.entities[0];
+		if (registry.motions.has(player)) {
+			vec2 player_position = registry.motions.get(player).position;
+
+			// Update the camera to center on the player¡¯s position
+			camera_system.updateCamera(player_position, w, h);
+		}
+	}
+
+	// Get the camera matrix after update
+	mat3 camera_matrix = camera_system.getViewportMatrix(w, h);
+	//--------------------------Camera--------------------------//
+
 	// First render to the custom framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
 	gl_has_errors();
@@ -423,19 +558,40 @@ void RenderSystem::draw()
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
 	// Draw all textured meshes that have a position and size component
+	//for (Entity entity : registry.renderRequests.entities)
+	//{
+	//	if (!registry.motions.has(entity))
+	//		continue;
+	//	// Note, its not very efficient to access elements indirectly via the entity
+	//	// albeit iterating through all Sprites in sequence. A good point to optimize
+	//	if (!registry.texts.has(entity)) {
+	//		drawTexturedMesh(entity, projection_2D);
+	//	}
+	//	else {
+	//		drawText(entity, projection_2D);
+	//	}
+	//}
+
+	// Use the camera matrix for all entities
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity))
-			continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
-		if (!registry.texts.has(entity)) {
+		//if (!registry.motions.has(entity))
+		//	continue;
+		if (registry.texts.has(entity)) {
+			drawText(entity, projection_2D);
+		}
+		else if (registry.maps.has(entity)) {
+			drawMap(entity, camera_matrix);
+		}
+		else if (registry.UIs.has(entity)) {
 			drawTexturedMesh(entity, projection_2D);
 		}
 		else {
-			drawText(entity, projection_2D);
+			drawTexturedMesh(entity, camera_matrix);
 		}
 	}
+
+
 	// Truely render to the screen
 	drawToScreen();
 
@@ -459,4 +615,11 @@ mat3 RenderSystem::createProjectionMatrix()
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+}
+
+void RenderSystem::setTextPosition(Entity textEntity, vec2 newPosition) {
+	if (registry.motions.has(textEntity)) {
+		Motion& motion = registry.motions.get(textEntity);
+		motion.position = newPosition;
+	}
 }

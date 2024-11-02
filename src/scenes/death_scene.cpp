@@ -3,23 +3,23 @@
 
 
 void DeathScene::initialize(RenderSystem* renderer) {
+	this->renderer = renderer;
 	renderer->text_renderer.createText("You are dead", { window_width_px/2-120.f, window_height_px/2-20.f }, 40.f, { 1.f, 1.f, 1.f });
 	renderer->text_renderer.createText("Restart", { window_width_px / 2 - 120.f, window_height_px/2+40.f }, 20.f, { 1.f, 1.f, 1.f });
 	renderer->text_renderer.createText("Main Menu", { window_width_px / 2 + 40.f, window_height_px/2+40.f }, 20.f, { 1.f, 1.f, 1.f });
 	//(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
-void DeathScene::step(RenderSystem* renderer) {
-	(RenderSystem*)renderer;
+void DeathScene::step(float elapsed_ms) {
+	// pass
 }
 
-void DeathScene::destroy(RenderSystem* renderer) {
+void DeathScene::destroy() {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
-	(RenderSystem*)renderer;
 }
 
-void DeathScene::on_key(RenderSystem* renderer, int key, int action, int mod) {
+void DeathScene::on_key(int key, int action, int mod) {
 	(int)key;
 	(int)action;
 	(int)mod;
@@ -38,15 +38,14 @@ void DeathScene::on_mouse_move(vec2 mouse_position) {
 	(vec2)mouse_position;
 }
 
-void DeathScene::on_mouse_click(RenderSystem* renderer, int button, int action, int mod) {
-	(RenderSystem*)renderer;
+void DeathScene::on_mouse_click(int button, int action, int mod) {
 	(int)button;
 	(int)action;
 	(int)mod;
 }
 
-void DeathScene::draw_fps(RenderSystem* renderer) {
-	(RenderSystem*)renderer;
+void DeathScene::draw_fps() {
+	// pass
 }
 
 

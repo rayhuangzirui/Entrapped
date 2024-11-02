@@ -5,12 +5,15 @@
 
 #include "common.hpp"
 #include "components.hpp"
+#include "camera_system.hpp"
 #include "tiny_ecs.hpp"
 #include <text_renderer.hpp>
 
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
 class RenderSystem {
+	CameraSystem camera_system;
+
 	/**
 	 * The following arrays store the assets the game will use. They are loaded
 	 * at initialization and are assumed to not be modified by the render loop.
@@ -25,23 +28,26 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SALMON, mesh_path("salmon.obj")),
+		//std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player_mesh.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player_1.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::BULLET, mesh_path("bullet_1.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ENEMY_WOMAN, mesh_path("woman_walk_1.obj")),
 		// specify meshes of other assets here
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-			textures_path("player_1.png"),
-			textures_path("player_3.png"),
-			textures_path("player_2.png"),
+			textures_path("player_1_new.png"),
+			textures_path("player_3_new.png"),
+			textures_path("player_2_new.png"),
 
-			textures_path("player_back_1.png"),
+			/*textures_path("player_back_1.png"),
 			textures_path("player_back_2.png"),
 			textures_path("player_back_3.png"),
 
 			textures_path("player_front_1.png"),
 			textures_path("player_front_2.png"),
-			textures_path("player_front_3.png"),
+			textures_path("player_front_3.png"),*/
 
 			textures_path("tile_door_open.png"),
 			textures_path("tile_door_closed.png"),
@@ -64,8 +70,11 @@ class RenderSystem {
 			textures_path("woman_walk_3.png"),
 			textures_path("woman_walk_4.png"),
 
-			textures_path("puffer_fish.png"),
-			textures_path("eel.png"),
+			textures_path("bullet_1.png"),
+
+			textures_path("pistol.png"),
+			textures_path("SMG.png"),
+			textures_path("rifle.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -75,10 +84,13 @@ class RenderSystem {
 		shader_path("egg"),
 		shader_path("salmon"),
 		shader_path("textured"),
-		shader_path("water"),
 		shader_path("text"),
 		shader_path("ring"),
 		shader_path("rectangle")
+		shader_path("box"),
+		shader_path("global"),
+		//shader_path("textured")
+		shader_path("map")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -97,9 +109,12 @@ public:
 	void initializeGlEffects();
 
 	void initializeGlMeshes();
+
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 
 	void initializeGlGeometryBuffers();
+
+	void initializeMap();
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the wind
 	// shader
@@ -115,11 +130,12 @@ public:
 
 	// Text renderer
 	TextRenderer text_renderer;
-
+	void setTextPosition(Entity textEntity, vec2 newPosition);
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawText(Entity entity, const mat3& projection);
+	void drawMap(Entity entity, const mat3& projection);
 	void drawToScreen();
 
 	// Window handle
@@ -132,6 +148,10 @@ private:
 	GLuint frame_buffer;
 	GLuint off_screen_render_buffer_color;
 	GLuint off_screen_render_buffer_depth;
+
+	// map buffer
+	GLuint m_map_VAO;
+	GLuint m_map_VBO;
 
 	Entity screen_state_entity;
 };

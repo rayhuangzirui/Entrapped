@@ -29,8 +29,6 @@ public:
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
-	ComponentContainer<Eatable> eatables;
-	ComponentContainer<Deadly> deadlys;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<Text> texts;
 	ComponentContainer<vec3> colors;
@@ -50,6 +48,17 @@ public:
 	// Bounding box
 	ComponentContainer<BoundingBox> boundingBoxes;
 
+	//For Damage text render purpose
+	ComponentContainer<DamageText> damageTexts;
+
+	ComponentContainer<Map> maps;
+
+	// UI related
+	ComponentContainer<UI> UIs;
+	ComponentContainer<PlayerHPBar> playerHPBars;
+	ComponentContainer<FPSText> fpsTexts;
+
+
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
@@ -61,7 +70,6 @@ public:
 		registry_list.push_back(&aiTimers);
 		registry_list.push_back(&guns);
 		registry_list.push_back(&parents);
-		registry_list.push_back(&fps);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
@@ -70,8 +78,6 @@ public:
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
-		registry_list.push_back(&eatables);
-		registry_list.push_back(&deadlys);
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&texts);
 		registry_list.push_back(&colors);
@@ -81,9 +87,19 @@ public:
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&lightups);
-
 		// AI related
 		registry_list.push_back(&enemyAIs);
+
+		registry_list.push_back(&damageTexts);
+
+		registry_list.push_back(&maps);
+
+		// UI related
+		registry_list.push_back(&UIs);
+		registry_list.push_back(&playerHPBars);
+		registry_list.push_back(&fps);
+		registry_list.push_back(&fpsTexts);
+		
 	}
 
 	void clear_all_components() {

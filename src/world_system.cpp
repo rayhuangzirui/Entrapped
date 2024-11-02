@@ -24,34 +24,15 @@ const int cell_size = 48;
 
 
 // create the underwater world
-WorldSystem::WorldSystem()
-	//: points(0)
-	//: next_eel_spawn(0.f)
-	: next_enemy_spawn(0.f) {
+WorldSystem::WorldSystem() {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
+
+	this->renderer = nullptr;
+	this->window = nullptr;
 }
 
 WorldSystem::~WorldSystem() {
-
-	// destroy music components
-	//if (background_music != nullptr)
-	//	Mix_FreeMusic(background_music);
-	//// replace with player dead sound
-	//if (player_dead_sound != nullptr)
-	//	Mix_FreeChunk(player_dead_sound);
-	//if (enemy_dead_sound != nullptr)
-	//	Mix_FreeChunk(enemy_dead_sound);
-	//if (enemy_hit_sound != nullptr)
-	//	Mix_FreeChunk(enemy_hit_sound);
-	//if (bullet_hit_sound != nullptr)
-	//	Mix_FreeChunk(bullet_hit_sound);
-	//if (bullet_fire_sound != nullptr)
-	//	Mix_FreeChunk(bullet_fire_sound);
-
-
-	//Mix_CloseAudio();
-
 	// Destroy all created components
 	registry.clear_all_components();
 
@@ -91,7 +72,7 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Salmon Game Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(window_width_px, window_height_px, "Entrapped", nullptr, nullptr);
 	if (window == nullptr) {
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
@@ -112,7 +93,6 @@ GLFWwindow* WorldSystem::create_window() {
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
-  // MERGE TODO: move this part to game scene
 	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
 		fprintf(stderr, "Failed to initialize SDL Audio");
 		return nullptr;
@@ -122,26 +102,7 @@ GLFWwindow* WorldSystem::create_window() {
 		return nullptr;
 	}
 
-  background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
-  player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
-	
-	// TODO: Sound effects are not added to the audio path yet
-	//enemy_dead_sound = Mix_LoadWAV(audio_path("enemy_dead.wav").c_str());
-	//enemy_hit_sound = Mix_LoadWAV(audio_path("enemy_hit.wav").c_str());
-	//bullet_hit_sound = Mix_LoadWAV(audio_path("bullet_hit.wav").c_str());
-	//bullet_fire_sound = Mix_LoadWAV(audio_path("bullet_fire.wav").c_str());
-
-	if (background_music == nullptr || player_dead_sound == nullptr || enemy_dead_sound == nullptr
-		|| enemy_hit_sound == nullptr || bullet_hit_sound == nullptr || bullet_fire_sound == nullptr) {
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("bgm.wav").c_str(),
-			audio_path("death_sound.wav").c_str());
-			//audio_path("enemy_dead.wav").c_str(),
-			//audio_path("enemy_hit.wav").c_str(),
-			//audio_path("bullet_hit.wav").c_str(),
-			//audio_path("bullet_fire.wav").c_str());
-		return nullptr;
-	}
+	// Updating window title: Entrapped
 
 	return window;
 }
@@ -149,125 +110,15 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 
-	//createPlayer(renderer, vec2(300, 300));
-
-	// Playing background music indefinitely
-	//Mix_PlayMusic(background_music, -1);
-	//fprintf(stderr, "Loaded music\n");
-
-	// Set all states to default
-
-    restart_game();
-
-	//initialize the maze
-
-  //restart_game();
 	this->scene_system.initialize(this->renderer);
 	this->scene_system.pushScene();
-	this->scene_system.handle_collisions();
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-	this->scene_system.step();
+	this->scene_system.step(elapsed_ms_since_last_update);
 	this->scene_system.handle_collisions();
-  
-	// Updating window title: Entrapped
-	std::stringstream title_ss;
-	title_ss << "Entrapped";
-	glfwSetWindowTitle(window, title_ss.str().c_str());
-
-	// Remove debug info from the last step
-	//while (registry.debugComponents.entities.size() > 0)
-	//registry.remove_all_components_of(registry.debugComponents.entities.back());
-	// update LightUp timers and remove if time drops below zero, similar to the death counter
-	for (Entity entity : registry.lightUps.entities) {
-		// progress timer
-		LightUp& lightup = registry.lightUps.get(entity);
-		lightup.counter_ms -= elapsed_ms_since_last_update;
-
-		/*std::cout << "LightUp timer: " << counter.counter_ms << " ms" << std::endl;*/
-
-		// Interpolate the color and opacity using LERP: https://www.gamedev.net/tutorials/programming/general-and-gameplay-programming/a-brief-introduction-to-lerp-r4954/
-		// function lerp(start, end, t)
-		//    return start * (1 - t) + end * t;
-		float t = (sin(lightup.blink_timer * 10) + 1) / 2;
-
-		// Color shift: interpolate between the original color and the light up red color
-		vec3 original_color = { 1.f, 1.f, 1.f }; // white
-		vec3 lightup_color = { 1.f, 0.f, 0.f }; // red
-		vec3 new_color = original_color * (1 - t) + lightup_color * t;	// lerp
-
-		// Opacity shift: interpolate between the original opacity and 0.5
-		float original_opacity = 1.f;
-		float hit_opacity = 0.5f;
-		float new_opacity = original_opacity * (1 - t) + hit_opacity * t;	// lerp
-
-		// Update the color and opacity
-		registry.colors.get(entity) = new_color;
-		registry.opacities.get(entity).opacity = new_opacity;
-
-
-		if (lightup.counter_ms < 0) {
-			registry.lightUps.remove(entity); // remove the light up effect when timer ends
-		}
-
-		lightup.blink_timer += elapsed_ms_since_last_update / 1000.f; // update the blink timer
-	}
-	
-	// Damage cool down timer drop 
-	for (Entity entity : registry.damageCoolDowns.entities) {
-		// progress timer
-		DamageCoolDown& counter = registry.damageCoolDowns.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-
-		/*std::cout << "Damage timer: " << counter.counter_ms << " ms" << std::endl;*/
-
-		if (counter.counter_ms < 0) {
-			registry.damageCoolDowns.remove(entity); 
-		}
-
-	}
-
-	// FPS counter
-	if (registry.fps.entities.size() == 0) {
-		registry.fps.emplace(FPS_entity);
-	}
-	
-	FPS& fps_counter = registry.fps.get(FPS_entity);
-	
-	fps_counter.elapsed_time += elapsed_ms_since_last_update;
-	fps_counter.frame_count++;
-
-	if (fps_counter.elapsed_time >= 1000) {
-		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
-		fps_counter.frame_count = 0;
-		fps_counter.elapsed_time = 0.0;
-	}
-
-	draw_fps();
-
-	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	return true;
-}
-
-// Reset the world state to its initial state
-void WorldSystem::restart_game() {
-	// Debugging for memory/component leaks
-	registry.list_all_components();
-	printf("Restarting\n");
-
-	// Reset the game speed
-	current_speed = 1.f;
-
-	// Remove all entities that we created
-	// All that have a motion, we could also iterate over all fish, eels, ... but that would be more cumbersome
-	while (registry.motions.entities.size() > 0)
-		registry.remove_all_components_of(registry.motions.entities.back());
-
-	// Debugging for memory/component leaks
-	registry.list_all_components();
-
 }
 
 // Should the game be over ?
@@ -275,133 +126,15 @@ bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));
 }
 
-void WorldSystem::draw_maze() {
-    for (int y = 0; y < MAZE_HEIGHT; ++y) {
-        for (int x = 0; x < MAZE_WIDTH; ++x) {
-            if (maze[y][x] == 1) {
-                // Create a wall at this grid position
-                vec2 wall_position = vec2(x * cell_size, y * cell_size);
-                vec2 wall_size = vec2(cell_size, cell_size);
-                createWall(renderer, wall_position, wall_size);
-            }
-        }
-    }
-}
-
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-// MERGE TODO
-// 	// Handle Salmon Movement
-// 	Motion& motion = registry.motions.get(player_salmon);
-
-// 	static bool isSprinting = false;  // Flag to check if sprint is active
-
-// 	// Use WASD keys to control movement
-// 	if (action == GLFW_PRESS) {
-// 		switch (key) {
-// 		case GLFW_KEY_W:
-// 			motion.velocity.y = -PLAYER_SPEED;  // Upward
-// 			break;
-// 		case GLFW_KEY_S:
-// 			motion.velocity.y = PLAYER_SPEED;   // Downward
-// 			break;
-// 		case GLFW_KEY_A:
-// 			motion.velocity.x = -PLAYER_SPEED;  // Leftward
-// 			break;
-// 		case GLFW_KEY_D:
-// 			motion.velocity.x = PLAYER_SPEED;   // Rightward
-// 			break;
-// 		case GLFW_KEY_LEFT_SHIFT:
-// 			isSprinting = true;  // Start sprinting
-// 			break;
-// 		case GLFW_KEY_SPACE:  // Dash
-// 			if (!registry.dashTimers.has(player_salmon)) {
-// 				registry.dashTimers.emplace(player_salmon, DashTimer{ 200.f }); // Dash for 200 ms
-// 				motion.velocity *= 2.5f; // Increase velocity to dash speed (e.g., 2.5x normal speed)
-// 			}
-// 			break;
-// 		}
-// 	}
-// 	else if (action == GLFW_RELEASE) {
-// 		switch (key) {
-// 		case GLFW_KEY_W:
-// 		case GLFW_KEY_S:
-// 			motion.velocity.y = 0.f;  // Stop moving vertically
-// 			break;
-// 		case GLFW_KEY_A:
-// 		case GLFW_KEY_D:
-// 			motion.velocity.x = 0.f;  // Stop moving horizontally
-// 			break;
-// 		case GLFW_KEY_LEFT_SHIFT:
-// 			isSprinting = false;  // Stop sprinting
-// 			break;
-// 		}
-// 	}
-
-// 	// Apply sprint effect if active
-// 	if (isSprinting) {
-// 		if (motion.velocity.x != 0) {
-// 			motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;  // Double horizontal speed
-// 		}
-// 		if (motion.velocity.y != 0) {
-// 			motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;  // Double vertical speed
-// 		}
-// 	}
-// 	else {
-// 		// Reset speed if not sprinting and direction key is pressed
-// 		if (motion.velocity.x > PLAYER_SPEED) {
-// 			motion.velocity.x = PLAYER_SPEED;
-// 		}
-// 		else if (motion.velocity.x < -PLAYER_SPEED) {
-// 			motion.velocity.x = -PLAYER_SPEED;
-// 		}
-// 		if (motion.velocity.y > PLAYER_SPEED) {
-// 			motion.velocity.y = PLAYER_SPEED;
-// 		}
-// 		else if (motion.velocity.y < -PLAYER_SPEED) {
-// 			motion.velocity.y = -PLAYER_SPEED;
-// 		}
-// 	}
-
-// 	// Resetting game
-// 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-// 		int w, h;
-// 		glfwGetWindowSize(window, &w, &h);
-
-// 		restart_game();
-// 	}
-
-// 	// Debugging
-// 	if (key == GLFW_KEY_D) {
-// 		if (action == GLFW_RELEASE)
-// 			debugging.in_debug_mode = false;
-// 		else
-// 			debugging.in_debug_mode = true;
-// 	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	scene_system.on_key(key, action, mod);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE SALMON ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the salmon's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	
-	//(vec2)mouse_position; // dummy to avoid compiler warning
 	scene_system.on_mouse_move(mouse_position);
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mod) {
 	scene_system.on_mouse_click(button, action, mod);
-}
-
-void WorldSystem::draw_fps() {
-	scene_system.draw_fps();
 }

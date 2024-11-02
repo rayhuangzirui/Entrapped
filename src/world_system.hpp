@@ -14,10 +14,6 @@
 #include "render_system.hpp"
 #include <scenes/scene_system.hpp>
 
-//Adjust here: gloabl constant for player speed
-const float PLAYER_SPEED = 200.f;  // Adjust as needed for proper movement speed
-const float SPRINT_MULTIPLIER = 2.0f;  // Speed multiplier when sprinting
-
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -37,18 +33,8 @@ public:
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
 
-	// Check for collisions
-	//void handle_collisions();
-
-	// Shoot a bullet logic
-	void shoot_bullet();
-
 	// Should the game be over ?
 	bool is_over()const;
-
-	void draw_maze();
-
-	void draw_fps();
 
 private:
 	// Input callback functions
@@ -56,35 +42,12 @@ private:
 	void on_mouse_move(vec2 pos);
 	void on_mouse_click(int button, int action, int mod);
 	SceneSystem scene_system;
-	// restart level
-	void restart_game();
 
 	// OpenGL window handle
 	GLFWwindow* window;
 
-	// Number of fish eaten by the salmon, displayed in the window title
-	//unsigned int points;// no longer needed
-
 	// Game state
 	RenderSystem* renderer;
-	float current_speed;
-	float next_enemy_spawn;
-	
-	Entity player_entity;
-	Entity FPS_entity;
-	Entity fps_text_entity;
-
-	// Sprint flag to check if sprinting
-	bool isSprinting;
-
-	// music references
-	Mix_Music* background_music;
-	Mix_Chunk* player_dead_sound; 
-
-	Mix_Chunk* enemy_dead_sound;
-	Mix_Chunk* enemy_hit_sound;
-	Mix_Chunk* bullet_hit_sound;
-	Mix_Chunk* bullet_fire_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

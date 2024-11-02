@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
+#include <string>
 
 // Parent-Child relationship
 struct Parent
@@ -27,6 +28,11 @@ struct Player
 
 	// Player's Profession may be used in the future
 	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+};
+
+// Portal to the next map
+struct Portal {
+	std::string next_map = "test";
 };
 
 // Gun component
@@ -56,8 +62,8 @@ struct Gun
 	float angle = 0.f;
 
 	// Position offset of the gun from the player
-	//vec2 offset = { 20.f, 0 };
-	vec2 offset = { 0, 0 };
+	vec2 offset = { 20.f, -6.f };
+	//vec2 offset = { 0, 0 };
 };
 
 // Bullet component
@@ -89,6 +95,8 @@ struct Enemy
 	
 	// Enemy's damage
 	int damage = 1;
+
+	Entity health_bar_entity;
 };
 
 // Enemy AI component
@@ -101,16 +109,26 @@ struct EnemyAI {
 
 struct Health {
 	int current_health;  // Health points of an entity
+	int max_health; 
 };
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
 };
 
+struct Chest
+{
+	bool isOpen = false;
+};
 
 // component used to render text
 struct Text {
 	std::string content;
+};
+
+// text for overlay HUD
+struct HUD {
+
 };
 
 // All data relevant to the shape and motion of entities
@@ -120,6 +138,13 @@ struct Motion {
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
 };
+
+// Health bar component for enemies
+struct HealthBar {
+	Entity owner;  // Entity that the health bar is associated with
+	
+};
+
 
 // Stucture to store collision information
 struct Collision
@@ -326,10 +351,13 @@ const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	TEXTURED = COLOURED + 1,
+	DEBUG_LINE = COLOURED + 1,
+	SALMON = DEBUG_LINE + 1,
+	TEXTURED = SALMON + 1,
 	TEXT = TEXTURED + 1,
 	RING = TEXT + 1,
-	BOX = RING + 1,
+	RECTANGLE = RING + 1,
+	BOX = RECTANGLE + 1,
 	GLOBAL = BOX+1,
 	MAP = GLOBAL + 1,
 	EFFECT_COUNT = MAP + 1,
@@ -337,13 +365,15 @@ enum class EFFECT_ASSET_ID {
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	SPRITE = 0,
+	MESH = 0,
+	SPRITE = MESH + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	PLAYER = SCREEN_TRIANGLE + 1,
-	TEXT = PLAYER + 1,
-	BULLET = TEXT + 1,
-	MAZE = BULLET + 1,
+	TEXT = SCREEN_TRIANGLE + 1,
+	PLAYER = TEXT + 1,
+	BULLET = PLAYER + 1,
+	ENEMY_WOMAN = BULLET + 1,
+	MAZE = ENEMY_WOMAN  + 1,
 	SQUARE = MAZE + 1,
 	GEOMETRY_COUNT = SQUARE + 1
 

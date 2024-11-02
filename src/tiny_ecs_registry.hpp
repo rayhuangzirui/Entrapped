@@ -36,6 +36,7 @@ public:
 	ComponentContainer<DashTimer> dashTimers;
 	ComponentContainer<LightUp> lightups;
 	ComponentContainer<EnemyDeathTime> enemyDeathTimers;
+	ComponentContainer<HealthBar> healthBars;
 
 	// AI related
 	ComponentContainer<EnemyAI> enemyAIs;
@@ -57,6 +58,9 @@ public:
 	ComponentContainer<UI> UIs;
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
+
+	// Map transition
+	ComponentContainer<Portal> portals;
 
 
 	// constructor that adds all containers for looping over them
@@ -100,6 +104,9 @@ public:
 		registry_list.push_back(&playerHPBars);
 		registry_list.push_back(&fps);
 		registry_list.push_back(&fpsTexts);
+
+		// portal
+		registry_list.push_back(&portals);
 		
 	}
 

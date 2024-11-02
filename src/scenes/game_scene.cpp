@@ -1,9 +1,11 @@
 #include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "maze.hpp" // Access box_testing_environment
+#include "state_manager.hpp"
 #include "physics_system.hpp" // to check_player_wall_collision
 #include "render_system.hpp"
 #include <iostream>
+#include "components.hpp"
 
 const int cell_size = 48;
 
@@ -62,14 +64,14 @@ Entity createBox(vec2 position, vec2 scale)
 //}
 
 // Create player hp bar
-Entity GameScene::createPlayerHPBar(vec2 position) {
+Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 	Entity entity = Entity();
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0, 0 };
 	motion.position = position;
-	motion.scale = {200, 30};
+	motion.scale = {200*ratio, 30};
 
 	registry.UIs.emplace(entity);
 
@@ -83,15 +85,20 @@ Entity GameScene::createPlayerHPBar(vec2 position) {
 	return entity;
 }
 
+void GameScene::refreshUI(Entity player) {
+	while (registry.UIs.entities.size() > 0)
+		registry.remove_all_components_of(registry.UIs.entities.back());
 
-void GameScene::initializeUI(Entity player) {
 	Player& player_component = registry.players.get(player);
 
-	createPlayerHPBar({ 120.f, 35.f });
-	renderer->text_renderer.createText(std::to_string(player_component.health)+"/" + std::to_string(player_component.max_health), {35.f, 32.f}, 20.f, {1.f, 1.f, 1.f});
+	float ratio = ((float)player_component.health) / ((float)player_component.max_health);
+	createPlayerHPBar({ 120.f - 100*(1-ratio), 35.f}, ratio);
+	Entity health_text = renderer->text_renderer.createText(std::to_string(player_component.health) + "/" + std::to_string(player_component.max_health), { 35.f, 32.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.UIs.emplace(health_text);
 
 	// create ammo text
-	renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), {35.f, 72.f}, 20.f, {1.f, 1.f, 1.f});
+	Entity ammo_text = renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), { 35.f, 72.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.UIs.emplace(ammo_text);
 }
 
 //bool show_bounding_boxes = true;
@@ -99,7 +106,10 @@ void GameScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 
 	// *Render the maze before initializing player and enemy entities*
-	render_maze_new(); 
+
+	state.changeMap("test");
+	render_maze(); 
+	createPortal({ 2.5 * state.TILE_SIZE, 2.5 * state.TILE_SIZE }, "tutorial");
 
 	player = createPlayer({ 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
@@ -107,11 +117,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 	enemy = createEnemy({ 700, 300 });
 	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
-	if (registry.guns.entities.size() > 0) {
-		Entity gun = registry.guns.entities[0];
-		update_gun_position(player, gun);
-	}
-	
 	// fps entity
 	FPS_entity = Entity();
 
@@ -146,7 +151,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	current_speed = 5.0f;
 	player_velocity = { 0.0, 0.0 };
 
-	initializeUI(player);
+	refreshUI(player);
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -189,15 +194,16 @@ void GameScene::step(float elapsed_ms) {
 			}
 		}
 
-		auto& bbox_container = registry.boundingBoxes;
-		for (uint i = 0; i < bbox_container.components.size(); i++) {
-			BoundingBox bbox = bbox_container.components[i];
-			Entity entity = bbox_container.entities[i];
-			Motion motion = motion_container.get(entity);
+		//auto& bbox_container = registry.boundingBoxes;
+		//for (uint i = 0; i < bbox_container.components.size(); i++) {
+		//	BoundingBox bbox = bbox_container.components[i];
+		//	Entity entity = bbox_container.entities[i];
+		//	Motion motion = motion_container.get(entity);
 
-			createBox(motion.position, motion.scale);
-		}
+		//	createBox(motion.position, motion.scale);
+		//}
 	}
+	//drawHealthBars(renderer);
 	// update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.lightUps.entities) {
 		// progress timer
@@ -264,6 +270,9 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 	draw_fps();*/
+
+	// Update HP and ammo
+	refreshUI(player);
 
 	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
@@ -559,12 +568,6 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 		}
 	}
-
-	// Update the player's gun position based on player's position
-	if (registry.guns.entities.size() > 0) {
-		Entity gun = registry.guns.entities[0];
-		update_gun_position(player, gun);
-	}
 	
 	if (action == GLFW_PRESS) {
 		switch (key) {
@@ -592,6 +595,8 @@ void GameScene::on_key(int key, int action, int mod) {
 		else
 			debugging.in_debug_mode = true;
 	}
+
+	
 	(int)key;
 	(int)action;
 	(int)mod;
@@ -626,8 +631,7 @@ bool GameScene::check_player_wall_collision(const Motion& player_motion) {
     return false; // No collision detected
 }
 
-void GameScene::render_maze_new() {
-	const int TILE_SIZE = 48;
+void GameScene::render_maze() {
 	auto entity = Entity();
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = {24.f, 24.f};
@@ -646,89 +650,6 @@ void GameScene::render_maze_new() {
 
 }
 
-// Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze
-void GameScene::render_maze() {
-	RenderSystem* renderer = this->renderer;
-	// Tile dimensions
-	const int TILE_SIZE = 48;
-
-	// Loop through each row and column of the maze
-	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
-		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
-			// Determine the texture to use and create an entity for the tile
-			TEXTURE_ASSET_ID texture_id;
-			if (box_testing_environment[row][col] == 1) {
-				texture_id = TEXTURE_ASSET_ID::WALL_6;
-
-				// Calculate position for the tile
-				float x = (col+0.5) * TILE_SIZE;
-				float y = (row + 0.5)* TILE_SIZE;
-
-				// Create an entity for the wall tile
-				Entity wall_entity = Entity();
-
-				// Store a reference to the potentially re-used mesh object
-				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-				registry.meshPtrs.emplace(wall_entity, &mesh);
-
-				// Setting initial motion values
-				Motion& motion = registry.motions.emplace(wall_entity);
-				motion.position = { x, y };
-				motion.angle = 0;
-				motion.scale = { TILE_SIZE, TILE_SIZE };
-
-				// Add a bounding box component for wall tiles
-				vec2 min = vec2(x, y);
-				vec2 max = vec2(x + TILE_SIZE, y + TILE_SIZE);
-				//registry.boundingBoxes.emplace(wall_entity, BoundingBox{ min, max });
-
-				// Add the render request for the wall entity
-				registry.renderRequests.insert(
-					wall_entity,
-					{ texture_id,
-					  EFFECT_ASSET_ID::TEXTURED,
-					  GEOMETRY_BUFFER_ID::SPRITE });
-			}
-			else {
-				texture_id = TEXTURE_ASSET_ID::FLOOR_5;
-
-				// Calculate position for the tile
-				float x = (col + 0.5) * TILE_SIZE;
-				float y = (row + 0.5) * TILE_SIZE;
-
-				// Create an entity for the floor tile
-				Entity floor_entity = Entity();
-
-				// Store a reference to the potentially re-used mesh object
-				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-				registry.meshPtrs.emplace(floor_entity, &mesh);
-
-				// Setting initial motion values
-				Motion& motion = registry.motions.emplace(floor_entity);
-				motion.position = { x, y };
-				motion.angle = 0;
-				motion.scale = { TILE_SIZE, TILE_SIZE };
-
-				// Add the render request for the floor entity
-				registry.renderRequests.insert(
-					floor_entity,
-					{ texture_id,
-					  EFFECT_ASSET_ID::TEXTURED,
-					  GEOMETRY_BUFFER_ID::SPRITE });
-			}
-		}
-	}
-	//for (int y = 0; y < MAZE_HEIGHT; ++y) {
-	//	for (int x = 0; x < MAZE_WIDTH; ++x) {
-	//		if (tutorial_maze[y][x] == 1) {
-	//			// Create a wall at this grid position
-	//			vec2 wall_position = vec2((x+0.5) * cell_size, (y+0.5) * cell_size);
-	//			vec2 wall_size = vec2(cell_size, cell_size);
-	//			createWall(renderer, wall_position, wall_size);
-	//		}
-	//	}
-	//}
-}
 
 Entity GameScene::createWall(vec2 position, vec2 size)
 {
@@ -769,8 +690,12 @@ Entity GameScene::createPlayer(vec2 pos) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::PLAYER);
 	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009457, 0.017041
+	printf("Player mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+	// Adjusted the position of verticies to match the size of player in Mesh::loadFromOBJFile
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -798,17 +723,52 @@ Entity GameScene::createPlayer(vec2 pos) {
 	printf("Player bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	// Add the render request for the player entity
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::PLAYER_1,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
+	// Debug mode: visualize meshes
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1,
+			  EFFECT_ASSET_ID::SALMON,
+			  GEOMETRY_BUFFER_ID::PLAYER });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	// Attach a gun to the player entity
 	createGun(entity);
 
 	return entity;
+}
+
+Entity GameScene::createChest(RenderSystem* renderer, vec2 position) {
+    Entity chest_entity = Entity();
+
+    // Store a reference to the potentially re-used mesh object (basic square for a chest)
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(chest_entity, &mesh);
+
+    
+    Motion& motion = registry.motions.emplace(chest_entity);
+    motion.position = position;  
+    motion.angle = 0.f;         
+    motion.scale = vec2(TILE_SIZE, TILE_SIZE);  
+
+    // Add render request for chest using a colored effect
+    registry.renderRequests.insert(
+        chest_entity,
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture, just use a color
+          EFFECT_ASSET_ID::COLOURED,
+          GEOMETRY_BUFFER_ID::SPRITE });
+
+    // Set the color for the chest (yellow)
+    registry.colors.emplace(chest_entity, vec3(1.0f, 1.0f, 0.0f));  // RGB for yellow
+
+    return chest_entity;
 }
 
 Entity GameScene::createGun(Entity player) {
@@ -862,15 +822,66 @@ Entity GameScene::createGun(Entity player) {
 	return entity;
 }
 
-// Update gun position based on player position
-void GameScene::update_gun_position(Entity player, Entity gun) {
-	Motion& player_motion = registry.motions.get(player);
-	Motion& gun_motion = registry.motions.get(gun);
+Entity GameScene::createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size) {
+   auto health_bar_entity = Entity();
 
-	// Update gun position based on player's velocity
-	//gun_motion.position = player_motion.position + registry.guns.get(gun).offset;
+    // Store a reference to the potentially re-used mesh object
+    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+    registry.meshPtrs.emplace(health_bar_entity, &mesh);
 
-	gun_motion.velocity = player_velocity;
+    // Get the entity's motion to determine where the health bar should be positioned
+    Motion& entity_motion = registry.motions.get(entity);
+
+    // Set initial motion values for the health bar
+    Motion& health_bar_motion = registry.motions.emplace(health_bar_entity);
+    health_bar_motion.position = entity_motion.position + offset;
+    health_bar_motion.angle = 0.f;
+    health_bar_motion.velocity = {0.f, 0.f};
+    health_bar_motion.scale = size;
+
+    // Add a HealthBar component to keep track of the owner entity
+    HealthBar& health_bar = registry.healthBars.emplace(health_bar_entity);
+    health_bar.owner = entity;
+
+    // Add the render request for the health bar (using a colored effect)
+    registry.renderRequests.insert(
+        health_bar_entity,
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture needed, using a color
+          EFFECT_ASSET_ID::COLOURED,         // Use color to render the health bar
+          GEOMETRY_BUFFER_ID::SPRITE });
+
+    // Set the color of the health bar to red
+    registry.colors.emplace(health_bar_entity, vec3(1.0f, 0.0f, 0.0f));  // Red color
+
+    return health_bar_entity;
+
+}
+
+
+// Portal Component
+Entity GameScene::createPortal(vec2 pos, std::string map_name) {
+	Entity entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = pos;
+	motion.scale = { 48, 48 };
+
+	Portal& portal = registry.portals.emplace(entity);
+	portal.next_map = map_name;
+
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::FLOOR_4,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
 }
 
 Entity GameScene::createEnemy(vec2 pos) {
@@ -878,8 +889,11 @@ Entity GameScene::createEnemy(vec2 pos) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
 	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -894,6 +908,13 @@ Entity GameScene::createEnemy(vec2 pos) {
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 10;
+	health.max_health = 10;
+
+
+	// health bar for enemy
+	//vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
+ //   vec2 size = {100.f, 10.f};   // Initial size of the health bar
+ //   enemy.health_bar_entity = createHealthBar(renderer, entity, offset, size);
 	
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
@@ -910,12 +931,20 @@ Entity GameScene::createEnemy(vec2 pos) {
 	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::SALMON,
+			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	return entity;
 }
@@ -982,6 +1011,7 @@ void GameScene::handle_collisions() {
 			}
 		}
 
+		// Bullet & Enemy collision
 		if (registry.bullets.has(entity)) {
 			if (registry.enemies.has(entity_other)) {
 				// Bullet and enemy components
@@ -1026,11 +1056,38 @@ void GameScene::handle_collisions() {
 		//		// Remove the bullet
 		//		registry.remove_all_components_of(entity);
 		//	}
-		//  }
+		//}
+
+		// Player & Portal Collision
+		if (registry.players.has(entity)) {
+			if (registry.portals.has(entity_other)) {
+				Portal& portal = registry.portals.get(entity_other);
+				changeMap(portal.next_map);
+			}
+		}
 	}
 
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
+}
+
+void GameScene::changeMap(std::string map_name) {
+	// remove bullets and enemies
+	while (registry.bullets.entities.size() > 0)
+		registry.remove_all_components_of(registry.bullets.entities.back());
+	while (registry.enemies.entities.size() > 0)
+		registry.remove_all_components_of(registry.enemies.entities.back());
+
+	// also remove portals
+	while (registry.portals.entities.size() > 0)
+		registry.remove_all_components_of(registry.portals.entities.back());
+
+	vec2 player_spawn = state.changeMap(map_name);
+
+	Entity& player_entity = registry.players.entities[0];
+	Motion& player_motion = registry.motions.get(player_entity);
+
+	player_motion.position = { (player_spawn.x + 0.5) * 48,(player_spawn.y + 0.5) * 48 };
 }
 
 // Add bullet creation
@@ -1039,7 +1096,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BULLET);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
@@ -1077,13 +1134,21 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	vec2 max = motion.position + (motion.scale / 2.0f);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::BULLET_1,
-		  EFFECT_ASSET_ID::TEXTURED,
-		  GEOMETRY_BUFFER_ID::SPRITE });
-
-	// Play the bullet fire sound
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::BULLET_1,
+			  EFFECT_ASSET_ID::SALMON,
+			  GEOMETRY_BUFFER_ID::BULLET });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::BULLET_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
+  // Play the bullet fire sound
 	Mix_PlayChannel(-1, shoot_sound, 0);
 }
 
@@ -1206,6 +1271,38 @@ void GameScene::draw_fps() {
 		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
 		registry.fpsTexts.emplace(text);
 	}
+}
+
+
+// void GameScene::drawHealthBars(RenderSystem* renderer) {
+
+
+void GameScene::drawHealthBars(RenderSystem* renderer) {
+    auto& health_container = registry.healths;
+
+    // Iterate over all entities with Health components
+    for (uint i = 0; i < health_container.components.size(); i++) {
+        Entity entity = health_container.entities[i];
+
+        // Only update health bars for enemies
+        if (registry.enemies.has(entity)) {
+            Health& health = health_container.components[i];
+            Motion& enemy_motion = registry.motions.get(entity);
+            Enemy& enemy = registry.enemies.get(entity);
+
+            // Calculate the health percentage
+            float health_percentage = static_cast<float>(health.current_health) / static_cast<float>(health.max_health);
+            vec2 size = {100.f * health_percentage, 10.f};  // Width proportional to health
+            vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
+
+            // Update the health bar's motion component
+            if (enemy.health_bar_entity != Entity()) {
+                Motion& health_bar_motion = registry.motions.get(enemy.health_bar_entity);
+                health_bar_motion.position = enemy_motion.position + offset;
+                health_bar_motion.scale = size;
+            }
+        }
+    }
 }
 
 void GameScene::updateCamera(const vec2& player_position) {

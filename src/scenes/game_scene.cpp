@@ -285,42 +285,36 @@ void GameScene::step(float elapsed_ms) {
 				TEXTURE_ASSET_ID::WOMAN_WALK_4
 			};
 
-			// Frame update logic
 			frame_timer += elapsed_ms;
 			if (frame_timer >= frame_delay) {
 				frame_timer = 0.f;
 				enemy_frame = (enemy_frame + 1) % 4;
 			}
 
-			// Set the current walking frame texture
 			auto& texture = registry.renderRequests.get(enemy);
 			texture.used_texture = enemy_walking_frames[enemy_frame];
 
-			// Keep track of the enemy's last direction to prevent frequent flipping
 			static float last_direction_x = motion.velocity.x;
-			static float flip_cooldown = 1000.f;  // Set a cooldown period to avoid fast flipping
+			static float flip_cooldown = 1000.f;
 			static float flip_timer = 0.f;
 
-			// Update the flip timer
 			flip_timer += elapsed_ms;
 
-			// Flip enemy sprite based on direction if cooldown has passed
 			if (flip_timer >= flip_cooldown) {
 				if (motion.velocity.x < 0 && last_direction_x >= 0) {
-					motion.scale.x = -abs(motion.scale.x);  // Flip to face left
+					motion.scale.x = -abs(motion.scale.x);
 					last_direction_x = motion.velocity.x;
-					flip_timer = 0.f;  // Reset flip timer after a change
+					flip_timer = 0.f; 
 				}
 				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
-					motion.scale.x = abs(motion.scale.x);  // Flip to face right
+					motion.scale.x = abs(motion.scale.x);
 					last_direction_x = motion.velocity.x;
 					flip_timer = 0.f;
 				}
 			}
 
-			// If velocity is zero, maintain the direction but set the idle texture
 			if (motion.velocity.x == 0) {
-				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // Idle frame
+				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
 			}
 
 			// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);

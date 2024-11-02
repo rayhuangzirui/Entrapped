@@ -113,9 +113,11 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 	vec3 size3d = max_position - min_position;
 	out_size = size3d;
 
-	// Normalize mesh to range -0.5 ... 0.5
-	for (ColoredVertex& pos : out_vertices)
+
+	// Normalize mesh to range -0.5 ... 0.5 (verticies position)
+	for (ColoredVertex& pos : out_vertices) {
 		pos.position = ((pos.position - min_position) / size3d) - vec3(0.5f, 0.5f, 0.5f);
+	}
 
 	return true;
 }

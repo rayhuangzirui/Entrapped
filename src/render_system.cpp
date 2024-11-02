@@ -10,7 +10,7 @@
 #include <iostream>
 #include <glm/ext/matrix_clip_space.hpp>
 
-#include <maze.hpp>
+#include "state_manager.hpp"
 
 
 void RenderSystem::drawTexturedMesh(Entity entity,
@@ -109,7 +109,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			glUniform1f(opacity_uloc, 1.0f);
 		}
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::RING || render_request.used_effect == EFFECT_ASSET_ID::BOX)
+	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::DEBUG_LINE || render_request.used_effect == EFFECT_ASSET_ID::RING || render_request.used_effect == EFFECT_ASSET_ID::BOX)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
@@ -124,6 +124,16 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
 							  sizeof(ColoredVertex), (void *)sizeof(vec3));
 		gl_has_errors();
+		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
+		{
+			// Light up?
+			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
+			assert(light_up_uloc >= 0);
+
+			// !!! TODO A1: set the light_up shader variable using glUniform1i,
+			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
+			gl_has_errors();
+		}
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::COLOURED)
 {
@@ -145,6 +155,40 @@ void RenderSystem::drawTexturedMesh(Entity entity,
         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&default_color);
     }
 }
+
+//    else if (render_request.used_effect == EFFECT_ASSET_ID::RECTANGLE)
+// {
+//     GLint in_position_loc = glGetAttribLocation(program, "in_position");
+//     gl_has_errors();
+
+//     glEnableVertexAttribArray(in_position_loc);
+//     glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(ColoredVertex), (void *)0);
+//     gl_has_errors();
+
+//     // Setting the color using a uniform
+//     if (registry.colors.has(entity))
+//     {
+//         const vec3 color = registry.colors.get(entity);
+//         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&color);
+//     }
+//     else
+//     {
+//         vec3 default_color = vec3(1.f, 1.f, 0.f);  // Default to yellow for the chest
+//         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&default_color);
+//     }
+    
+//     // Bind the transformation matrix
+//     Transform transform;
+//     transform.translate(motion.position);
+//     transform.scale(motion.scale);
+//     glUniformMatrix3fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, (float *)&transform.mat);
+//     gl_has_errors();
+
+
+// }
+
+
+  
 	
 	else
 	{
@@ -383,24 +427,28 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 
 	float x = 0.0;
 	float y = 0.0;
-	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
-		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
+	for (int row = 0; row < state.map_height; ++row) {
+		for (int col = 0; col < state.map_width; ++col) {
 			GLfloat xpos = x;
 			GLfloat ypos = y;
+			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+			if (state.map[row][col] == 1) {
+				texture_id =
+					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+			}
+			else if (state.map[row][col] == 0 || state.map[row][col] == 3 || state.map[row][col] == 2) {
+				texture_id =
+					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
+			}
+			else {
+				x += 48.f;
+				continue;
+			}
 			GLuint xpos_loc = glGetUniformLocation(currProgram, "xpos");
 			glUniform1f(xpos_loc, (float)xpos);
 			GLuint ypos_loc = glGetUniformLocation(currProgram, "ypos");
 			glUniform1f(ypos_loc, (float)ypos);
 			gl_has_errors();
-			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			if (box_testing_environment[row][col] == 1) {
-				texture_id =
-					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			}
-			else if (box_testing_environment[row][col] == 0) {
-				texture_id =
-					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
-			}
 			glBindTexture(GL_TEXTURE_2D, texture_id);
 			gl_has_errors();
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -488,7 +536,7 @@ void RenderSystem::draw()
 		if (registry.motions.has(player)) {
 			vec2 player_position = registry.motions.get(player).position;
 
-			// Update the camera to center on the player¡¯s position
+			// Update the camera to center on the playerÂ¡Â¯s position
 			camera_system.updateCamera(player_position, w, h);
 		}
 	}

@@ -11,3 +11,5 @@
 extern const int box_testing_environment[BOX_MAZE_HEIGHT][BOX_MAZE_WIDTH];
 extern const int maze[MAZE_HEIGHT][MAZE_WIDTH];
 extern const int tutorial_maze[MAZE_HEIGHT][MAZE_WIDTH];
+extern std::vector<std::vector<int>> box_testing_environtment_vector;
+extern std::vector<std::vector<int>> tutorial_maze_vector;

@@ -35,6 +35,7 @@ public:
 	ComponentContainer<Health> healths;  // Adding Health component container
 	ComponentContainer<DashTimer> dashTimers;
 	ComponentContainer<LightUp> lightups;
+	ComponentContainer<EnemyDeathTime> enemyDeathTimers;
 	ComponentContainer<HealthBar> healthBars;
 
 	// AI related
@@ -90,6 +91,7 @@ public:
 		registry_list.push_back(&bullets);
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&lightups);
+		registry_list.push_back(&enemyDeathTimers);
 		// AI related
 		registry_list.push_back(&enemyAIs);
 

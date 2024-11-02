@@ -122,6 +122,17 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
+	player_hurt_sound = Mix_LoadWAV(audio_path("male-hurt.wav").c_str());
+	monster_dead_sound = Mix_LoadWAV(audio_path("monster-dead.wav").c_str());
+	monster_hurt_sound = Mix_LoadWAV(audio_path("monster-hurt.wav").c_str());
+
+	explode_sound = Mix_LoadWAV(audio_path("explode.wav").c_str());
+	shoot_sound = Mix_LoadWAV(audio_path("gunshot.wav").c_str());
+	health_pickup_sound = Mix_LoadWAV(audio_path("health-pickup.wav").c_str());
+	item_pickup_sound = Mix_LoadWAV(audio_path("item-pickup.wav").c_str());
+	reload_sound = Mix_LoadWAV(audio_path("reload.wav").c_str());
+	stab_sound = Mix_LoadWAV(audio_path("stab.wav").c_str());
+
 	if (background_music == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
 			audio_path("bgm.wav").c_str());
@@ -243,7 +254,7 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 	// FPS counter
-	if (registry.fps.entities.size() == 0) {
+	/*if (registry.fps.entities.size() == 0) {
 		registry.fps.emplace(FPS_entity);
 	}
 
@@ -258,13 +269,136 @@ void GameScene::step(float elapsed_ms) {
 		fps_counter.elapsed_time = 0.0;
 	}
 
-	draw_fps();
+	draw_fps();*/
 
 	// Update HP and ammo
 	refreshUI(player);
 
 	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
+
+	if (registry.enemies.size() > 0) {
+		// give enemy walking frames
+		for (int i = 0; i < registry.enemies.size(); i++) {
+			static int enemy_frame = 0;
+			static float frame_delay = 150.f;
+			static float frame_timer = 0.f;
+
+			auto& enemy = registry.enemies.entities[i];
+			auto& motion = registry.motions.get(enemy);
+
+			TEXTURE_ASSET_ID enemy_walking_frames[4] = {
+				TEXTURE_ASSET_ID::WOMAN_WALK_1,
+				TEXTURE_ASSET_ID::WOMAN_WALK_2,
+				TEXTURE_ASSET_ID::WOMAN_WALK_3,
+				TEXTURE_ASSET_ID::WOMAN_WALK_4
+			};
+
+			// Update the frame timer
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f; // Reset the timer
+				enemy_frame = (enemy_frame + 1) % 4; // Cycle through the frames
+			}
+
+			// Set the current walking frame texture
+			auto& texture = registry.renderRequests.get(enemy);
+			texture.used_texture = enemy_walking_frames[enemy_frame];
+
+			// flip enemy sprite based on direction
+			if (motion.velocity.x < 0) {
+				motion.scale.x = -abs(motion.scale.x);
+			}
+			else {
+				motion.scale.x = abs(motion.scale.x);
+			}
+		}
+	}
+
+	// deal with enemy death animation
+	if (registry.enemyDeathTimers.size() > 0) {
+		auto& enemyDeathTimers = registry.enemyDeathTimers;
+		TEXTURE_ASSET_ID monster_dead[3] = {
+			TEXTURE_ASSET_ID::WOMAN_DEAD_3,
+			TEXTURE_ASSET_ID::WOMAN_DEAD_2,
+			TEXTURE_ASSET_ID::WOMAN_DEAD_1
+		};
+
+		const float frame_delay = 1000.0f;
+
+		for (uint i = 0; i < enemyDeathTimers.components.size(); i++) {
+			// Entity entity = enemyDeathTimers.entities[i];
+			EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.components[i];
+			auto& motion = registry.motions.get(enemyDeathTimers.entities[i]);
+			motion.scale = abs(motion.scale);
+
+			// Remove the enemy entity from the ai
+			registry.enemyAIs.remove(enemyDeathTimers.entities[i]);
+
+			//printf("enemy position before: %f, %f\n", motion.position.x, motion.position.y);
+
+			const float pos_x = motion.position.x;
+			const float pos_y = motion.position.y;
+
+			motion.position = { pos_x, pos_y };
+			//printf("enemy position after: %f, %f\n", motion.position.x, motion.position.y);
+
+			// Reduce timer for entity's lifespan
+			enemyDeathTimer.counter_ms -= 200.0f;
+			//printf("death timer: %f\n", enemyDeathTimer.counter_ms);
+
+			// Calculate current frame based on elapsed time
+			int frame = static_cast<int>((enemyDeathTimer.counter_ms) / frame_delay);
+			//printf("current frame: %d\n", frame);
+
+			// Check if entity's death animation has finished
+			if (enemyDeathTimer.counter_ms < 0.f) {
+				registry.remove_all_components_of(enemyDeathTimers.entities[i]);
+				//printf("Enemy is dead and removed!\n");
+			}
+			else {
+				auto& texture = registry.renderRequests.get(enemyDeathTimers.entities[i]);
+				//printf("before scale: %f, %f\n", motion.scale.x, motion.scale.y);
+				if (frame == 0) {
+					motion.scale = { 1.547f * 64.f * 1.3, 1.547f * 10.f * 1.3 };
+					motion.position.y += 3;
+					//printf("after scale: %f, %f\n", motion.scale.x, motion.scale.y);
+				}
+				texture.used_texture = monster_dead[frame];
+				//printf("current texture: %d\n", texture.used_texture);
+			}
+		}
+	}
+
+	// deal with player death animation
+	assert(registry.screenStates.components.size() <= 1);
+	ScreenState& screen = registry.screenStates.components[0];
+
+	float min_counter_ms = 3000.f;
+	for (Entity entity : registry.deathTimers.entities) {
+		// progress timer
+		DeathTimer& counter = registry.deathTimers.get(entity);
+		counter.counter_ms -= elapsed_ms;
+		if (counter.counter_ms < min_counter_ms) {
+			min_counter_ms = counter.counter_ms;
+		}
+
+		// restart the game once the death timer expired
+		if (counter.counter_ms < 0) {
+			registry.deathTimers.remove(entity);
+			screen.darken_screen_factor = 0;
+			restart_game();
+		}
+	}
+	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+}
+
+void GameScene::restart_game() {
+	printf("restarting\n");
+	while (registry.motions.entities.size() > 0)
+		registry.remove_all_components_of(registry.motions.entities.back());
+
+	initialize(this->renderer);
 }
 
 void GameScene::destroy() {
@@ -272,6 +406,15 @@ void GameScene::destroy() {
 		registry.remove_all_components_of(registry.motions.entities.back());
 	Mix_FreeMusic(background_music);
 	Mix_FreeChunk(player_dead_sound);
+	Mix_FreeChunk(player_hurt_sound);
+	Mix_FreeChunk(monster_dead_sound);
+	Mix_FreeChunk(monster_hurt_sound);
+	Mix_FreeChunk(explode_sound);
+	Mix_FreeChunk(shoot_sound);
+	Mix_FreeChunk(health_pickup_sound);
+	Mix_FreeChunk(item_pickup_sound);
+	Mix_FreeChunk(reload_sound);
+	Mix_FreeChunk(stab_sound);
 }
 
 std::string GameScene::get_next_scene() {
@@ -289,18 +432,6 @@ void GameScene::on_key(int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_3
 	};
 
-	/*TEXTURE_ASSET_ID walking_front[3] = {
-	TEXTURE_ASSET_ID::PLAYER_FRONT_1,
-	TEXTURE_ASSET_ID::PLAYER_FRONT_2,
-	TEXTURE_ASSET_ID::PLAYER_FRONT_3
-	};
-
-	TEXTURE_ASSET_ID walking_back[3] = {
-	TEXTURE_ASSET_ID::PLAYER_BACK_1,
-	TEXTURE_ASSET_ID::PLAYER_BACK_2,
-	TEXTURE_ASSET_ID::PLAYER_BACK_3
-	};*/
-
 	Motion& motion = registry.motions.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
@@ -316,20 +447,28 @@ void GameScene::on_key(int key, int action, int mod) {
 		switch (key) {
 		case GLFW_KEY_W:
 			player_velocity.y += -PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_S:
 			player_velocity.y += PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_A:
 			player_velocity.x += -PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
+			
+			if (motion.scale.x > 0) {
+				motion.position.x -= motion.scale.x / 2;
+			}
 			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 			break;
 		case GLFW_KEY_D:
 			player_velocity.x += PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
+			
+			if (motion.scale.x < 0) {
+				motion.position.x -= motion.scale.x / 2;
+			}
 			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
@@ -354,19 +493,6 @@ void GameScene::on_key(int key, int action, int mod) {
 
 	}
 	else if (action == GLFW_RELEASE) {
-		//switch (key) {
-		//case GLFW_KEY_W:
-		//case GLFW_KEY_S:
-		//	motion.velocity.y = 0.f;
-		//	break;
-		//case GLFW_KEY_A:
-		//case GLFW_KEY_D:
-		//	motion.velocity.x = 0.f;
-		//	break;
-		//case GLFW_KEY_LEFT_SHIFT:
-		//	isSprinting = false;
-		//	break;
-		//}
 		switch (key) {
 		case GLFW_KEY_W:
 			player_velocity.y -= -PLAYER_SPEED;
@@ -422,15 +548,15 @@ void GameScene::on_key(int key, int action, int mod) {
 			// Loop through the frames for the current direction
 			if (key == GLFW_KEY_W) {
 				frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
-				texture.used_texture = walking_sideways[frame];  // Set texture for walking back
+				texture.used_texture = walking_sideways[frame];
 			}
 			else if (key == GLFW_KEY_S) {
 				frame = (frame + 1) % 3;
-				texture.used_texture = walking_sideways[frame];  // Set texture for walking front
+				texture.used_texture = walking_sideways[frame];
 			}
 			else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
 				frame = (frame + 1) % 3;
-				texture.used_texture = walking_sideways[frame];  // Set texture for walking sideways
+				texture.used_texture = walking_sideways[frame];
 			}
 
 			// Adjust sprite orientation for left or right movement
@@ -823,10 +949,15 @@ Entity GameScene::createEnemy(vec2 pos) {
 	return entity;
 }
 
+void restart_game() {
+
+}
+
 // Compute collisions between entities
 void GameScene::handle_collisions() {
 	// Loop over all collisions detected by the physics system
 	auto& collisionsRegistry = registry.collisions;
+
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
@@ -846,9 +977,10 @@ void GameScene::handle_collisions() {
 					registry.damageCoolDowns.emplace(entity);
 					player.health -= enemy.damage;
 
-					Mix_PlayChannel(-1, player_dead_sound, 0);
-					std::cout << "player is hit " << std::endl;
-					Mix_PlayChannel(-1, player_dead_sound, 0);
+					if (player.health > 0) {
+						Mix_PlayChannel(-1, player_hurt_sound, 0);
+						// Mix_PlayChannel(-1, player_dead_sound, 0);
+					}
 
 
 					if (!registry.lightUps.has(entity)) {
@@ -864,10 +996,16 @@ void GameScene::handle_collisions() {
 						//registry.remove_all_components_of(entity);
 						
 						if (!registry.deathTimers.has(entity)) {
+							Mix_PlayChannel(-1, player_dead_sound, 0);
 							registry.deathTimers.emplace(entity, DeathTimer{ 2000.f });
 							// TODO: play death animation and restart the game
+							// deal with player death animation
+							Motion& motion = registry.motions.get(entity);
+							motion.angle = M_PI / 2;
+							registry.colors.get(entity) = { 1.f, 0.f, 0.f };
+							motion.scale.x *= -1;
 						}
-						
+	
 					}
 				}
 			}
@@ -888,8 +1026,8 @@ void GameScene::handle_collisions() {
 		}
 
 		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
-		//if (registry.bullets.has(entity)) {
-		//	if (registry.enemies.has(entity_other)) {
+		// if (registry.bullets.has(entity)) {
+		// if (registry.enemies.has(entity_other)) {
 		//		// Bullet and enemy components
 		//		Bullet& bullet = registry.bullets.get(entity);
 		//		Enemy& enemy = registry.enemies.get(entity_other);
@@ -966,7 +1104,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	motion.position = position;
 	motion.velocity = direction * 300.f;
 	motion.angle = atan2(direction.y, direction.x); // Calculate angle from direction, in radians for sprite rotation
-	motion.scale = vec2({ 20.f, 20.f });
+	motion.scale = vec2({ 15.f, 15.f });
 
 	// Create an empty Bullet component for the bullet
 	Bullet& bullet = registry.bullets.emplace(entity);
@@ -1010,11 +1148,14 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 			  EFFECT_ASSET_ID::TEXTURED,
 			  GEOMETRY_BUFFER_ID::SPRITE });
 	}
+  // Play the bullet fire sound
+	Mix_PlayChannel(-1, shoot_sound, 0);
 }
 
 void GameScene::apply_damage(Entity& target, int damage) {
     // Check if the target has a Health component
     if (registry.healths.has(target)) {
+		Mix_PlayChannel(-1, monster_dead_sound, 0);
         Health& health = registry.healths.get(target);
         health.current_health -= damage;  // Apply the damage
         std::cout << "Enemy lost " << damage << " health. Current health: " << health.current_health << std::endl;
@@ -1026,8 +1167,14 @@ void GameScene::apply_damage(Entity& target, int damage) {
         /*show_damage_number(renderer, position, damage);*/
 
         // If health falls to 0 or below, remove the entity
-        if (health.current_health <= 0) {
-            registry.remove_all_components_of(target);
+        if (health.current_health == 0) {
+			// health.current_health = 1;
+
+			registry.enemies.remove(target);
+			registry.enemyDeathTimers.insert(target, { 3000.0f , 3000.0f });
+			Mix_PlayChannel(-1, monster_hurt_sound, 0);
+
+            // registry.remove_all_components_of(target);
             std::cout << "Enemy is dead!" << std::endl;
         }
     }

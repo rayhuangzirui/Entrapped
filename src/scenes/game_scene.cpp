@@ -1,6 +1,7 @@
 #include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "maze.hpp" // Access box_testing_environment
+#include "state_manager.hpp"
 #include "physics_system.hpp" // to check_player_wall_collision
 #include "render_system.hpp"
 #include <iostream>
@@ -63,14 +64,14 @@ Entity createBox(vec2 position, vec2 scale)
 //}
 
 // Create player hp bar
-Entity GameScene::createPlayerHPBar(vec2 position) {
+Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 	Entity entity = Entity();
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0, 0 };
 	motion.position = position;
-	motion.scale = {200, 30};
+	motion.scale = {200*ratio, 30};
 
 	registry.UIs.emplace(entity);
 
@@ -84,15 +85,20 @@ Entity GameScene::createPlayerHPBar(vec2 position) {
 	return entity;
 }
 
+void GameScene::refreshUI(Entity player) {
+	while (registry.UIs.entities.size() > 0)
+		registry.remove_all_components_of(registry.UIs.entities.back());
 
-void GameScene::initializeUI(Entity player) {
 	Player& player_component = registry.players.get(player);
 
-	createPlayerHPBar({ 120.f, 35.f });
-	renderer->text_renderer.createText(std::to_string(player_component.health)+"/" + std::to_string(player_component.max_health), {35.f, 32.f}, 20.f, {1.f, 1.f, 1.f});
+	float ratio = ((float)player_component.health) / ((float)player_component.max_health);
+	createPlayerHPBar({ 120.f - 100*(1-ratio), 35.f}, ratio);
+	Entity health_text = renderer->text_renderer.createText(std::to_string(player_component.health) + "/" + std::to_string(player_component.max_health), { 35.f, 32.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.UIs.emplace(health_text);
 
 	// create ammo text
-	renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), {35.f, 72.f}, 20.f, {1.f, 1.f, 1.f});
+	Entity ammo_text = renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), { 35.f, 72.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.UIs.emplace(ammo_text);
 }
 
 //bool show_bounding_boxes = true;
@@ -100,7 +106,10 @@ void GameScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 
 	// *Render the maze before initializing player and enemy entities*
-	render_maze_new(); 
+
+	state.changeMap("test");
+	render_maze(); 
+	createPortal({ 2.5 * state.TILE_SIZE, 2.5 * state.TILE_SIZE }, "tutorial");
 
 	player = createPlayer({ 300, 300 });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
@@ -131,7 +140,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	current_speed = 5.0f;
 	player_velocity = { 0.0, 0.0 };
 
-	initializeUI(player);
+	refreshUI(player);
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -252,7 +261,7 @@ void GameScene::step(float elapsed_ms) {
 	draw_fps();
 
 	// Update HP and ammo
-
+	refreshUI(player);
 
 	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
@@ -496,8 +505,7 @@ bool GameScene::check_player_wall_collision(const Motion& player_motion) {
     return false; // No collision detected
 }
 
-void GameScene::render_maze_new() {
-	const int TILE_SIZE = 48;
+void GameScene::render_maze() {
 	auto entity = Entity();
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = {24.f, 24.f};
@@ -516,80 +524,6 @@ void GameScene::render_maze_new() {
 
 }
 
-// Currently only using box_testing_environment in maze.cpp, change variable names accordingly if you want to render another maze
-void GameScene::render_maze() {
-	RenderSystem* renderer = this->renderer;
-	// Tile dimensions
-	const int TILE_SIZE = 48;
-
-	// Loop through each row and column of the maze
-	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
-		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
-			// Determine the texture to use and create an entity for the tile
-			TEXTURE_ASSET_ID texture_id;
-			if (box_testing_environment[row][col] == 1) {
-				texture_id = TEXTURE_ASSET_ID::WALL_6;
-
-				// Calculate position for the tile
-				float x = (col+0.5) * TILE_SIZE;
-				float y = (row + 0.5)* TILE_SIZE;
-
-				// Create an entity for the wall tile
-				Entity wall_entity = Entity();
-
-				// Store a reference to the potentially re-used mesh object
-				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-				registry.meshPtrs.emplace(wall_entity, &mesh);
-
-				// Setting initial motion values
-				Motion& motion = registry.motions.emplace(wall_entity);
-				motion.position = { x, y };
-				motion.angle = 0;
-				motion.scale = { TILE_SIZE, TILE_SIZE };
-
-				// Add a bounding box component for wall tiles
-				vec2 min = vec2(x, y);
-				vec2 max = vec2(x + TILE_SIZE, y + TILE_SIZE);
-				//registry.boundingBoxes.emplace(wall_entity, BoundingBox{ min, max });
-
-				// Add the render request for the wall entity
-				registry.renderRequests.insert(
-					wall_entity,
-					{ texture_id,
-					  EFFECT_ASSET_ID::TEXTURED,
-					  GEOMETRY_BUFFER_ID::SPRITE });
-			}
-			else {
-				texture_id = TEXTURE_ASSET_ID::FLOOR_5;
-
-				// Calculate position for the tile
-				float x = (col + 0.5) * TILE_SIZE;
-				float y = (row + 0.5) * TILE_SIZE;
-
-				// Create an entity for the floor tile
-				Entity floor_entity = Entity();
-
-				// Store a reference to the potentially re-used mesh object
-				Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-				registry.meshPtrs.emplace(floor_entity, &mesh);
-
-				// Setting initial motion values
-				Motion& motion = registry.motions.emplace(floor_entity);
-				motion.position = { x, y };
-				motion.angle = 0;
-				motion.scale = { TILE_SIZE, TILE_SIZE };
-
-				// Add the render request for the floor entity
-				registry.renderRequests.insert(
-					floor_entity,
-					{ texture_id,
-					  EFFECT_ASSET_ID::TEXTURED,
-					  GEOMETRY_BUFFER_ID::SPRITE });
-			}
-			
-        }
-    }
-}
 
 Entity GameScene::createWall(vec2 position, vec2 size)
 {
@@ -798,6 +732,32 @@ Entity GameScene::createHealthBar(RenderSystem* renderer, Entity entity, vec2 of
 }
 
 
+// Portal Component
+Entity GameScene::createPortal(vec2 pos, std::string map_name) {
+	Entity entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = pos;
+	motion.scale = { 48, 48 };
+
+	Portal& portal = registry.portals.emplace(entity);
+	portal.next_map = map_name;
+
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::FLOOR_4,
+		  EFFECT_ASSET_ID::TEXTURED,
+		  GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
 Entity GameScene::createEnemy(vec2 pos) {
 	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
@@ -913,6 +873,7 @@ void GameScene::handle_collisions() {
 			}
 		}
 
+		// Bullet & Enemy collision
 		if (registry.bullets.has(entity)) {
 			if (registry.enemies.has(entity_other)) {
 				// Bullet and enemy components
@@ -958,10 +919,37 @@ void GameScene::handle_collisions() {
 		//		registry.remove_all_components_of(entity);
 		//	}
 		//}
+
+		// Player & Portal Collision
+		if (registry.players.has(entity)) {
+			if (registry.portals.has(entity_other)) {
+				Portal& portal = registry.portals.get(entity_other);
+				changeMap(portal.next_map);
+			}
+		}
 	}
 
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
+}
+
+void GameScene::changeMap(std::string map_name) {
+	// remove bullets and enemies
+	while (registry.bullets.entities.size() > 0)
+		registry.remove_all_components_of(registry.bullets.entities.back());
+	while (registry.enemies.entities.size() > 0)
+		registry.remove_all_components_of(registry.enemies.entities.back());
+
+	// also remove portals
+	while (registry.portals.entities.size() > 0)
+		registry.remove_all_components_of(registry.portals.entities.back());
+
+	vec2 player_spawn = state.changeMap(map_name);
+
+	Entity& player_entity = registry.players.entities[0];
+	Motion& player_motion = registry.motions.get(player_entity);
+
+	player_motion.position = { (player_spawn.x + 0.5) * 48,(player_spawn.y + 0.5) * 48 };
 }
 
 // Add bullet creation

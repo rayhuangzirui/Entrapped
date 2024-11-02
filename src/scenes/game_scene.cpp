@@ -64,14 +64,14 @@ Entity createBox(vec2 position, vec2 scale)
 //}
 
 // Create player hp bar
-Entity GameScene::createPlayerHPBar(vec2 position) {
+Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 	Entity entity = Entity();
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0, 0 };
 	motion.position = position;
-	motion.scale = {200, 30};
+	motion.scale = {200*ratio, 30};
 
 	registry.UIs.emplace(entity);
 
@@ -85,15 +85,20 @@ Entity GameScene::createPlayerHPBar(vec2 position) {
 	return entity;
 }
 
+void GameScene::refreshUI(Entity player) {
+	while (registry.UIs.entities.size() > 0)
+		registry.remove_all_components_of(registry.UIs.entities.back());
 
-void GameScene::initializeUI(Entity player) {
 	Player& player_component = registry.players.get(player);
 
-	createPlayerHPBar({ 120.f, 35.f });
-	renderer->text_renderer.createText(std::to_string(player_component.health)+"/" + std::to_string(player_component.max_health), {35.f, 32.f}, 20.f, {1.f, 1.f, 1.f});
+	float ratio = ((float)player_component.health) / ((float)player_component.max_health);
+	createPlayerHPBar({ 120.f - 100*(1-ratio), 35.f}, ratio);
+	Entity health_text = renderer->text_renderer.createText(std::to_string(player_component.health) + "/" + std::to_string(player_component.max_health), { 35.f, 32.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.UIs.emplace(health_text);
 
 	// create ammo text
-	renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), {35.f, 72.f}, 20.f, {1.f, 1.f, 1.f});
+	Entity ammo_text = renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), { 35.f, 72.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.UIs.emplace(ammo_text);
 }
 
 //bool show_bounding_boxes = true;
@@ -140,7 +145,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	current_speed = 5.0f;
 	player_velocity = { 0.0, 0.0 };
 
-	initializeUI(player);
+	refreshUI(player);
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -261,7 +266,7 @@ void GameScene::step(float elapsed_ms) {
 	draw_fps();
 
 	// Update HP and ammo
-
+	refreshUI(player);
 
 	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;

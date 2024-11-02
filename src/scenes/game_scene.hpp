@@ -35,8 +35,8 @@ private:
 	Entity createPortal(vec2 pos, std::string map_name);
 	Entity createEnemy(vec2 pos);
 	Entity createWall(vec2 position, vec2 size);
-	Entity createPlayerHPBar(vec2 position);
-	void initializeUI(Entity player);
+	Entity createPlayerHPBar(vec2 position, float ratio);
+	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
 	void changeMap(std::string map_name);

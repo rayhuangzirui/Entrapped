@@ -17,6 +17,8 @@ struct Player
 	// Player's health
 	int health = 5;
 
+	int max_health = 5;
+
 	// Hit cooldown
 	float hit_cooldown = 0.f;
 
@@ -105,21 +107,15 @@ struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
 };
 
-// anything that is deadly to the player
-struct Deadly
-{
-	// A1 code
-};
-
-// anything the player can eat
-struct Eatable
-{
-	// A1 code
-};
 
 // component used to render text
 struct Text {
 	std::string content;
+};
+
+// text for overlay HUD
+struct HUD {
+
 };
 
 // All data relevant to the shape and motion of entities
@@ -136,6 +132,11 @@ struct Collision
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };
+};
+
+struct DamageText {
+	float duration_ms;  // Time left for the damage text to stay on screen
+	vec2 position;      // Position of the damage text
 };
 
 // Data structure for toggling debug mode
@@ -196,6 +197,21 @@ struct KnockbackTimer
 	float counter_ms = 100.f; // knockback for 0.1 second
 };
 
+// Component to distinguish between UI and game elements
+struct UI {
+
+};
+
+// Text that displays FPS
+struct FPSText {
+
+};
+
+// Component for the Player hp bar
+struct PlayerHPBar {
+	float max_length = 100.f;
+};
+
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & salmon.vs.glsl)
 struct ColoredVertex
 {
@@ -223,6 +239,13 @@ struct Mesh
 struct BoundingBox {
 	vec2 min; // Minimum x, y coordinates of the bounding box
 	vec2 max; // Maximum x, y coordinates of the bounding box
+};
+
+// The map
+struct Map {
+	int width;
+	int height;
+	std::vector<std::vector<int>> grid;
 };
 
 /**
@@ -255,15 +278,15 @@ enum class TEXTURE_ASSET_ID {
 	PLAYER_2 = PLAYER_1 + 1,
 	PLAYER_3 = PLAYER_2 + 1,
 
-	PLAYER_BACK_1 = PLAYER_3 + 1,
+	/*PLAYER_BACK_1 = PLAYER_3 + 1,
 	PLAYER_BACK_2 = PLAYER_BACK_1 + 1,
 	PLAYER_BACK_3 = PLAYER_BACK_2 + 1,
 
 	PLAYER_FRONT_1 = PLAYER_BACK_3 + 1,
 	PLAYER_FRONT_2 = PLAYER_FRONT_1 + 1,
-	PLAYER_FRONT_3 = PLAYER_FRONT_2 + 1,
+	PLAYER_FRONT_3 = PLAYER_FRONT_2 + 1,*/
 
-	DOOR_OPEN = PLAYER_FRONT_3 + 1,
+	DOOR_OPEN = PLAYER_3 + 1,
 	DOOR_CLOSED = DOOR_OPEN + 1,
 
 	WALL_1 = DOOR_CLOSED + 1,
@@ -285,71 +308,37 @@ enum class TEXTURE_ASSET_ID {
 	WOMAN_WALK_4 = WOMAN_WALK_3 + 1,
 
 	BULLET_1 = WOMAN_WALK_4 + 1,
-	GUN = BULLET_1 + 1,
 
-	TEXTURE_COUNT = GUN + 1
+	PISTOL = BULLET_1 + 1,
+	SMG = PISTOL + 1,
+	RIFLE = SMG + 1,
+
+	TEXTURE_COUNT = RIFLE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
-//enum class PLAYER_BACK_TEXTURE_ASSET_ID {
-//	PLAYER_BACK_1 = 0,
-//	PLAYER_BACK_2 = PLAYER_BACK_1 + 1,
-//	PLAYER_BACK_3 = PLAYER_BACK_2 + 1,
-//	TEXTURE_BACK_COUNT = PLAYER_BACK_3 + 1
-//};
-//const int texture_back_count = (int)PLAYER_BACK_TEXTURE_ASSET_ID::TEXTURE_BACK_COUNT;
-//
-//enum class FLOOR_TEXTURE_ASSET_ID {
-//	FLOOR = 0,
-//	FLOOR_1 = FLOOR + 1,
-//	FLOOR_2 = FLOOR_1 + 1,
-//	FLOOR_3 = FLOOR_2 + 1,
-//	FLOOR_4 = FLOOR_3 + 1,
-//	FLOOR_TEXTURE_COUNT = FLOOR_4 + 1
-//};
-//const int floor_texture_count = (int)FLOOR_TEXTURE_ASSET_ID::FLOOR_TEXTURE_COUNT;
-//
-//enum class DOOR_TEXTURE_ASSET_ID {
-//	DOOR_OPEN = 0,
-//	DOOR_CLOSED = DOOR_OPEN + 1,
-//	DOOR_TEXTURE_COUNT = DOOR_CLOSED + 1
-//};
-//const int door_texture_count = (int)DOOR_TEXTURE_ASSET_ID::DOOR_TEXTURE_COUNT;
-//
-//enum class WALL_TEXTURE_ASSET_ID {
-//	WALL = 0,
-//	WALL_1 = WALL + 1,
-//	WALL_2 = WALL_1 + 1,
-//	WALL_3 = WALL_2 + 1,
-//	WALL_4 = WALL_3 + 1,
-//	WALL_5 = WALL_4 + 1,
-//	WALL_TEXTURE_COUNT = WALL_5 + 1
-//};
-//const int wall_texture_count = (int)WALL_TEXTURE_ASSET_ID::WALL_TEXTURE_COUNT;
-
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	DEBUG_LINE = COLOURED + 1,
-	SALMON = DEBUG_LINE + 1,
-	TEXTURED = SALMON + 1,
-	WATER = TEXTURED + 1,
-	TEXT = WATER + 1,
+	TEXTURED = COLOURED + 1,
+	TEXT = TEXTURED + 1,
 	RING = TEXT + 1,
-	EFFECT_COUNT = RING + 1,
+	BOX = RING + 1,
+	GLOBAL = BOX+1,
+	MAP = GLOBAL + 1,
+	EFFECT_COUNT = MAP + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
 	MESH = 0,
 	SPRITE = MESH + 1,
-	EGG = SPRITE + 1,
 	DEBUG_LINE = SPRITE + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	TEXT = SCREEN_TRIANGLE + 1,
 	PLAYER = TEXT + 1,
 	BULLET = PLAYER + 1,
 	ENEMY_WOMAN = BULLET + 1,
-	MAZE = BULLET + 1,
+	MAZE = ENEMY_WOMAN  + 1,
 	SQUARE = MAZE + 1,
 	GEOMETRY_COUNT = SQUARE + 1
 

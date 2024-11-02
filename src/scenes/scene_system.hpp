@@ -16,7 +16,7 @@ public:
 	BaseScene* current_scene;
 	void initialize(RenderSystem* renderer);
 	void pushScene();
-	void step();
+	void step(float elapsed_ms);
 	void on_key(int key, int action, int mod);
 	void popScene();
 	void changeScene(std::string name);

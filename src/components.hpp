@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
+#include <string>
 
 // Parent-Child relationship
 struct Parent
@@ -27,6 +28,11 @@ struct Player
 
 	// Player's Profession may be used in the future
 	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+};
+
+// Portal to the next map
+struct Portal {
+	std::string next_map = "test";
 };
 
 // Gun component

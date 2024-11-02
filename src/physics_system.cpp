@@ -431,15 +431,15 @@ void handle_wall_mesh_collision(BoundingBox& bb, Motion& motion, Mesh& mesh) {
     bb.min = motion.position - (abs(motion.scale) / 2.0f);
     bb.max = motion.position + (abs(motion.scale) / 2.0f);
 
-    int y_top = clamp_m(floor(round_to_digits(bb.min.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
-    int y_bot = clamp_m(floor(round_to_digits(bb.max.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
-    int x_left = clamp_m(floor(round_to_digits(bb.min.x / TILE_SIZE, 6)), 0, BOX_MAZE_WIDTH - 1);
-    int x_right = clamp_m(floor(round_to_digits(bb.max.x / TILE_SIZE, 6)), 0, BOX_MAZE_WIDTH - 1);
+    int y_top = clamp_m(floor(round_to_digits(bb.min.y / TILE_SIZE, 6)), 0, state.map_height - 1);
+    int y_bot = clamp_m(floor(round_to_digits(bb.max.y / TILE_SIZE, 6)), 0, state.map_height - 1);
+    int x_left = clamp_m(floor(round_to_digits(bb.min.x / TILE_SIZE, 6)), 0, state.map_width - 1);
+    int x_right = clamp_m(floor(round_to_digits(bb.max.x / TILE_SIZE, 6)), 0, state.map_width - 1);
 
 	//printf("y_top: %d, y_bot: %d, x_left: %d, x_right: %d\n", y_top, y_bot, x_left, x_right);
     for (uint j = y_top; j <= y_bot; ++j) {
         for (uint i = x_left; i <= x_right; ++i) {
-            if (box_testing_environment[j][i] == 1) {
+            if (state.map[j][i] == 1) {
 				vec2 wall_pos = vec2((i + 0.5) * TILE_SIZE, (j + 0.5) * TILE_SIZE);
                 vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
                 /*printf("y: %d, x: %d\n", j, i);

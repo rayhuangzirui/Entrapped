@@ -62,8 +62,8 @@ struct Gun
 	float angle = 0.f;
 
 	// Position offset of the gun from the player
-	//vec2 offset = { 20.f, 0 };
-	vec2 offset = { 0, 0 };
+	vec2 offset = { 20.f, -6.f };
+	//vec2 offset = { 0, 0 };
 };
 
 // Bullet component

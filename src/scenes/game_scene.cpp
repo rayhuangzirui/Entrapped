@@ -188,7 +188,7 @@ void GameScene::step(float elapsed_ms) {
 		//	createBox(motion.position, motion.scale);
 		//}
 	}
-	drawHealthBars(renderer);
+	//drawHealthBars(renderer);
 	// update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.lightUps.entities) {
 		// progress timer

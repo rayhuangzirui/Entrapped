@@ -155,6 +155,40 @@ void RenderSystem::drawTexturedMesh(Entity entity,
         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&default_color);
     }
 }
+
+//    else if (render_request.used_effect == EFFECT_ASSET_ID::RECTANGLE)
+// {
+//     GLint in_position_loc = glGetAttribLocation(program, "in_position");
+//     gl_has_errors();
+
+//     glEnableVertexAttribArray(in_position_loc);
+//     glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(ColoredVertex), (void *)0);
+//     gl_has_errors();
+
+//     // Setting the color using a uniform
+//     if (registry.colors.has(entity))
+//     {
+//         const vec3 color = registry.colors.get(entity);
+//         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&color);
+//     }
+//     else
+//     {
+//         vec3 default_color = vec3(1.f, 1.f, 0.f);  // Default to yellow for the chest
+//         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&default_color);
+//     }
+    
+//     // Bind the transformation matrix
+//     Transform transform;
+//     transform.translate(motion.position);
+//     transform.scale(motion.scale);
+//     glUniformMatrix3fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, (float *)&transform.mat);
+//     gl_has_errors();
+
+
+// }
+
+
+  
 	
 	else
 	{

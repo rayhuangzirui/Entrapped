@@ -35,6 +35,7 @@ public:
 	ComponentContainer<Health> healths;  // Adding Health component container
 	ComponentContainer<DashTimer> dashTimers;
 	ComponentContainer<LightUp> lightups;
+	ComponentContainer<HealthBar> healthBars;
 
 	// AI related
 	ComponentContainer<EnemyAI> enemyAIs;

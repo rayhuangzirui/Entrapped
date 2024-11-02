@@ -89,6 +89,8 @@ struct Enemy
 	
 	// Enemy's damage
 	int damage = 1;
+
+	Entity health_bar_entity;
 };
 
 // Enemy AI component
@@ -101,12 +103,17 @@ struct EnemyAI {
 
 struct Health {
 	int current_health;  // Health points of an entity
+	int max_health; 
 };
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
 };
 
+struct Chest
+{
+	bool isOpen = false;
+};
 
 // component used to render text
 struct Text {
@@ -125,6 +132,13 @@ struct Motion {
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
 };
+
+// Health bar component for enemies
+struct HealthBar {
+	Entity owner;  // Entity that the health bar is associated with
+	
+};
+
 
 // Stucture to store collision information
 struct Collision
@@ -324,7 +338,8 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = SALMON + 1,
 	TEXT = TEXTURED + 1,
 	RING = TEXT + 1,
-	BOX = RING + 1,
+	RECTANGLE = RING + 1,
+	BOX = RECTANGLE + 1,
 	GLOBAL = BOX+1,
 	MAP = GLOBAL + 1,
 	EFFECT_COUNT = MAP + 1,

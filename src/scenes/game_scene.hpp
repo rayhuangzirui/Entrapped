@@ -15,6 +15,7 @@ public:
 	std::string get_next_scene();
 	void handle_collisions();
 	void on_mouse_move(vec2 mouse_position);
+	void drawHealthBars(RenderSystem* renderer);
 	void on_mouse_click(int button, int action, int mod);
 	void draw_fps();
 
@@ -28,6 +29,8 @@ private:
 	void render_maze();
 	bool check_player_wall_collision(const Motion& player_motion);
 	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);
+	Entity createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size);
+	Entity createChest(RenderSystem* renderer, vec2 pos);
 	Entity createPlayer(vec2 pos);
 	Entity createGun(Entity player);
 	Entity createEnemy(vec2 pos);

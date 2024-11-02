@@ -36,7 +36,8 @@ void draw_debug_bounding_boxes() {
         Motion& motion = motion_container.components[i];
         Entity entity = motion_container.entities[i];
 
-        if (!registry.players.has(entity) && !registry.enemies.has(entity) && !registry.eatables.has(entity)) {
+        if (!registry.players.has(entity) && !registry.enemies.has(entity)) {
+            //!registry.eatables.has(entity)
             continue;
         }
 
@@ -199,46 +200,15 @@ int clamp_m(int n, int min_v, int max_v) {
     return min(max(n, min_v), max_v);
 }
 
-//vec4 check_wall_collision(const BoundingBox& bb) {
-//    const int TILE_SIZE = 48;
-//    int y_top = floor(bb.min.y/TILE_SIZE);
-//    int y_bot = floor(bb.max.y / TILE_SIZE);
-//    int x_left = floor(bb.min.x / TILE_SIZE);
-//    int x_right = floor(bb.max.x / TILE_SIZE);
-//    //printf("collision index: %d, %d, %d, %d\n", y_top, y_bot, x_left, x_right);
-//
-//    vec4 result = { 0, 0, 0, 0 };
-//
-//    // check in box
-//    for (uint i = x_left+1; i < x_right; i++) {
-//        if (box_testing_environment[y_top][i] == 1) {
-//            result.x = (y_top + 1) * TILE_SIZE - bb.min.y;
-//        }
-//        if (box_testing_environment[y_bot][i] == 1) {
-//            result.y = bb.max.y - y_bot * TILE_SIZE;
-//        }
-//    }
-//
-//    for (uint i = y_top; i < y_bot; i++) {
-//        if (box_testing_environment[i][x_left] == 1) {
-//            result.z = (x_left + 1) * TILE_SIZE - bb.min.x;
-//        }
-//        if (box_testing_environment[i][x_right] == 1) {
-//            result.w = bb.max.x - x_right * TILE_SIZE;
-//        }
-//    }
-//    if (result.x > 0 || result.y > 0 || result.z > 0 || result.w > 0) {
-//        //printf("collision vector: %f, %f, %f, %f\n", result.x, result.y, result.z, result.w);
-//    }
-//
-//    return result;
-//}
-
 // borrowed from https://stackoverflow.com/questions/13094224/a-c-routine-to-round-a-float-to-n-significant-digits
 float round_to_digits(float value, int digits)
 {
     if (value == 0.0) // otherwise it will return 'nan' due to the log10() of zero
         return 0.0;
+
+    float factor = pow(10.0, digits - ceil(log10(fabs(value))));
+    return round(value * factor) / factor;
+}
 
 // Mesh-mesh collision
 void handle_mesh_box_collision() {
@@ -249,33 +219,33 @@ void handle_mesh_box_collision() {
         Motion& motion_i = motion_registry.components[i];
         Entity entity_i = motion_registry.entities[i];
 
-		// Skip entities without a mesh
-		if (!registry.meshPtrs.has(entity_i)) {
-			continue;
-		}
+        // Skip entities without a mesh
+        if (!registry.meshPtrs.has(entity_i)) {
+            continue;
+        }
 
-		Mesh& mesh_i = *registry.meshPtrs.get(entity_i);
+        Mesh& mesh_i = *registry.meshPtrs.get(entity_i);
 
         for (uint j = i + 1; j < motion_registry.size(); j++) {
             Motion& motion_j = motion_registry.components[j];
             Entity entity_j = motion_registry.entities[j];
 
 
-			if (!registry.meshPtrs.has(entity_j)) {
-				continue;
-			}
+            if (!registry.meshPtrs.has(entity_j)) {
+                continue;
+            }
 
-			Mesh& mesh_j = *registry.meshPtrs.get(entity_j);
+            Mesh& mesh_j = *registry.meshPtrs.get(entity_j);
 
-			vec2 aabb_i = get_aabb(motion_i);
+            vec2 aabb_i = get_aabb(motion_i);
             vec2 aabb_j = get_aabb(motion_j);
 
-			// Fast AABB check
-			if (!aabb_intersect(motion_i.position, aabb_i, motion_j.position, aabb_j)) {
-				continue;
-			}
+            // Fast AABB check
+            if (!aabb_intersect(motion_i.position, aabb_i, motion_j.position, aabb_j)) {
+                continue;
+            }
 
-			bool collision = false;
+            bool collision = false;
 
             for (auto& vertex_index : mesh_i.vertex_indices) {
                 vec3 vertex = mesh_i.vertices[vertex_index].position;
@@ -301,17 +271,16 @@ void handle_mesh_box_collision() {
                 if (collision) {
                     // Create a collisions event
                     // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-					printf("collision detected\n");
+                    printf("collision detected\n");
                     registry.collisions.emplace_with_duplicates(entity_i, entity_j);
                     registry.collisions.emplace_with_duplicates(entity_j, entity_i);
                     break;
                 }
             }
 
-        }              
+        }
     }
 }
-
 
 vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
     bb.min = motion.position - (abs(motion.scale) / 2.0f);

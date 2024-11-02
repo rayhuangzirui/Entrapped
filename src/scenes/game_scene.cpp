@@ -178,14 +178,14 @@ void GameScene::step(float elapsed_ms) {
 			}
 		}
 
-		auto& bbox_container = registry.boundingBoxes;
-		for (uint i = 0; i < bbox_container.components.size(); i++) {
-			BoundingBox bbox = bbox_container.components[i];
-			Entity entity = bbox_container.entities[i];
-			Motion motion = motion_container.get(entity);
+		//auto& bbox_container = registry.boundingBoxes;
+		//for (uint i = 0; i < bbox_container.components.size(); i++) {
+		//	BoundingBox bbox = bbox_container.components[i];
+		//	Entity entity = bbox_container.entities[i];
+		//	Motion motion = motion_container.get(entity);
 
-			createBox(motion.position, motion.scale);
-		}
+		//	createBox(motion.position, motion.scale);
+		//}
 	}
 	// update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.lightUps.entities) {

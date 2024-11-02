@@ -10,7 +10,7 @@
 #include <iostream>
 #include <glm/ext/matrix_clip_space.hpp>
 
-#include <maze.hpp>
+#include "state_manager.hpp"
 
 
 void RenderSystem::drawTexturedMesh(Entity entity,
@@ -427,16 +427,16 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 
 	float x = 0.0;
 	float y = 0.0;
-	for (int row = 0; row < BOX_MAZE_HEIGHT; ++row) {
-		for (int col = 0; col < BOX_MAZE_WIDTH; ++col) {
+	for (int row = 0; row < state.map_height; ++row) {
+		for (int col = 0; col < state.map_width; ++col) {
 			GLfloat xpos = x;
 			GLfloat ypos = y;
 			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			if (box_testing_environment[row][col] == 1) {
+			if (state.map[row][col] == 1) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
 			}
-			else if (box_testing_environment[row][col] == 0 || box_testing_environment[row][col] == 3) {
+			else if (state.map[row][col] == 0 || state.map[row][col] == 3) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
 			}

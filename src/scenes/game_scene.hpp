@@ -25,7 +25,6 @@ private:
 	float current_speed;
 	Entity player;
 	Entity enemy;
-	void render_maze_new();
 	void render_maze();
 	bool check_player_wall_collision(const Motion& player_motion);
 	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);
@@ -33,11 +32,14 @@ private:
 	Entity createChest(RenderSystem* renderer, vec2 pos);
 	Entity createPlayer(vec2 pos);
 	Entity createGun(Entity player);
+	Entity createPortal(vec2 pos, std::string map_name);
 	Entity createEnemy(vec2 pos);
 	Entity createWall(vec2 position, vec2 size);
-	Entity createPlayerHPBar(vec2 position);
-	void initializeUI(Entity player);
+	Entity createPlayerHPBar(vec2 position, float ratio);
+	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
+
+	void changeMap(std::string map_name);
 
 	void apply_damage(Entity& target, int damage);
 	void show_damage_number(vec2 position, int damage);

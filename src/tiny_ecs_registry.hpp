@@ -58,6 +58,9 @@ public:
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
 
+	// Map transition
+	ComponentContainer<Portal> portals;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -99,6 +102,9 @@ public:
 		registry_list.push_back(&playerHPBars);
 		registry_list.push_back(&fps);
 		registry_list.push_back(&fpsTexts);
+
+		// portal
+		registry_list.push_back(&portals);
 		
 	}
 

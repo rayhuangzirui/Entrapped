@@ -269,7 +269,7 @@ void GameScene::step(float elapsed_ms) {
 	(RenderSystem*)renderer;
 
 	if (registry.enemies.size() > 0) {
-		// give enemy walking frames
+		// Enemy walking frames and animations
 		for (int i = 0; i < registry.enemies.size(); i++) {
 			static int enemy_frame = 0;
 			static float frame_delay = 150.f;
@@ -285,24 +285,45 @@ void GameScene::step(float elapsed_ms) {
 				TEXTURE_ASSET_ID::WOMAN_WALK_4
 			};
 
-			// Update the frame timer
+			// Frame update logic
 			frame_timer += elapsed_ms;
 			if (frame_timer >= frame_delay) {
-				frame_timer = 0.f; // Reset the timer
-				enemy_frame = (enemy_frame + 1) % 4; // Cycle through the frames
+				frame_timer = 0.f;
+				enemy_frame = (enemy_frame + 1) % 4;
 			}
 
 			// Set the current walking frame texture
 			auto& texture = registry.renderRequests.get(enemy);
 			texture.used_texture = enemy_walking_frames[enemy_frame];
 
-			// flip enemy sprite based on direction
-			if (motion.velocity.x < 0) {
-				motion.scale.x = -abs(motion.scale.x);
+			// Keep track of the enemy's last direction to prevent frequent flipping
+			static float last_direction_x = motion.velocity.x;
+			static float flip_cooldown = 1000.f;  // Set a cooldown period to avoid fast flipping
+			static float flip_timer = 0.f;
+
+			// Update the flip timer
+			flip_timer += elapsed_ms;
+
+			// Flip enemy sprite based on direction if cooldown has passed
+			if (flip_timer >= flip_cooldown) {
+				if (motion.velocity.x < 0 && last_direction_x >= 0) {
+					motion.scale.x = -abs(motion.scale.x);  // Flip to face left
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f;  // Reset flip timer after a change
+				}
+				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+					motion.scale.x = abs(motion.scale.x);  // Flip to face right
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f;
+				}
 			}
-			else {
-				motion.scale.x = abs(motion.scale.x);
+
+			// If velocity is zero, maintain the direction but set the idle texture
+			if (motion.velocity.x == 0) {
+				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // Idle frame
 			}
+
+			printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
 		}
 	}
 

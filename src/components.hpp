@@ -113,6 +113,11 @@ struct Text {
 	std::string content;
 };
 
+// text for overlay HUD
+struct HUD {
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };

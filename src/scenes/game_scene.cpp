@@ -254,6 +254,9 @@ void GameScene::step(float elapsed_ms) {
 
 	draw_fps();
 
+	// Update HP and ammo
+
+
 	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 }

@@ -457,18 +457,18 @@ void GameScene::on_key(int key, int action, int mod) {
 			player_velocity.x += -PLAYER_SPEED;
 			//texture.used_texture = walking_sideways[frame];
 			
-			if (motion.scale.x > 0) {
-				motion.position.x -= motion.scale.x / 2;
-			}
+			//if (motion.scale.x > 0) {
+			//	motion.position.x -= motion.scale.x / 2;
+			//}
 			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 			break;
 		case GLFW_KEY_D:
 			player_velocity.x += PLAYER_SPEED;
 			//texture.used_texture = walking_sideways[frame];
 			
-			if (motion.scale.x < 0) {
-				motion.position.x -= motion.scale.x / 2;
-			}
+			//if (motion.scale.x < 0) {
+			//	motion.position.x -= motion.scale.x / 2;
+			//}
 			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 			break;
 		case GLFW_KEY_LEFT_SHIFT:

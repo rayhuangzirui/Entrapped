@@ -1,4 +1,5 @@
 #pragma once
+# define M_PIl          3.141592653589793238462643383279502884L
 
 #include "base_scene.hpp"
 #include "render_system.hpp"
@@ -38,6 +39,8 @@ private:
 	Entity createPlayerHPBar(vec2 position, float ratio);
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
+
+	void spawnEnemies();
 
 	void changeMap(std::string map_name);
 

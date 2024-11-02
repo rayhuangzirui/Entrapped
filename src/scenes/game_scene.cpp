@@ -85,6 +85,18 @@ Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 	return entity;
 }
 
+// spawn enemies
+void GameScene::spawnEnemies() {
+	for (int row = 0; row < state.map_height; ++row) {
+		for (int col = 0; col < state.map_width; ++col) {
+			if (state.map[row][col] == 2) {
+				Entity enemy = createEnemy({ (col + 0.5) * state.TILE_SIZE, (row + 0.5) * state.TILE_SIZE });
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+		}
+	}
+}
+
 void GameScene::refreshUI(Entity player) {
 	while (registry.UIs.entities.size() > 0)
 		registry.remove_all_components_of(registry.UIs.entities.back());
@@ -115,6 +127,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
+	spawnEnemies();
 
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
@@ -256,7 +269,7 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 	// FPS counter
-	/*if (registry.fps.entities.size() == 0) {
+	if (registry.fps.entities.size() == 0) {
 		registry.fps.emplace(FPS_entity);
 	}
 
@@ -271,7 +284,7 @@ void GameScene::step(float elapsed_ms) {
 		fps_counter.elapsed_time = 0.0;
 	}
 
-	draw_fps();*/
+	draw_fps();
 
 	// Update HP and ammo
 	refreshUI(player);
@@ -1099,6 +1112,9 @@ void GameScene::changeMap(std::string map_name) {
 
 	// spawn exit
 	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+
+	// spawn enemies
+	spawnEnemies();
 }
 
 // Add bullet creation
@@ -1138,7 +1154,9 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 
 	// Gun's ammo - 1
 	Gun& gun_component = registry.guns.get(gun);
-	gun_component.current_ammo -= 1;
+	//gun_component.current_ammo -= 1;
+	Player& player_component = registry.players.get(player);
+	player_component.ammo -= 1;
 
 	// Add a bounding box to the bullet entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -1227,10 +1245,20 @@ void GameScene::on_mouse_move(vec2 mouse_position) {
 	Motion& gun_motion = registry.motions.get(entity);
 
 	// Calculate the direction vector from the gun to the mouse/cursor
-	vec2 direction = mouse_position - gun_motion.position;
+	vec2 direction = mouse_position - vec2(window_width_px/2, window_height_px/2);
 
 	// Calculate the rotation angle using atan2(y,x)
 	gun_motion.angle = atan2(direction.y, direction.x);
+	if (gun_motion.angle > (M_PIl / 2) || gun_motion.angle < -(M_PIl / 2)) {
+		if (gun_motion.scale.y > 0) {
+			gun_motion.scale.y = -gun_motion.scale.y;
+		}
+	}
+	else {
+		if (gun_motion.scale.y < 0) {
+			gun_motion.scale.y = -gun_motion.scale.y;
+		}
+	}
 }
 
 void GameScene::on_mouse_click(int button, int action, int mod) {

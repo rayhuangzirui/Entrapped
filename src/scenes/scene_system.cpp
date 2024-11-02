@@ -3,6 +3,7 @@
 #include "main_menu.hpp"
 #include "game_scene.hpp"
 #include "death_scene.hpp"
+#include "tiny_ecs_registry.hpp"
 
 SceneSystem::SceneSystem() {
 	this->renderer = nullptr;

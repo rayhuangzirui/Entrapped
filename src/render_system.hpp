@@ -129,7 +129,6 @@ private:
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawText(Entity entity, const mat3& projection);
 	void drawMap(Entity entity, const mat3& projection);
-	void drawMapNew(Entity entity, const mat3& projection);
 	void drawToScreen();
 
 	// Window handle

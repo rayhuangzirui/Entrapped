@@ -1,5 +1,6 @@
 #include "main_menu.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <iostream>
 
 
 void MainMenu::initialize(RenderSystem* renderer) {
@@ -16,6 +17,7 @@ void MainMenu::step(float elapsed_ms) {
 void MainMenu::destroy() {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
+
 }
 
 void MainMenu::on_key(int key, int action, int mod) {

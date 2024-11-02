@@ -423,18 +423,6 @@ void GameScene::on_key(int key, int action, int mod) {
 	TEXTURE_ASSET_ID::PLAYER_3
 	};
 
-	/*TEXTURE_ASSET_ID walking_front[3] = {
-	TEXTURE_ASSET_ID::PLAYER_FRONT_1,
-	TEXTURE_ASSET_ID::PLAYER_FRONT_2,
-	TEXTURE_ASSET_ID::PLAYER_FRONT_3
-	};
-
-	TEXTURE_ASSET_ID walking_back[3] = {
-	TEXTURE_ASSET_ID::PLAYER_BACK_1,
-	TEXTURE_ASSET_ID::PLAYER_BACK_2,
-	TEXTURE_ASSET_ID::PLAYER_BACK_3
-	};*/
-
 	Motion& motion = registry.motions.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
@@ -450,20 +438,28 @@ void GameScene::on_key(int key, int action, int mod) {
 		switch (key) {
 		case GLFW_KEY_W:
 			player_velocity.y += -PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_S:
 			player_velocity.y += PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_A:
 			player_velocity.x += -PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
+			
+			if (motion.scale.x > 0) {
+				motion.position.x -= motion.scale.x / 2;
+			}
 			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 			break;
 		case GLFW_KEY_D:
 			player_velocity.x += PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
+			//texture.used_texture = walking_sideways[frame];
+			
+			if (motion.scale.x < 0) {
+				motion.position.x -= motion.scale.x / 2;
+			}
 			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
@@ -488,19 +484,6 @@ void GameScene::on_key(int key, int action, int mod) {
 
 	}
 	else if (action == GLFW_RELEASE) {
-		//switch (key) {
-		//case GLFW_KEY_W:
-		//case GLFW_KEY_S:
-		//	motion.velocity.y = 0.f;
-		//	break;
-		//case GLFW_KEY_A:
-		//case GLFW_KEY_D:
-		//	motion.velocity.x = 0.f;
-		//	break;
-		//case GLFW_KEY_LEFT_SHIFT:
-		//	isSprinting = false;
-		//	break;
-		//}
 		switch (key) {
 		case GLFW_KEY_W:
 			player_velocity.y -= -PLAYER_SPEED;

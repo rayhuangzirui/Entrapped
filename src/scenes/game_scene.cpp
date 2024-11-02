@@ -108,11 +108,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 	enemy = createEnemy({ 700, 300 });
 	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
-	if (registry.guns.entities.size() > 0) {
-		Entity gun = registry.guns.entities[0];
-		update_gun_position(player, gun);
-	}
-	
 	// fps entity
 	FPS_entity = Entity();
 
@@ -437,12 +432,6 @@ void GameScene::on_key(int key, int action, int mod) {
 				motion.scale.x = abs(motion.scale.x);  // Face right
 			}
 		}
-	}
-
-	// Update the player's gun position based on player's position
-	if (registry.guns.entities.size() > 0) {
-		Entity gun = registry.guns.entities[0];
-		update_gun_position(player, gun);
 	}
 	
 	if (action == GLFW_PRESS) {
@@ -808,16 +797,6 @@ Entity GameScene::createHealthBar(RenderSystem* renderer, Entity entity, vec2 of
 
 }
 
-// Update gun position based on player position
-void GameScene::update_gun_position(Entity player, Entity gun) {
-	Motion& player_motion = registry.motions.get(player);
-	Motion& gun_motion = registry.motions.get(gun);
-
-	// Update gun position based on player's velocity
-	//gun_motion.position = player_motion.position + registry.guns.get(gun).offset;
-
-	gun_motion.velocity = player_velocity;
-}
 
 Entity GameScene::createEnemy(vec2 pos) {
 	RenderSystem* renderer = this->renderer;

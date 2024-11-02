@@ -155,6 +155,13 @@ void handle_mesh_mesh_collision() {
 
             bool collision_detected = false;
 
+			// AABB check before mesh-mesh collision
+			vec2 aabb_i = get_aabb(motion_i);
+			vec2 aabb_j = get_aabb(motion_j);
+            if (!aabb_intersect(motion_i.position, aabb_i, motion_j.position, aabb_j)) {
+                continue;
+            }
+
             // Loop through all triangles in mesh_i and mesh_j
             for (size_t k = 0; k < mesh_i.vertex_indices.size(); k += 3) {
                 vec2 t1_v0 = transform_vertex(mesh_i.vertices[mesh_i.vertex_indices[k]].position, motion_i);
@@ -282,12 +289,13 @@ void handle_mesh_box_collision() {
     }
 }
 
+// check wall collision based on the bounding box
 vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
     bb.min = motion.position - (abs(motion.scale) / 2.0f);
     bb.max = motion.position + (abs(motion.scale) / 2.0f);
     const int TILE_SIZE = 48;
     vec2 offset = vec2(0, 0);
-
+    
     int y_top = clamp_m(floor(round_to_digits(bb.min.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
     int y_bot = clamp_m(floor(round_to_digits(bb.max.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
     int x_left = clamp_m(floor(round_to_digits(bb.min.x / TILE_SIZE, 6)), 0, BOX_MAZE_WIDTH - 1);
@@ -345,6 +353,101 @@ vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
     return result;
 }
 
+void handle_wall_mesh_collision(BoundingBox& bb, Motion& motion, Mesh& mesh) {
+    const int TILE_SIZE = 48;
+    bb.min = motion.position - (abs(motion.scale) / 2.0f);
+    bb.max = motion.position + (abs(motion.scale) / 2.0f);
+
+    int y_top = clamp_m(floor(round_to_digits(bb.min.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
+    int y_bot = clamp_m(floor(round_to_digits(bb.max.y / TILE_SIZE, 6)), 0, BOX_MAZE_HEIGHT - 1);
+    int x_left = clamp_m(floor(round_to_digits(bb.min.x / TILE_SIZE, 6)), 0, BOX_MAZE_WIDTH - 1);
+    int x_right = clamp_m(floor(round_to_digits(bb.max.x / TILE_SIZE, 6)), 0, BOX_MAZE_WIDTH - 1);
+
+	//printf("y_top: %d, y_bot: %d, x_left: %d, x_right: %d\n", y_top, y_bot, x_left, x_right);
+    for (uint j = y_top; j <= y_bot; ++j) {
+        for (uint i = x_left; i <= x_right; ++i) {
+            if (box_testing_environment[j][i] == 1) {
+				vec2 wall_pos = vec2((i + 0.5) * TILE_SIZE, (j + 0.5) * TILE_SIZE);
+                vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
+                /*printf("y: %d, x: %d\n", j, i);
+                printf("wall_pos: %f, %f\n", wall_pos.x, wall_pos.y);
+                printf("player_pos: %f, %f\n", motion.position.x, motion.position.y);*/
+
+				// Quick aabb check
+                if (!aabb_intersect(motion.position, get_aabb(motion), wall_pos, wall_size)) {
+
+                    continue;
+                }
+
+				// loop through vertices of the mesh
+				for (size_t k = 0; k < mesh.vertex_indices.size(); k++) {
+					vec2 v0 = transform_vertex(mesh.vertices[mesh.vertex_indices[k]].position, motion);
+					if (point_in_aabb(v0, wall_pos, wall_size)) {
+						//printf("collision detected\n");
+						float wall_left = wall_pos.x - TILE_SIZE / 2;
+						float wall_right = wall_pos.x + TILE_SIZE / 2;
+						float wall_top = wall_pos.y + TILE_SIZE / 2;
+						float wall_bot = wall_pos.y - TILE_SIZE / 2;
+
+                        float x_overlap = 0;
+						float y_overlap = 0;
+
+						// X-axis overlap
+						if (v0.x < wall_right && v0.x > wall_left) {
+							if (v0.x < motion.position.x) {
+								x_overlap = wall_right - v0.x;
+							}
+							else {
+								x_overlap = wall_left - v0.x;
+							}
+						}
+
+						// Y-axis overlap
+						if (v0.y < wall_top && v0.y > wall_bot) {
+							if (v0.y < motion.position.y) {
+								y_overlap = wall_top - v0.y;
+							}
+							else {
+								y_overlap = wall_bot - v0.y;
+							}
+						}
+
+						// Resolve collision based on the minimum overlap direction (x or y)
+						if (abs(x_overlap) < abs(y_overlap)) {
+							motion.position.x += x_overlap;
+						}
+						else {
+							motion.position.y += y_overlap;
+						}
+
+
+
+
+                        //  if (v0.x < wall_right && v0.x > wall_left+TILE_SIZE/2) {
+
+						//	motion.position.x += wall_right - v0.x;
+						//	//printf("new player_pos: %f, %f\n", motion.position.x, motion.position.y);
+						//}
+						//else if (v0.x > wall_left && v0.x < wall_right - TILE_SIZE / 2) {
+						//	motion.position.x -= v0.x - wall_left;
+						//}
+						//
+						//else if (v0.y < wall_top && v0.y > wall_bot + TILE_SIZE / 2) {
+						//	motion.position.y += wall_top - v0.y;
+						//}
+						//else if (v0.y > wall_bot && v0.y < wall_top - TILE_SIZE / 2) {
+						//	motion.position.y -= v0.y - wall_bot;
+						//}
+						
+					}
+				}
+            }
+        }
+    }
+	
+}
+
+
 
 const float DASH_MULTIPLIER = 5.0f;
 
@@ -375,11 +478,20 @@ void PhysicsSystem::step(float elapsed_ms)
             motion.position += motion.velocity * step_seconds;
         }
 
-        if (bbox_container.has(entity)) {
+		// Mesh-wall collision
+        if (registry.meshPtrs.has(entity)) {
+			Mesh& mesh = *registry.meshPtrs.get(entity);
+			BoundingBox& bb = bbox_container.get(entity);
+
+			handle_wall_mesh_collision(bb, motion, mesh);
+        }
+
+		// Handle wall collision
+        /*if (bbox_container.has(entity)) {
             BoundingBox& bb = bbox_container.get(entity);
             // try y-axis first
             Motion temp = motion;
-            vec2 offset_y = check_wall_collision(bb, temp, 0);
+            vec2 offset_y = check_wall_collision(bb, temp,  0);
             temp.position += offset_y;
             vec2 offset_x = check_wall_collision(bb, temp, 1);
             vec2 offset_y_first = offset_x + offset_y;
@@ -399,7 +511,7 @@ void PhysicsSystem::step(float elapsed_ms)
 
             bb.min = motion.position - (abs(motion.scale) / 2.0f);
             bb.max = motion.position + (abs(motion.scale) / 2.0f);
-        }
+        }*/
     }
 
 	// Currently collisions are mesh-based: player-enemy, bullet-enemy
@@ -407,29 +519,20 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	// Mesh-box collision
 	//handle_mesh_box_collision();
-
-
-	// Box-box collision below
     
-    // Check for collisions between all moving entities
-    //ComponentContainer<Motion>& motion_container = registry.motions;
-    //for (uint i = 0; i < motion_container.components.size(); i++) {
-    //    Motion& motion_i = motion_container.components[i];
-    //    Entity entity_i = motion_container.entities[i];
-
-    //    // Note starting j at i+1 to compare all (i, j) pairs only once (and to not compare with itself)
-    //    for (uint j = i + 1; j < motion_container.components.size(); j++) {
-    //        Motion& motion_j = motion_container.components[j];
-    //        if (collides(motion_i, motion_j)) {
-    //            Entity entity_j = motion_container.entities[j];
-
-    //            // Create a collisions event
-    //            // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-    //            registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-    //            registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-    //        }
-    //    }
-    //}
+ 
+    // Update gun position
+    if (registry.players.size() > 0) {
+        Entity player_entity = registry.players.entities[0];
+        Motion& player_motion = motion_registry.get(player_entity);
+        if (registry.guns.entities.size() > 0) {
+            // update gun position
+            Entity gun = registry.guns.entities[0];
+            Gun& gun_component = registry.guns.get(gun);
+            Motion& gun_motion = motion_registry.get(gun);
+            gun_motion.position = player_motion.position + gun_component.offset;
+        }
+    }
 
     if (debugging.in_debug_mode) {
 	    draw_debug_bounding_boxes();

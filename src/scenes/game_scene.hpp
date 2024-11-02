@@ -40,10 +40,21 @@ private:
 	void show_damage_number(vec2 position, int damage);
 	void update_gun_position(Entity player, Entity gun);
 
+	void restart_game();
+
 	float PLAYER_SPEED = 100.0f;
 	const int TILE_SIZE = 48;
 	Mix_Music* background_music;
 	Mix_Chunk* player_dead_sound;
+	Mix_Chunk* player_hurt_sound;
+	Mix_Chunk* monster_dead_sound;
+	Mix_Chunk* monster_hurt_sound;
+	Mix_Chunk* explode_sound;
+	Mix_Chunk* shoot_sound;
+	Mix_Chunk* health_pickup_sound;
+	Mix_Chunk* item_pickup_sound;
+	Mix_Chunk* reload_sound;
+	Mix_Chunk* stab_sound;
 	vec2 player_velocity;
 
 	std::string next_scene = "";

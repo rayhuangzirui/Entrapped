@@ -66,11 +66,17 @@ class RenderSystem {
 			textures_path("woman_walk_3.png"),
 			textures_path("woman_walk_4.png"),
 
-			textures_path("puffer_fish.png"),
+			textures_path("bullet_1.png"),
+			textures_path("bullet_2.png"),
+			textures_path("bullet_3.png"),
 
 			textures_path("pistol.png"),
 			textures_path("SMG.png"),
 			textures_path("rifle.png"),
+
+			textures_path("woman_hurt_dead_1.png"),
+			textures_path("woman_hurt_dead_2.png"),
+			textures_path("woman_hurt_dead_3.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

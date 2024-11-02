@@ -159,6 +159,12 @@ struct DeathTimer
 	float counter_ms = 3000;
 };
 
+struct EnemyDeathTime
+{
+	float initial_ms = 3000;
+	float counter_ms = 3000;
+};
+
 // Added LightUp component: A timer that will be associated with the player lighting up after getting attacked by an enemy
 struct LightUp
 {
@@ -303,12 +309,18 @@ enum class TEXTURE_ASSET_ID {
 	WOMAN_WALK_4 = WOMAN_WALK_3 + 1,
 
 	BULLET_1 = WOMAN_WALK_4 + 1,
+	BULLET_2 = BULLET_1 + 1,
+	BULLET_3 = BULLET_2 + 1,
 
-	PISTOL = BULLET_1 + 1,
+	PISTOL = BULLET_3 + 1,
 	SMG = PISTOL + 1,
 	RIFLE = SMG + 1,
 
-	TEXTURE_COUNT = RIFLE + 1
+	WOMAN_DEAD_1 = RIFLE + 1,
+	WOMAN_DEAD_2 = WOMAN_DEAD_1 + 1,
+	WOMAN_DEAD_3 = WOMAN_DEAD_2 + 1,
+
+	TEXTURE_COUNT = WOMAN_DEAD_3 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

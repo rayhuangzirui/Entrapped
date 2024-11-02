@@ -60,6 +60,7 @@ private:
 	std::string next_scene = "";
 	CameraSystem camera;
 	void updateCamera(const vec2& player_position);
+	void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& target_position);
 
 	Entity FPS_entity;
 };

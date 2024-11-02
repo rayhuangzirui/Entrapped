@@ -491,15 +491,20 @@ void GameScene::on_key(int key, int action, int mod) {
 		case GLFW_KEY_A:
 			player_velocity.x += -PLAYER_SPEED;
 			texture.used_texture = walking_sideways[frame];
+			if (motion.scale.x > 0) {
+				vec2 target_position = motion.position - motion.scale / 2.0f;
+				updateCamera_smoothing(motion.position, target_position);
+			}
 			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 			break;
 		case GLFW_KEY_D:
 			player_velocity.x += PLAYER_SPEED;
 			texture.used_texture = walking_sideways[frame];
-			/*if (motion.scale.x < 0) {
-				motion.position.x -= motion.scale.x;
-			}*/
+			if (motion.scale.x < 0) {
+				vec2 target_position = motion.position - motion.scale / 2.0f;
+				updateCamera_smoothing(motion.position, target_position);
+			}
 			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 			break;
@@ -1251,6 +1256,16 @@ void GameScene::draw_fps() {
 
 void GameScene::updateCamera(const vec2& player_position) {
 	camera.updateCamera(player_position, window_width_px, window_height_px);
+}
+
+void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& target_position) {
+
+	const float smooth_factor = 0.1f;  // Adjust this for smoother camera movement (0.0 - 1.0)
+
+	// Smoothly move the camera towards the target position with a pivot correction
+	vec2 pivot_corrected_position = player_position + smooth_factor * (target_position - player_position);
+	camera.updateCamera(pivot_corrected_position, window_width_px, window_height_px);
+
 }
 
 // TODO: Reloading logic

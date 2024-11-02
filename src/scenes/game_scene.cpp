@@ -86,7 +86,7 @@ Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 }
 
 // spawn enemies
-void GameScene::spawnEnemies() {
+void GameScene::spawnEnemiesAndItems() {
 	for (int row = 0; row < state.map_height; ++row) {
 		for (int col = 0; col < state.map_width; ++col) {
 			if (state.map[row][col] == 2) {
@@ -127,7 +127,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
-	spawnEnemies();
+	spawnEnemiesAndItems();
 
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
@@ -717,7 +717,7 @@ Entity GameScene::createPlayer(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 0.6f * 165.f , 0.6f * 165.f });
+	motion.scale = vec2({ 75.f , 75.f });
 
 	// Create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
@@ -805,7 +805,7 @@ Entity GameScene::createGun(Entity player) {
 	gun_motion.position = player_motion.position + gun.offset;
 	gun_motion.angle = 0;
 	gun_motion.velocity = {0,0};
-	gun_motion.scale = {50, 50};
+	gun_motion.scale = {37.5, 37.5};
 	
 	// gun's states
 	gun.ammo_capacity = 30;
@@ -915,7 +915,7 @@ Entity GameScene::createEnemy(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 0.6f * 165.f , 0.6f * 165.f });
+	motion.scale = vec2({ 80.f ,80.f });
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
@@ -1114,7 +1114,7 @@ void GameScene::changeMap(std::string map_name) {
 	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 
 	// spawn enemies
-	spawnEnemies();
+	spawnEnemiesAndItems();
 }
 
 // Add bullet creation

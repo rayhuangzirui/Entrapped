@@ -40,13 +40,12 @@ private:
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
-	void spawnEnemies();
+	void spawnEnemiesAndItems();
 
 	void changeMap(std::string map_name);
 
 	void apply_damage(Entity& target, int damage);
 	void show_damage_number(vec2 position, int damage);
-	void update_gun_position(Entity player, Entity gun);
 
 	void restart_game();
 

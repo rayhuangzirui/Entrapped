@@ -107,15 +107,17 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	// *Render the maze before initializing player and enemy entities*
 
-	state.changeMap("test");
-	render_maze(); 
-	createPortal({ 2.5 * state.TILE_SIZE, 2.5 * state.TILE_SIZE }, "tutorial");
+	std::string map_name = state.map_lists[state.map_index];
+	MapState map_state = state.changeMap(map_name);
+	createMaze(); 
+	state.map_index++;
+	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 
-	player = createPlayer({ 300, 300 });
+	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE });
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 
-	enemy = createEnemy({ 700, 300 });
-	registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+	//enemy = createEnemy({ 700, 300 });
+	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
 	// fps entity
 	FPS_entity = Entity();
@@ -631,7 +633,7 @@ bool GameScene::check_player_wall_collision(const Motion& player_motion) {
     return false; // No collision detected
 }
 
-void GameScene::render_maze() {
+void GameScene::createMaze() {
 	auto entity = Entity();
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = {24.f, 24.f};
@@ -1082,12 +1084,21 @@ void GameScene::changeMap(std::string map_name) {
 	while (registry.portals.entities.size() > 0)
 		registry.remove_all_components_of(registry.portals.entities.back());
 
-	vec2 player_spawn = state.changeMap(map_name);
 
+	MapState map_state = state.changeMap(map_name);
+	state.map_index++;
+	if (state.map_index >= state.map_lists.size()) {
+		std::cout << "game over" << std::endl;
+		return;
+	}
+	
+	// spawn player
 	Entity& player_entity = registry.players.entities[0];
 	Motion& player_motion = registry.motions.get(player_entity);
+	player_motion.position = { (map_state.player_spawn.x + 0.5) * 48,(map_state.player_spawn.y + 0.5) * 48 };
 
-	player_motion.position = { (player_spawn.x + 0.5) * 48,(player_spawn.y + 0.5) * 48 };
+	// spawn exit
+	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 }
 
 // Add bullet creation

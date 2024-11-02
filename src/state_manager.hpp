@@ -2,6 +2,12 @@
 #include <vector>
 #include "common.hpp"
 
+struct MapState {
+	std::string map_name = "test";
+	vec2 player_spawn = { 5, 5 };
+	vec2 exit = { 2, 2 };
+};
+
 class StateManager
 {
 public:
@@ -9,6 +15,8 @@ public:
 	int map_height;
 	int map_width;
 	std::vector<std::vector<int>> map;
+	uint map_index;
+	std::vector<std::string> map_lists;
 
 	StateManager()
 	{
@@ -19,9 +27,11 @@ public:
 			{4, 5, 6},
 			{7, 8, 9}
 		};
+		map_index = 0;
+		map_lists = { "tutorial", "map_1" };
 	}
 
-	vec2 changeMap(std::string map_name);
+	MapState changeMap(std::string map_name);
 };
 
 extern StateManager state;

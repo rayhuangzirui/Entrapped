@@ -5,21 +5,25 @@
 StateManager state;
 
 // returns player spawning position
-vec2 StateManager::changeMap(std::string map_name) {
+MapState StateManager::changeMap(std::string map_name) {
+	MapState map_state;
+	map_state.map_name = map_name;
 	if (map_name.compare("test") == 0) {
 		map = box_testing_environtment_vector;
 		map_height = map.size();
 		map_width = map[0].size();
 
-		return { 4, 4 };
+		map_state.player_spawn = { 5, 5 };
+		map_state.exit = { 2, 2 };
 	}
 	else if (map_name.compare("tutorial") == 0) {
 		map = tutorial_maze_vector;
 		map_height = map.size();
 		map_width = map[0].size();
 
-		return { 2, 3 };
+		map_state.player_spawn = { 2,3 };
+		map_state.exit = {2, 18};
 	}
 
-	return { 0, 0 };
+	return map_state;
 }

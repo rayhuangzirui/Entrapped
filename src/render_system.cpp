@@ -436,7 +436,7 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
 			}
-			else if (state.map[row][col] == 0 || state.map[row][col] == 3) {
+			else if (state.map[row][col] == 0 || state.map[row][col] == 3 || state.map[row][col] == 2) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
 			}

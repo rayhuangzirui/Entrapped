@@ -488,7 +488,7 @@ void RenderSystem::draw()
 		if (registry.motions.has(player)) {
 			vec2 player_position = registry.motions.get(player).position;
 
-			// Update the camera to center on the player¡¯s position
+			// Update the camera to center on the playerÂ¡Â¯s position
 			camera_system.updateCamera(player_position, w, h);
 		}
 	}

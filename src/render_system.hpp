@@ -28,6 +28,10 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
+		//std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player_mesh.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER, mesh_path("player_1.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::BULLET, mesh_path("bullet_1.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ENEMY_WOMAN, mesh_path("woman_walk_1.obj")),
 		// specify meshes of other assets here
 	};
 
@@ -66,7 +70,7 @@ class RenderSystem {
 			textures_path("woman_walk_3.png"),
 			textures_path("woman_walk_4.png"),
 
-			textures_path("puffer_fish.png"),
+			textures_path("bullet_1.png"),
 
 			textures_path("pistol.png"),
 			textures_path("SMG.png"),

@@ -293,7 +293,7 @@ void GameScene::step(float elapsed_ms) {
 	(RenderSystem*)renderer;
 
 	if (registry.enemies.size() > 0) {
-		// give enemy walking frames
+		// Enemy walking frames and animations
 		for (int i = 0; i < registry.enemies.size(); i++) {
 			static int enemy_frame = 0;
 			static float frame_delay = 150.f;
@@ -309,24 +309,39 @@ void GameScene::step(float elapsed_ms) {
 				TEXTURE_ASSET_ID::WOMAN_WALK_4
 			};
 
-			// Update the frame timer
 			frame_timer += elapsed_ms;
 			if (frame_timer >= frame_delay) {
-				frame_timer = 0.f; // Reset the timer
-				enemy_frame = (enemy_frame + 1) % 4; // Cycle through the frames
+				frame_timer = 0.f;
+				enemy_frame = (enemy_frame + 1) % 4;
 			}
 
-			// Set the current walking frame texture
 			auto& texture = registry.renderRequests.get(enemy);
 			texture.used_texture = enemy_walking_frames[enemy_frame];
 
-			// flip enemy sprite based on direction
-			if (motion.velocity.x < 0) {
-				motion.scale.x = -abs(motion.scale.x);
+			static float last_direction_x = motion.velocity.x;
+			static float flip_cooldown = 1000.f;
+			static float flip_timer = 0.f;
+
+			flip_timer += elapsed_ms;
+
+			if (flip_timer >= flip_cooldown) {
+				if (motion.velocity.x < 0 && last_direction_x >= 0) {
+					motion.scale.x = -abs(motion.scale.x);
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f; 
+				}
+				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+					motion.scale.x = abs(motion.scale.x);
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f;
+				}
 			}
-			else {
-				motion.scale.x = abs(motion.scale.x);
+
+			if (motion.velocity.x == 0) {
+				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
 			}
+
+			// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
 		}
 	}
 
@@ -406,6 +421,35 @@ void GameScene::step(float elapsed_ms) {
 		}
 	}
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+
+	// deal with player walking animation
+	if (player_velocity.x != 0 || player_velocity.y != 0) {
+		static int player_frame = 0;
+		static float frame_delay = 150.f;
+		static float frame_timer = 0.f;
+
+		TEXTURE_ASSET_ID walking_sideways[3] = {
+			TEXTURE_ASSET_ID::PLAYER_1,
+			TEXTURE_ASSET_ID::PLAYER_2,
+			TEXTURE_ASSET_ID::PLAYER_3
+		};
+
+		// Update the frame timer
+		frame_timer += elapsed_ms;
+		if (frame_timer >= frame_delay) {
+			frame_timer = 0.f; // Reset the timer
+			player_frame = (player_frame + 1) % 3; // Cycle through the frames
+		}
+
+		// Set the current walking frame texture
+		auto& texture = registry.renderRequests.get(player);
+		texture.used_texture = walking_sideways[player_frame];
+	}
+	// when player is not moving, set the texture to idle
+	else {
+		auto& texture = registry.renderRequests.get(player);
+		texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
+	}
 }
 
 void GameScene::restart_game() {
@@ -462,28 +506,30 @@ void GameScene::on_key(int key, int action, int mod) {
 		switch (key) {
 		case GLFW_KEY_W:
 			player_velocity.y += -PLAYER_SPEED;
-			//texture.used_texture = walking_sideways[frame];
+			texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_S:
 			player_velocity.y += PLAYER_SPEED;
-			//texture.used_texture = walking_sideways[frame];
+			texture.used_texture = walking_sideways[frame];
 			break;
 		case GLFW_KEY_A:
 			player_velocity.x += -PLAYER_SPEED;
-			//texture.used_texture = walking_sideways[frame];
-			
-			//if (motion.scale.x > 0) {
-			//	motion.position.x -= motion.scale.x / 2;
-			//}
+			texture.used_texture = walking_sideways[frame];
+			if (motion.scale.x > 0) {
+				vec2 target_position = motion.position - motion.scale / 2.0f;
+				updateCamera_smoothing(motion.position, target_position);
+			}
 			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
+			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 			break;
 		case GLFW_KEY_D:
 			player_velocity.x += PLAYER_SPEED;
-			//texture.used_texture = walking_sideways[frame];
-			
-			//if (motion.scale.x < 0) {
-			//	motion.position.x -= motion.scale.x / 2;
-			//}
+			texture.used_texture = walking_sideways[frame];
+			if (motion.scale.x < 0) {
+				vec2 target_position = motion.position - motion.scale / 2.0f;
+				updateCamera_smoothing(motion.position, target_position);
+			}
+			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 			break;
 		case GLFW_KEY_LEFT_SHIFT:
@@ -562,16 +608,16 @@ void GameScene::on_key(int key, int action, int mod) {
 
 			// Loop through the frames for the current direction
 			if (key == GLFW_KEY_W) {
-				frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
-				texture.used_texture = walking_sideways[frame];
+				// frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
+				// texture.used_texture = walking_sideways[frame];
 			}
 			else if (key == GLFW_KEY_S) {
-				frame = (frame + 1) % 3;
-				texture.used_texture = walking_sideways[frame];
+				/*frame = (frame + 1) % 3;
+				texture.used_texture = walking_sideways[frame];*/
 			}
 			else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
-				frame = (frame + 1) % 3;
-				texture.used_texture = walking_sideways[frame];
+				/*frame = (frame + 1) % 3;
+				texture.used_texture = walking_sideways[frame];*/
 			}
 
 			// Adjust sprite orientation for left or right movement
@@ -1346,6 +1392,16 @@ void GameScene::drawHealthBars(RenderSystem* renderer) {
 
 void GameScene::updateCamera(const vec2& player_position) {
 	camera.updateCamera(player_position, window_width_px, window_height_px);
+}
+
+void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& target_position) {
+
+	const float smooth_factor = 0.1f;  // Adjust this for smoother camera movement (0.0 - 1.0)
+
+	// Smoothly move the camera towards the target position with a pivot correction
+	vec2 pivot_corrected_position = player_position + smooth_factor * (target_position - player_position);
+	camera.updateCamera(pivot_corrected_position, window_width_px, window_height_px);
+
 }
 
 // TODO: Reloading logic

@@ -323,7 +323,7 @@ void GameScene::step(float elapsed_ms) {
 				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // Idle frame
 			}
 
-			printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
+			// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
 		}
 	}
 

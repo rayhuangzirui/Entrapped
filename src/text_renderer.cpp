@@ -153,7 +153,7 @@ void TextRenderer::updateTextPosition(Entity text_entity, glm::vec2 new_position
     if (registry.motions.has(text_entity)) {
         // Update the position of the Motion component
         registry.motions.get(text_entity).position = new_position;
-        std::cout << ">>> Text position updated to: (" << new_position.x << ", " << new_position.y << ")" << std::endl;
+        //std::cout << ">>> Text position updated to: (" << new_position.x << ", " << new_position.y << ")" << std::endl;
     }
     else {
         std::cout << ">>> Warning: Attempted to update position of non-existent text entity" << std::endl;

@@ -200,6 +200,7 @@ void GameScene::updateHints(Entity player, const CameraSystem& camera_system) {
 
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
+	std::cout << registry.enemies.size() << std::endl;
 	this->renderer = renderer;
 	CameraSystem& camera = renderer->getCameraSystem();
 
@@ -253,6 +254,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	player_velocity = { 0.0, 0.0 };
 
 	refreshUI(player);
+	std::cout << "here?" << std::endl;
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -567,6 +569,8 @@ void GameScene::restart_game() {
 void GameScene::destroy() {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
+	while (registry.fps.entities.size() > 0)
+		registry.remove_all_components_of(registry.fps.entities.back());
 	Mix_FreeMusic(background_music);
 	Mix_FreeChunk(player_dead_sound);
 	Mix_FreeChunk(player_hurt_sound);

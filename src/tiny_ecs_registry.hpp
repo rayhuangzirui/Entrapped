@@ -119,6 +119,9 @@ public:
 		// chest
 		registry_list.push_back(&healthChests);
 		registry_list.push_back(&ammoChests);
+
+		// hint
+		registry_list.push_back(&hints);
 		
 	}
 

@@ -299,7 +299,6 @@ void GameScene::updateHints(Entity player) {
 
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
-	std::cout << registry.enemies.size() << std::endl;
 	this->renderer = renderer;
 	camera = renderer->getCameraSystem();
 
@@ -391,7 +390,6 @@ void GameScene::step(float elapsed_ms) {
 			Entity entity = enemyAI_container.entities[i];
 			Motion motion = motion_container.get(entity);
 			
-			//std::cout << "here" << std::endl;
 			Entity ring = createRing(motion.position, vec2(enemyAI.detection_radius*2, enemyAI.detection_radius * 2));
 			if (enemyAI.state == 0) {
 				registry.colors.insert(ring, { 0.0, 1.0f, 0.0f });
@@ -798,6 +796,61 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 
 		}
+		motion.velocity = player_velocity;
+
+		// Apply sprint effect if active
+		if (isSprinting) {
+			if (motion.velocity.x != 0) {
+				motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+			}
+			if (motion.velocity.y != 0) {
+				motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+			}
+		}
+		else {
+			if (motion.velocity.x > PLAYER_SPEED) {
+				motion.velocity.x = PLAYER_SPEED;
+			}
+			else if (motion.velocity.x < -PLAYER_SPEED) {
+				motion.velocity.x = -PLAYER_SPEED;
+			}
+			if (motion.velocity.y > PLAYER_SPEED) {
+				motion.velocity.y = PLAYER_SPEED;
+			}
+			else if (motion.velocity.y < -PLAYER_SPEED) {
+				motion.velocity.y = -PLAYER_SPEED;
+			}
+		}
+
+		// Update frame and texture for animation when moving
+		if (action == GLFW_REPEAT) {
+			// Increment the frame after the delay to create animation effect
+			if (frame_counter++ >= frame_delay) {
+				frame_counter = 0;
+
+				// Loop through the frames for the current direction
+				if (key == GLFW_KEY_W) {
+					// frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
+					// texture.used_texture = walking_sideways[frame];
+				}
+				else if (key == GLFW_KEY_S) {
+					/*frame = (frame + 1) % 3;
+					texture.used_texture = walking_sideways[frame];*/
+				}
+				else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
+					/*frame = (frame + 1) % 3;
+					texture.used_texture = walking_sideways[frame];*/
+				}
+
+				// Adjust sprite orientation for left or right movement
+				if (key == GLFW_KEY_A) {
+					motion.scale.x = -abs(motion.scale.x);  // Face left
+				}
+				else if (key == GLFW_KEY_D) {
+					motion.scale.x = abs(motion.scale.x);  // Face right
+				}
+			}
+		}
 	}
 
 	// Handle interact key
@@ -811,7 +864,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !health_chest.isOpen) {
 				Mix_PlayChannel(-1, health_pickup_sound, 0);
-				player_component.health += (int) health_chest.amount;
+				player_component.health += (int)health_chest.amount;
 				player_component.health = min(player_component.health, player_component.max_health);
 				health_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
@@ -834,7 +887,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !ammo_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
-				player_component.ammo += (int) ammo_chest.amount;
+				player_component.ammo += (int)ammo_chest.amount;
 				ammo_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
 				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
@@ -846,61 +899,6 @@ void GameScene::on_key(int key, int action, int mod) {
 					}
 					registry.hints.remove(entity);
 				}
-			}
-		}
-	}
-	motion.velocity = player_velocity;
-
-	// Apply sprint effect if active
-	if (isSprinting) {
-		if (motion.velocity.x != 0) {
-			motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
-		}
-		if (motion.velocity.y != 0) {
-			motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
-		}
-	}
-	else {
-		if (motion.velocity.x > PLAYER_SPEED) {
-			motion.velocity.x = PLAYER_SPEED;
-		}
-		else if (motion.velocity.x < -PLAYER_SPEED) {
-			motion.velocity.x = -PLAYER_SPEED;
-		}
-		if (motion.velocity.y > PLAYER_SPEED) {
-			motion.velocity.y = PLAYER_SPEED;
-		}
-		else if (motion.velocity.y < -PLAYER_SPEED) {
-			motion.velocity.y = -PLAYER_SPEED;
-		}
-	}
-
-	// Update frame and texture for animation when moving
-	if (action == GLFW_REPEAT) {
-		// Increment the frame after the delay to create animation effect
-		if (frame_counter++ >= frame_delay) {
-			frame_counter = 0;
-
-			// Loop through the frames for the current direction
-			if (key == GLFW_KEY_W) {
-				// frame = (frame + 1) % 3;  // Increment frame and wrap around using modulus
-				// texture.used_texture = walking_sideways[frame];
-			}
-			else if (key == GLFW_KEY_S) {
-				/*frame = (frame + 1) % 3;
-				texture.used_texture = walking_sideways[frame];*/
-			}
-			else if (key == GLFW_KEY_A || key == GLFW_KEY_D) {
-				/*frame = (frame + 1) % 3;
-				texture.used_texture = walking_sideways[frame];*/
-			}
-
-			// Adjust sprite orientation for left or right movement
-			if (key == GLFW_KEY_A) {
-				motion.scale.x = -abs(motion.scale.x);  // Face left
-			}
-			else if (key == GLFW_KEY_D) {
-				motion.scale.x = abs(motion.scale.x);  // Face right
 			}
 		}
 	}
@@ -1472,7 +1470,6 @@ void GameScene::handle_collisions() {
 }
 
 void GameScene::changeMap(std::string map_name) {
-	std::cout << state.map_index << std::endl;
 	if (state.map_index >= state.map_lists.size()) {
 		next_scene = "over_scene";
 		return;
@@ -1628,10 +1625,7 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			// Insert death animation timer or other removal actions
 			// Remove the hp bar
 			auto& enemy = registry.enemies.get(target);
-			std::cout << registry.healthBars.size() << std::endl;
 			registry.remove_all_components_of(enemy.health_bar_entity);
-
-			std::cout << registry.healthBars.size() << std::endl;
 			registry.enemies.remove(target);
 			registry.enemyDeathTimers.insert(target, { 3000.0f, 3000.0f });
 			Mix_PlayChannel(-1, monster_hurt_sound, 0);

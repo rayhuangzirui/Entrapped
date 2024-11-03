@@ -5,7 +5,7 @@
 void DeathScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 	renderer->text_renderer.createText("You are dead", { window_width_px/2-120.f, window_height_px/2-20.f }, 40.f, { 1.f, 1.f, 1.f });
-	renderer->text_renderer.createText("Press any key to return to the main menu", { window_width_px / 2 - 200.f, window_height_px/2+40.f }, 20.f, { 1.f, 1.f, 1.f });
+	renderer->text_renderer.createText("Press Q to return to the main menu", { window_width_px / 2 - 160.f, window_height_px/2+40.f }, 20.f, { 1.f, 1.f, 1.f });
 	//renderer->text_renderer.createText("Main Menu", { window_width_px / 2 + 40.f, window_height_px/2+40.f }, 20.f, { 1.f, 1.f, 1.f });
 	//(vec2)mouse_position; // dummy to avoid compiler warning
 }
@@ -23,7 +23,7 @@ void DeathScene::on_key(int key, int action, int mod) {
 	(int)key;
 	(int)action;
 	(int)mod;
-	if (action == GLFW_RELEASE) {
+	if (action == GLFW_RELEASE && key == GLFW_KEY_Q) {
 		next_scene = "main_menu";
 		return;
 	}

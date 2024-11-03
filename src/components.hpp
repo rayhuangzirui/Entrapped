@@ -240,6 +240,11 @@ struct DamageCoolDown
 	float counter_ms = 500; // damage cooldown for 0.5 second
 };
 
+// Background sprite that does not change with camera matrix
+struct Background {
+
+};
+
 // Opacity component
 struct Opacity
 {
@@ -385,7 +390,8 @@ enum class TEXTURE_ASSET_ID {
 	CHEST_CLOSED = WOMAN_DEAD_3 + 1,
 	CHEST_OPENED = CHEST_CLOSED + 1,
 
-	TEXTURE_COUNT = CHEST_OPENED + 1
+	SPACE_BACKGROUND = CHEST_OPENED + 1,
+	TEXTURE_COUNT = SPACE_BACKGROUND + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

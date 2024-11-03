@@ -114,6 +114,27 @@ Entity GameScene::createDirectionMarker(vec2 exit_position) {
 	return entity;
 }
 
+Entity GameScene::createBackground() {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = {window_width_px/2.f, window_height_px/2.f };
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ window_width_px , window_height_px });
+
+	registry.backgrounds.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::SPACE_BACKGROUND,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
 //Entity createShadowOverlay(vec2 position) {
 //
 //}
@@ -303,7 +324,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	camera = renderer->getCameraSystem();
 
 	// *Render the maze before initializing player and enemy entities*
-
+	createBackground();
 	std::string map_name = state.map_lists[state.map_index];
 	MapState map_state = state.changeMap(map_name);
 	createMaze(); 
@@ -1515,6 +1536,9 @@ void GameScene::changeMap(std::string map_name) {
 	// spawn player
 	Entity& player_entity = registry.players.entities[0];
 	Motion& player_motion = registry.motions.get(player_entity);
+	Player& player_component = registry.players.get(player_entity);
+	player_component.health = player_component.max_health;
+	player_component.ammo = 50;
 	player_motion.position = { (map_state.player_spawn.x + 0.5) * 48,(map_state.player_spawn.y + 0.5) * 48 };
 	// spawn exit
 	if (state.map_index >= state.map_lists.size()) {

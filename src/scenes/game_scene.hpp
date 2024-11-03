@@ -41,6 +41,7 @@ private:
 	Entity createHealthChest(vec2 position);
 	Entity createAmmoChest(vec2 position);
 	Entity createDirectionMarker(vec2 position);
+	Entity createBackground();
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
@@ -71,7 +72,7 @@ private:
 	std::string next_scene = "";
 	CameraSystem camera;
 	void updateCamera(const vec2& player_position);
-	void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& target_position);
+	void updateCamera_smoothing(const vec2& player_position, const vec2& target_position);
 
 	Entity FPS_entity;
 

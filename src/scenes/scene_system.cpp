@@ -3,6 +3,7 @@
 #include "main_menu.hpp"
 #include "game_scene.hpp"
 #include "death_scene.hpp"
+#include "over_scene.hpp"
 #include "tiny_ecs_registry.hpp"
 
 SceneSystem::SceneSystem() {
@@ -79,6 +80,11 @@ void SceneSystem::changeScene(std::string name) {
 		this->popScene();
 		delete this->current_scene;
 		this->current_scene = new DeathScene();
+	}
+	else if (name.compare("over_scene") == 0) {
+		this->popScene();
+		delete this->current_scene;
+		this->current_scene = new OverScene();
 	}
 	else {
 		std::cout << "Error: Unknow Scene Name" << std::endl;

@@ -811,6 +811,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			Motion& player_motion = registry.motions.get(player);
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !health_chest.isOpen) {
+				Mix_PlayChannel(-1, health_pickup_sound, 0);
 				player_component.health += health_chest.amount;
 				player_component.health = min(player_component.health, player_component.max_health);
 				health_chest.isOpen = true;
@@ -833,6 +834,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			Motion& player_motion = registry.motions.get(player);
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !ammo_chest.isOpen) {
+				Mix_PlayChannel(-1, item_pickup_sound, 0);
 				player_component.ammo += ammo_chest.amount;
 				ammo_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
@@ -1475,7 +1477,7 @@ void GameScene::handle_collisions() {
 void GameScene::changeMap(std::string map_name) {
 	std::cout << state.map_index << std::endl;
 	if (state.map_index >= state.map_lists.size()) {
-		std::cout << "game over" << std::endl;
+		next_scene = "over_scene";
 		return;
 	}
 	state.map_index++;

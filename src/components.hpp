@@ -35,6 +35,8 @@ struct Portal {
 	std::string next_map = "test";
 };
 
+
+
 // Gun component
 struct Gun
 {
@@ -119,6 +121,16 @@ struct DashTimer {
 struct Chest
 {
 	bool isOpen = false;
+};
+
+struct HealthChest {
+	bool isOpen = false;
+	float amount = 5;
+};
+
+struct AmmoChest {
+	bool isOpen = false;
+	float amount = 10;
 };
 
 // component used to render text

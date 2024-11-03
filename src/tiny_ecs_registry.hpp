@@ -107,6 +107,9 @@ public:
 
 		// portal
 		registry_list.push_back(&portals);
+
+		// health bar
+		registry_list.push_back(&healthBars);
 		
 	}
 

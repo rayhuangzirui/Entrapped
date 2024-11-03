@@ -1,6 +1,7 @@
 #include "main_menu.hpp"
 #include "tiny_ecs_registry.hpp"
 #include <iostream>
+#include "state_manager.hpp"
 
 
 void MainMenu::initialize(RenderSystem* renderer) {
@@ -8,6 +9,8 @@ void MainMenu::initialize(RenderSystem* renderer) {
 	renderer->text_renderer.createText("Entrapped", { 50.f, window_height_px - 200.f }, 40.f, { 1.f, 1.f, 1.f });
 	renderer->text_renderer.createText("Press any key to start the game", { 40.f, window_height_px - 140.f }, 20.f, { 1.f, 1.f, 1.f });
 	renderer->text_renderer.createText("Press ; key to enter debug mode", { 40.f, window_height_px - 110.f }, 20.f, { 1.f, 1.f, 1.f });
+
+	state.map_index = 0;
 	//(vec2)mouse_position; // dummy to avoid compiler warning
 }
 

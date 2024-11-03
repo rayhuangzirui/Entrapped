@@ -25,6 +25,12 @@ void SceneSystem::pushScene() {
 
 void SceneSystem::step(float elapsed_ms) {
 	current_scene->step(elapsed_ms);
+	std::string next_scene = current_scene->get_next_scene();
+	if (next_scene.compare("") != 0) {
+		changeScene(next_scene);
+		//std::cout << "err here" << std::endl;
+		pushScene();
+	}
 }
 
 void SceneSystem::popScene() {
@@ -34,12 +40,12 @@ void SceneSystem::popScene() {
 void SceneSystem::on_key(int key, int action, int mod) {
 	current_scene->on_key(key, action, mod);
 
-	std::string next_scene = current_scene->get_next_scene();
-	if (next_scene.compare("") != 0) {
-		changeScene(next_scene);
-		//std::cout << "err here" << std::endl;
-		pushScene();
-	}
+	//std::string next_scene = current_scene->get_next_scene();
+	//if (next_scene.compare("") != 0) {
+	//	changeScene(next_scene);
+	//	//std::cout << "err here" << std::endl;
+	//	pushScene();
+	//}
 }
 
 void SceneSystem::handle_collisions() {

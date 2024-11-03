@@ -30,6 +30,7 @@ private:
 	bool check_player_wall_collision(const Motion& player_motion);
 	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);
 	Entity createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size);
+	Entity createHealthBarNew(Entity entity);
 	Entity createChest(RenderSystem* renderer, vec2 pos);
 	Entity createPlayer(vec2 pos);
 	Entity createGun(Entity player);

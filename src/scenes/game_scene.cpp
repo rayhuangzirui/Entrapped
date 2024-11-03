@@ -176,6 +176,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 void GameScene::step(float elapsed_ms) {
 	RenderSystem* renderer = this->renderer;
+	auto& motion_container = registry.motions;
 	// remove all debug component
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
@@ -202,7 +203,6 @@ void GameScene::step(float elapsed_ms) {
 
 	if (debugging.in_debug_mode) {
 		auto& enemyAI_container = registry.enemyAIs;
-		auto& motion_container = registry.motions;
 		for (uint i = 0; i < enemyAI_container.components.size(); i++) {
 			EnemyAI enemyAI = enemyAI_container.components[i];
 			Entity entity = enemyAI_container.entities[i];
@@ -294,6 +294,22 @@ void GameScene::step(float elapsed_ms) {
 	// Update HP and ammo
 	refreshUI(player);
 
+	// Update enemy hp bar
+	auto& hp_bars = registry.healthBars;
+	auto& healths = registry.healths;
+	for (Entity entity : hp_bars.entities) {
+		Motion& motion = motion_container.get(entity);
+		HealthBar& hp_bar = hp_bars.get(entity);
+		Motion& enemy_motion = motion_container.get(hp_bar.owner);
+		Health& enemy_health = healths.get(hp_bar.owner);
+
+		float ratio = 
+			((float)enemy_health.current_health) / ((float)enemy_health.max_health);
+		motion.position = enemy_motion.position + vec2(0, -50);
+		motion.scale = { 60 * ratio, 10 };
+	}
+
+
 	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 
@@ -349,7 +365,6 @@ void GameScene::step(float elapsed_ms) {
 	//		// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
 	//	}
 	//}
-
 	// deal with enemy death animation
 	if (registry.enemyDeathTimers.size() > 0) {
 		auto& enemyDeathTimers = registry.enemyDeathTimers;
@@ -361,14 +376,14 @@ void GameScene::step(float elapsed_ms) {
 
 		const float frame_delay = 1000.0f;
 
-		for (uint i = 0; i < enemyDeathTimers.components.size(); i++) {
+		for (Entity entity: enemyDeathTimers.entities) {
 			// Entity entity = enemyDeathTimers.entities[i];
-			EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.components[i];
-			auto& motion = registry.motions.get(enemyDeathTimers.entities[i]);
+			EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
+			auto& motion = registry.motions.get(entity);
 			motion.scale = abs(motion.scale);
 
 			// Remove the enemy entity from the ai
-			registry.enemyAIs.remove(enemyDeathTimers.entities[i]);
+			registry.enemyAIs.remove(entity);
 
 			//printf("enemy position before: %f, %f\n", motion.position.x, motion.position.y);
 
@@ -388,11 +403,11 @@ void GameScene::step(float elapsed_ms) {
 
 			// Check if entity's death animation has finished
 			if (enemyDeathTimer.counter_ms < 0.f) {
-				registry.remove_all_components_of(enemyDeathTimers.entities[i]);
+				registry.remove_all_components_of(entity);
 				//printf("Enemy is dead and removed!\n");
 			}
 			else {
-				auto& texture = registry.renderRequests.get(enemyDeathTimers.entities[i]);
+				auto& texture = registry.renderRequests.get(entity);
 				//printf("before scale: %f, %f\n", motion.scale.x, motion.scale.y);
 				if (frame == 0) {
 					motion.scale = { 1.547f * 64.f * 1.3, 1.547f * 10.f * 1.3 };
@@ -417,6 +432,7 @@ void GameScene::step(float elapsed_ms) {
 		if (counter.counter_ms < min_counter_ms) {
 			min_counter_ms = counter.counter_ms;
 		}
+		screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 		// restart the game once the death timer expired
 		if (counter.counter_ms < 0) {
@@ -425,7 +441,6 @@ void GameScene::step(float elapsed_ms) {
 			restart_game();
 		}
 	}
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 	// deal with player walking animation
 	if (player_velocity.x != 0 || player_velocity.y != 0) {
@@ -458,11 +473,12 @@ void GameScene::step(float elapsed_ms) {
 }
 
 void GameScene::restart_game() {
-	printf("restarting\n");
-	while (registry.motions.entities.size() > 0)
-		registry.remove_all_components_of(registry.motions.entities.back());
+	//printf("restarting\n");
+	//while (registry.motions.entities.size() > 0)
+	//	registry.remove_all_components_of(registry.motions.entities.back());
 
-	initialize(this->renderer);
+	//initialize(this->renderer);
+	next_scene = "death_scene";
 }
 
 void GameScene::destroy() {
@@ -651,10 +667,6 @@ void GameScene::on_key(int key, int action, int mod) {
 	// Update the camera after input
 	updateCamera(registry.motions.get(player).position);
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_L) {
-		next_scene = "death_scene";
-	}
-
 	if (key == GLFW_KEY_SEMICOLON) {
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
@@ -773,7 +785,7 @@ Entity GameScene::createPlayer(vec2 pos) {
 	// Create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
 	// Initialize health and ammo
-	player.health = 100;
+	player.health = 5;
 	player.ammo = 30;
 
 	// Add the Health component to the player entity with initial health of 100
@@ -909,39 +921,63 @@ Entity GameScene::createGun(Entity player) {
 	return entity;
 }
 
-Entity GameScene::createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size) {
-   auto health_bar_entity = Entity();
+//Entity GameScene::createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size) {
+//   auto health_bar_entity = Entity();
+//
+//    // Store a reference to the potentially re-used mesh object
+//    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+//    registry.meshPtrs.emplace(health_bar_entity, &mesh);
+//
+//    // Get the entity's motion to determine where the health bar should be positioned
+//    Motion& entity_motion = registry.motions.get(entity);
+//
+//    // Set initial motion values for the health bar
+//    Motion& health_bar_motion = registry.motions.emplace(health_bar_entity);
+//    health_bar_motion.position = entity_motion.position + offset;
+//    health_bar_motion.angle = 0.f;
+//    health_bar_motion.velocity = {0.f, 0.f};
+//    health_bar_motion.scale = size;
+//
+//    // Add a HealthBar component to keep track of the owner entity
+//    HealthBar& health_bar = registry.healthBars.emplace(health_bar_entity);
+//    health_bar.owner = entity;
+//
+//    // Add the render request for the health bar (using a colored effect)
+//    registry.renderRequests.insert(
+//        health_bar_entity,
+//        { TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture needed, using a color
+//          EFFECT_ASSET_ID::COLOURED,         // Use color to render the health bar
+//          GEOMETRY_BUFFER_ID::SPRITE });
+//
+//    // Set the color of the health bar to red
+//    registry.colors.emplace(health_bar_entity, vec3(1.0f, 0.0f, 0.0f));  // Red color
+//
+//    return health_bar_entity;
+//
+//}
 
-    // Store a reference to the potentially re-used mesh object
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-    registry.meshPtrs.emplace(health_bar_entity, &mesh);
+Entity GameScene::createHealthBarNew(Entity enemy) {
+	Entity entity = Entity();
 
-    // Get the entity's motion to determine where the health bar should be positioned
-    Motion& entity_motion = registry.motions.get(entity);
+	Motion& enemy_motion = registry.motions.get(enemy);
+	Motion& motion = registry.motions.emplace(entity);
+	vec2 pos = {0, -50};
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = pos + enemy_motion.position;
+	motion.scale = { 60.f, 10 };
 
-    // Set initial motion values for the health bar
-    Motion& health_bar_motion = registry.motions.emplace(health_bar_entity);
-    health_bar_motion.position = entity_motion.position + offset;
-    health_bar_motion.angle = 0.f;
-    health_bar_motion.velocity = {0.f, 0.f};
-    health_bar_motion.scale = size;
+	HealthBar& hp_bar = registry.healthBars.emplace(entity);
+	hp_bar.owner = enemy;
 
-    // Add a HealthBar component to keep track of the owner entity
-    HealthBar& health_bar = registry.healthBars.emplace(health_bar_entity);
-    health_bar.owner = entity;
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
 
-    // Add the render request for the health bar (using a colored effect)
-    registry.renderRequests.insert(
-        health_bar_entity,
-        { TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture needed, using a color
-          EFFECT_ASSET_ID::COLOURED,         // Use color to render the health bar
-          GEOMETRY_BUFFER_ID::SPRITE });
-
-    // Set the color of the health bar to red
-    registry.colors.emplace(health_bar_entity, vec3(1.0f, 0.0f, 0.0f));  // Red color
-
-    return health_bar_entity;
-
+	return entity;
 }
 
 // Portal Component
@@ -1032,11 +1068,11 @@ Entity GameScene::createEnemy(vec2 pos) {
 			  GEOMETRY_BUFFER_ID::SPRITE });
 	}
 
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
 	return entity;
-}
-
-void restart_game() {
-
 }
 
 // Compute collisions between entities
@@ -1059,7 +1095,7 @@ void GameScene::handle_collisions() {
 				// Reduce player health
 				//printf("Player health: %d\n", player.health);
 
-				if (!registry.damageCoolDowns.has(entity)) {
+				if (!registry.damageCoolDowns.has(entity) && !registry.deathTimers.has(entity)) {
 					registry.damageCoolDowns.emplace(entity);
 					player.health -= enemy.damage;
 
@@ -1275,7 +1311,14 @@ void GameScene::apply_damage(Entity& target, int damage) {
         if (health.current_health == 0) {
 			// health.current_health = 1;
 
+			// Remove the hp bar
+			auto& enemy = registry.enemies.get(target);
+			std::cout << registry.healthBars.size() << std::endl;
+			registry.remove_all_components_of(enemy.health_bar_entity);
+
+			std::cout << registry.healthBars.size() << std::endl;
 			registry.enemies.remove(target);
+
 			registry.enemyDeathTimers.insert(target, { 3000.0f , 3000.0f });
 			Mix_PlayChannel(-1, monster_hurt_sound, 0);
 

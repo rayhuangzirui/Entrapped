@@ -104,6 +104,7 @@ public:
 		registry_list.push_back(&enemies);
 		registry_list.push_back(&lightups);
 		registry_list.push_back(&enemyDeathTimers);
+		registry_list.push_back(&boundingBoxes);
 		// AI related
 		registry_list.push_back(&enemyAIs);
 

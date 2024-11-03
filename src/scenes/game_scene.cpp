@@ -392,20 +392,26 @@ void GameScene::step(float elapsed_ms) {
 			Entity entity = enemyAI_container.entities[i];
 			Motion motion = motion_container.get(entity);
 			
+			//std::cout << "here" << std::endl;
+			Entity ring = createRing(motion.position, vec2(enemyAI.detection_radius*2, enemyAI.detection_radius * 2));
 			if (enemyAI.state == 0) {
-				//std::cout << "here" << std::endl;
-				createRing(motion.position, vec2(enemyAI.detection_radius*2, enemyAI.detection_radius * 2));
+				registry.colors.insert(ring, { 0.0, 1.0f, 0.0f });
+			}
+			else if (enemyAI.state == 1){
+				registry.colors.insert(ring, { 1.0, 0.0f, 0.0f });
+			}
+			else if (enemyAI.state == 2) {
+				registry.colors.insert(ring, { 0.0, 0.0f, 1.0f });
 			}
 		}
 
-		//auto& bbox_container = registry.boundingBoxes;
-		//for (uint i = 0; i < bbox_container.components.size(); i++) {
-		//	BoundingBox bbox = bbox_container.components[i];
-		//	Entity entity = bbox_container.entities[i];
-		//	Motion motion = motion_container.get(entity);
+		auto& bbox_container = registry.boundingBoxes;
+		for (uint i = 0; i < bbox_container.components.size(); i++) {
+			Entity entity = bbox_container.entities[i];
+			Motion motion = motion_container.get(entity);
 
-		//	createBox(motion.position, motion.scale);
-		//}
+			createBox(motion.position, {10, 10});
+		}
 	}
 	//drawHealthBars(renderer);
 	// update LightUp timers and remove if time drops below zero, similar to the death counter
@@ -578,7 +584,7 @@ void GameScene::step(float elapsed_ms) {
 			//printf("enemy position after: %f, %f\n", motion.position.x, motion.position.y);
 
 			// Reduce timer for entity's lifespan
-			enemyDeathTimer.counter_ms -= 200.0f;
+			enemyDeathTimer.counter_ms -= 20.0f;
 			//printf("death timer: %f\n", enemyDeathTimer.counter_ms);
 
 			// Calculate current frame based on elapsed time
@@ -703,96 +709,97 @@ void GameScene::on_key(int key, int action, int mod) {
 	static bool isSprinting = false;
 
 	// Handle movement keys (W, A, S, D)
-	if (action == GLFW_PRESS) {
-		vec2 new_position = motion.position;
+	if (!registry.deathTimers.has(player)) {
 		if (action == GLFW_PRESS) {
-			// Reset frame and counter when a new key is pressed
-			frame = 0;
-			frame_counter = 0;
+			vec2 new_position = motion.position;
+			if (action == GLFW_PRESS) {
+				// Reset frame and counter when a new key is pressed
+				frame = 0;
+				frame_counter = 0;
+			}
+			switch (key) {
+			case GLFW_KEY_W:
+				player_velocity.y += -PLAYER_SPEED;
+				texture.used_texture = walking_sideways[frame];
+				break;
+			case GLFW_KEY_S:
+				player_velocity.y += PLAYER_SPEED;
+				texture.used_texture = walking_sideways[frame];
+				break;
+			case GLFW_KEY_A:
+				player_velocity.x += -PLAYER_SPEED;
+				texture.used_texture = walking_sideways[frame];
+				if (motion.scale.x > 0) {
+					vec2 target_position = motion.position - motion.scale / 2.0f;
+					updateCamera_smoothing(motion.position, target_position);
+					Entity& gun = registry.guns.entities[0];
+					Motion& gun_motion = registry.motions.get(gun);
+					/*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
+					printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
+
+					Gun& gun_component = registry.guns.get(gun);
+					gun_component.offset.x = -abs(gun_component.offset.x);
+				}
+				motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
+				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
+				break;
+			case GLFW_KEY_D:
+				player_velocity.x += PLAYER_SPEED;
+				texture.used_texture = walking_sideways[frame];
+				if (motion.scale.x < 0) {
+					vec2 target_position = motion.position - motion.scale / 2.0f;
+					updateCamera_smoothing(motion.position, target_position);
+
+					Entity& gun = registry.guns.entities[0];
+					Motion& gun_motion = registry.motions.get(gun);
+					Gun& gun_component = registry.guns.get(gun);
+					gun_component.offset.x = abs(gun_component.offset.x);
+				}
+				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
+				motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
+				break;
+			case GLFW_KEY_LEFT_SHIFT:
+				isSprinting = true;
+				break;
+			case GLFW_KEY_SPACE:
+				if (!registry.dashTimers.has(player)) {
+					registry.dashTimers.emplace(player, DashTimer{ 200.f });
+					motion.velocity *= 2.5f;
+				}
+				break;
+			case GLFW_KEY_F:
+				// get the fps entity
+				Entity fps_entity = registry.fps.entities[0];
+				FPS& fps_counter = registry.fps.get(fps_entity);
+				// visialize fps
+				fps_counter.visible = !fps_counter.visible;
+				printf("FPS counter visibility: %d\n", fps_counter.visible);
+				printf("FPS: %f\n", fps_counter.fps);
+				break;
+			}
+
 		}
-		switch (key) {
-		case GLFW_KEY_W:
-			player_velocity.y += -PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
-			break;
-		case GLFW_KEY_S:
-			player_velocity.y += PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
-			break;
-		case GLFW_KEY_A:
-			player_velocity.x += -PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
-			if (motion.scale.x > 0) {
-				vec2 target_position = motion.position - motion.scale / 2.0f;
-				updateCamera_smoothing(motion.position, target_position);
-				Entity& gun = registry.guns.entities[0];
-				Motion& gun_motion = registry.motions.get(gun);
-				/*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
-				printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
+		else if (action == GLFW_RELEASE) {
+			switch (key) {
+			case GLFW_KEY_W:
+				player_velocity.y -= -PLAYER_SPEED;
+				break;
+			case GLFW_KEY_S:
+				player_velocity.y -= PLAYER_SPEED;
+				break;
+			case GLFW_KEY_A:
+				player_velocity.x -= -PLAYER_SPEED;
+				break;
+			case GLFW_KEY_D:
+				player_velocity.x -= PLAYER_SPEED;
+				break;
+			case GLFW_KEY_LEFT_SHIFT:
+				isSprinting = false;
+				break;
+			}
 
-				Gun& gun_component = registry.guns.get(gun);
-				gun_component.offset.x = -abs(gun_component.offset.x);
-			}
-			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
-			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
-			break;
-		case GLFW_KEY_D:
-			player_velocity.x += PLAYER_SPEED;
-			texture.used_texture = walking_sideways[frame];
-			if (motion.scale.x < 0) {
-				vec2 target_position = motion.position - motion.scale / 2.0f;
-				updateCamera_smoothing(motion.position, target_position);
-
-				Entity& gun = registry.guns.entities[0];
-				Motion& gun_motion = registry.motions.get(gun);
-				Gun& gun_component = registry.guns.get(gun);
-				gun_component.offset.x = abs(gun_component.offset.x);
-			}
-			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
-			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
-			break;
-		case GLFW_KEY_LEFT_SHIFT:
-			isSprinting = true;
-			break;
-		case GLFW_KEY_SPACE:
-			if (!registry.dashTimers.has(player)) {
-				registry.dashTimers.emplace(player, DashTimer{ 200.f });
-				motion.velocity *= 2.5f;
-			}
-			break;
-		case GLFW_KEY_F:
-			// get the fps entity
-			Entity fps_entity = registry.fps.entities[0];
-			FPS& fps_counter = registry.fps.get(fps_entity);
-			// visialize fps
-			fps_counter.visible = !fps_counter.visible;
-			printf("FPS counter visibility: %d\n", fps_counter.visible);
-			printf("FPS: %f\n", fps_counter.fps);
-			break;
 		}
-
 	}
-	else if (action == GLFW_RELEASE) {
-		switch (key) {
-		case GLFW_KEY_W:
-			player_velocity.y -= -PLAYER_SPEED;
-			break;
-		case GLFW_KEY_S:
-			player_velocity.y -= PLAYER_SPEED;
-			break;
-		case GLFW_KEY_A:
-			player_velocity.x -= -PLAYER_SPEED;
-			break;
-		case GLFW_KEY_D:
-			player_velocity.x -= PLAYER_SPEED;
-			break;
-		case GLFW_KEY_LEFT_SHIFT:
-			isSprinting = false;
-			break;
-		}
-
-	}
-
 
 	// Handle interact key
 	if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
@@ -805,6 +812,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !health_chest.isOpen) {
 				player_component.health += health_chest.amount;
+				player_component.health = min(player_component.health, player_component.max_health);
 				health_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
 				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
@@ -1009,8 +1017,8 @@ Entity GameScene::createPlayer(vec2 pos) {
 	// Create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
 	// Initialize health and ammo
-	player.health = 5;
-	player.ammo = 30;
+	player.health = 20;
+	player.ammo = 50;
 
 	// Add the Health component to the player entity with initial health of 100
 	Health& health = registry.healths.emplace(entity);
@@ -1375,6 +1383,7 @@ void GameScene::handle_collisions() {
 							motion.angle = M_PI / 2;
 							registry.colors.get(entity) = { 1.f, 0.f, 0.f };
 							motion.scale.x *= -1;
+							motion.velocity = { 0, 0 };
 						}
 	
 					}

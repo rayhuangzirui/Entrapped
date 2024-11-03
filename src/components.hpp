@@ -16,9 +16,9 @@ struct Parent
 struct Player
 {
 	// Player's health
-	int health = 100;
+	int health = 20;
 
-	int max_health = 100;
+	int max_health = 20;
 
 	// Hit cooldown
 	float hit_cooldown = 0.f;
@@ -108,9 +108,11 @@ struct Enemy
 
 // Enemy AI component
 struct EnemyAI {
-	float detection_radius = 175;
+	vec2 last_player_position = { 0,0 };
+	float detection_radius = 250;
 	float chase_timer = 3000;
 	float wander_timer = 0;
+	float flee_timer = 3000;
 	int state = 0;
 };
 

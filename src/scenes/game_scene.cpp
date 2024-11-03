@@ -90,9 +90,13 @@ void GameScene::spawnEnemiesAndItems() {
 	std::cout << "spawned enemies" << std::endl;
 	for (int row = 0; row < state.map_height; ++row) {
 		for (int col = 0; col < state.map_width; ++col) {
+			vec2 pos = { (col + 0.5) * state.TILE_SIZE, (row + 0.5) * state.TILE_SIZE };
 			if (state.map[row][col] == 2) {
-				Entity enemy = createEnemy({ (col + 0.5) * state.TILE_SIZE, (row + 0.5) * state.TILE_SIZE });
+				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+			else if (state.map[row][col] == 3) {
+				Entity chest = createHealthChest(pos);
 			}
 		}
 	}
@@ -831,6 +835,27 @@ Entity GameScene::createChest(RenderSystem* renderer, vec2 position) {
     registry.colors.emplace(chest_entity, vec3(1.0f, 1.0f, 0.0f));  // RGB for yellow
 
     return chest_entity;
+}
+
+Entity GameScene::createHealthChest(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 48.f ,48.f });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::CHEST_CLOSED,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
 }
 
 Entity GameScene::createGun(Entity player) {

@@ -440,7 +440,7 @@ void handle_wall_mesh_collision(Entity& entity, BoundingBox& bb, Motion& motion,
 	//printf("y_top: %d, y_bot: %d, x_left: %d, x_right: %d\n", y_top, y_bot, x_left, x_right);
     for (uint j = y_top; j <= y_bot; ++j) {
         for (uint i = x_left; i <= x_right; ++i) {
-            if (state.map[j][i] == 1) {
+            if (state.map[j][i] == 1 || state.map[j][i] == 3) {
 				vec2 wall_pos = vec2((i + 0.5) * TILE_SIZE, (j + 0.5) * TILE_SIZE);
                 vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
                 /*printf("y: %d, x: %d\n", j, i);

@@ -80,7 +80,10 @@ class RenderSystem {
 
 			textures_path("woman_hurt_dead_1.png"),
 			textures_path("woman_hurt_dead_2.png"),
-			textures_path("woman_hurt_dead_3.png")
+			textures_path("woman_hurt_dead_3.png"),
+
+			textures_path("chest_closed.png"),
+			textures_path("chest_opened.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

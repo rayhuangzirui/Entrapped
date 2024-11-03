@@ -37,7 +37,7 @@ private:
 	Entity createEnemy(vec2 pos);
 	Entity createWall(vec2 position, vec2 size);
 	Entity createPlayerHPBar(vec2 position, float ratio);
-	//Entity createHealthPickup(vec2 position);
+	Entity createHealthChest(vec2 position);
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 

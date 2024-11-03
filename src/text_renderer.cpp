@@ -142,7 +142,7 @@ void TextRenderer::removeText(Entity text_entity) {
     if (registry.texts.has(text_entity)) {
         // Remove all components associated with the text entity
         registry.remove_all_components_of(text_entity);
-        std::cout << ">>> Text removed" << std::endl;
+        //std::cout << ">>> Text removed" << std::endl;
     }
     else {
         std::cout << ">>> Warning: Attempted to remove non-existent text entity" << std::endl;

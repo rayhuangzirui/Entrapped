@@ -37,7 +37,6 @@ public:
 	ComponentContainer<LightUp> lightups;
 	ComponentContainer<EnemyDeathTime> enemyDeathTimers;
 	ComponentContainer<HealthBar> healthBars;
-	ComponentContainer<Hint> hints;
 
 	// AI related
 	ComponentContainer<EnemyAI> enemyAIs;
@@ -66,6 +65,14 @@ public:
 	// Chest related
 	ComponentContainer<HealthChest> healthChests;
 	ComponentContainer<AmmoChest> ammoChests;
+
+	// Hint related
+	ComponentContainer<Hint> hints;
+	ComponentContainer<CameraText> cameraTexts;
+	ComponentContainer<Invisibles> invisibles;
+
+	// Other functionality
+	ComponentContainer<DirectionMarker> directionMarkers;
 
 
 	// constructor that adds all containers for looping over them
@@ -122,7 +129,12 @@ public:
 
 		// hint
 		registry_list.push_back(&hints);
-		
+		registry_list.push_back(&cameraTexts);
+		registry_list.push_back(&invisibles);
+
+		// direction marker
+		registry_list.push_back(&directionMarkers);
+
 	}
 
 	void clear_all_components() {

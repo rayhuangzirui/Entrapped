@@ -30,5 +30,7 @@ MapState StateManager::changeMap(std::string map_name) {
 	map_height = map.size();
 	map_width = map[0].size();
 
+	current_map_state = map_state;
+
 	return map_state;
 }

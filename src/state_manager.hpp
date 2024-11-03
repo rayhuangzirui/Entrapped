@@ -17,6 +17,7 @@ public:
 	std::vector<std::vector<int>> map;
 	uint map_index;
 	std::vector<std::string> map_lists;
+	MapState current_map_state;
 
 	StateManager()
 	{

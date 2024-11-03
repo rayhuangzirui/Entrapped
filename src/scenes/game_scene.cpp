@@ -59,6 +59,61 @@ Entity createBox(vec2 position, vec2 scale)
 	return entity;
 }
 
+// Debug Component
+Entity createInvisible(vec2 position)
+{
+	Entity entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	// Create motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = {0, 0};
+
+	registry.invisibles.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+	return entity;
+}
+
+Entity GameScene::createDirectionMarker(vec2 exit_position) {
+	Entity entity = Entity();
+	// computer marker location, clamped at the edge of the screen
+	Motion& player_motion = registry.motions.get(player);
+	vec2 direction = exit_position - player_motion.position;
+	if (abs(direction.x) < ((float)window_width_px) / 2 && abs(direction.y) < ((float)window_height_px)/2) {
+		return entity;
+	}
+
+	direction.x = min(max(direction.x, -((float)window_width_px) / 2), ((float)window_width_px) / 2);
+	direction.y = min(max(direction.y, -((float)window_height_px) / 2), ((float)window_height_px) / 2);
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = direction + vec2(((float)window_width_px) / 2, ((float)window_height_px) / 2);
+	motion.scale = { 100, 100 };
+
+	registry.UIs.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+	return entity;
+}
+
 //Entity createShadowOverlay(vec2 position) {
 //
 //}
@@ -95,17 +150,57 @@ void GameScene::spawnEnemiesAndItems() {
 				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
-				// Attach a hint to this enemy entity
-				Hint hint;
-				hint.text = "Left Click to shoot!";
-				hint.radius = 300.0f;  // Set the radius for the hint display
-				registry.hints.emplace(enemy, hint);
+				if (state.map_index == 1) { // tutorial 
+					// Attach a hint to this enemy entity
+					Hint hint;
+					hint.text = "Left click to shoot!";
+					hint.radius = 300.0f;  // Set the radius for the hint display
+					registry.hints.emplace(enemy, hint);
+				}
 			}
 			else if (state.map[row][col] == 3) {
 				Entity chest = createHealthChest(pos);
+				if (state.map_index == 1) {
+					Hint hint;
+					hint.text = "Chest with healing item. Press E to open";
+					hint.radius = 200.0f;  // Set the radius for the hint display
+					registry.hints.emplace(chest, hint);
+				}
+			}
+			else if (state.map[row][col] == 4) {
+				Entity chest = createAmmoChest(pos);
+				if (state.map_index == 1) {
+					Hint hint;
+					hint.text = "Chest with ammo. Press E to open";
+					hint.radius = 200.0f;  // Set the radius for the hint display
+					registry.hints.emplace(chest, hint);
+				}
 			}
 		}
 	}
+
+	// tutorial specific elements
+	if (state.map_index == 1) {
+		Entity marker = createInvisible({ 10, 10 });
+		Hint hint1;
+		hint1.text = "WASD to move player";
+		hint1.radius = 300.0f;  // Set the radius for the hint display
+		registry.hints.emplace(marker, hint1);
+
+		marker = createInvisible({ (15+0.5)*48, (16 + 0.5) * 48 });
+		Hint hint2;
+		hint2.text = "Hold shift to sprint";
+		hint2.radius = 300.0f;  // Set the radius for the hint display
+		registry.hints.emplace(marker, hint2);
+	}
+	else {
+		Entity marker = createInvisible({ 10, 10 });
+		Hint hint3;
+		hint3.text = "Look for the exit of the maze!";
+		hint3.radius = 300.0f;  // Set the radius for the hint display
+		registry.hints.emplace(marker, hint3);
+	}
+
 }
 
 void GameScene::refreshUI(Entity player) {
@@ -122,6 +217,8 @@ void GameScene::refreshUI(Entity player) {
 	// create ammo text
 	Entity ammo_text = renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), { 35.f, 72.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.UIs.emplace(ammo_text);
+
+	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
 
 
@@ -171,6 +268,7 @@ void GameScene::updateHints(Entity player, const CameraSystem& camera_system) {
 
 		Hint& hint = registry.hints.get(hint_entity);
 		vec2 hint_position = registry.motions.get(hint_entity).position;
+		vec2 hint_scale = registry.motions.get(hint_entity).scale;
 
 		// Check if player is within the hint radius
 		float distance = glm::distance(player_position, hint_position);
@@ -181,8 +279,9 @@ void GameScene::updateHints(Entity player, const CameraSystem& camera_system) {
 			hint.is_visible = true;
 
 			// Calculate the screen position based on the world position with an offset above the entity
-			vec2 screen_position = camera_system.worldToView(hint_position + vec2(140, -30));
-			hint.text_entity = renderer->text_renderer.createText(hint.text, screen_position, 20.f, { 1.f, 1.f, 1.f });
+			//vec2 screen_position = camera_system.worldToView(hint_position + vec2(140, -30));
+			hint.text_entity = renderer->text_renderer.createText(hint.text, hint_position + vec2(hint_scale.x, -30), 20.f, { 1.f, 1.f, 1.f });
+			registry.cameraTexts.emplace(hint.text_entity);
 		}
 		// Hide the hint text if the player moves outside the hint radius
 		else if (!within_radius && hint.is_visible) {
@@ -192,8 +291,8 @@ void GameScene::updateHints(Entity player, const CameraSystem& camera_system) {
 		}
 		// If already visible and within radius, update the text position to keep it above the moving entity
 		else if (within_radius && hint.is_visible) {
-			vec2 screen_position = camera_system.worldToView(hint_position + vec2(140, -30));
-			renderer->text_renderer.updateTextPosition(hint.text_entity, screen_position);
+			//vec2 screen_position = camera_system.worldToView(hint_position + vec2(140, -30));
+			renderer->text_renderer.updateTextPosition(hint.text_entity, hint_position + vec2(hint_scale.x, -30));
 		}
 	}
 }
@@ -704,10 +803,40 @@ void GameScene::on_key(int key, int action, int mod) {
 			Motion& motion = registry.motions.get(entity);
 			Motion& player_motion = registry.motions.get(player);
 			Player& player_component = registry.players.get(player);
-			if (distance(motion.position, player_motion.position) < 48 && !health_chest.isOpen) {
+			if (distance(motion.position, player_motion.position) < 200.f && !health_chest.isOpen) {
 				player_component.health += health_chest.amount;
 				health_chest.isOpen = true;
-
+				auto& chest_texture = registry.renderRequests.get(entity);
+				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
+				if (registry.hints.has(entity)) {
+					Hint& hint = registry.hints.get(entity);
+					if (hint.is_visible) {
+						// Remove the hint text entity if visible
+						renderer->text_renderer.removeText(hint.text_entity);
+					}
+					registry.hints.remove(entity);
+				}
+			}
+		}
+		auto& ammo_chests = registry.ammoChests;
+		for (Entity entity : ammo_chests.entities) {
+			AmmoChest& ammo_chest = ammo_chests.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			Motion& player_motion = registry.motions.get(player);
+			Player& player_component = registry.players.get(player);
+			if (distance(motion.position, player_motion.position) < 200.f && !ammo_chest.isOpen) {
+				player_component.ammo += ammo_chest.amount;
+				ammo_chest.isOpen = true;
+				auto& chest_texture = registry.renderRequests.get(entity);
+				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
+				if (registry.hints.has(entity)) {
+					Hint& hint = registry.hints.get(entity);
+					if (hint.is_visible) {
+						// Remove the hint text entity if visible
+						renderer->text_renderer.removeText(hint.text_entity);
+					}
+					registry.hints.remove(entity);
+				}
 			}
 		}
 	}
@@ -957,6 +1086,29 @@ Entity GameScene::createHealthChest(vec2 pos) {
 	motion.scale = vec2({ 48.f ,48.f });
 
 	registry.healthChests.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::CHEST_CLOSED,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity GameScene::createAmmoChest(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 48.f ,48.f });
+
+	registry.ammoChests.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,
@@ -1319,14 +1471,38 @@ void GameScene::changeMap(std::string map_name) {
 	}
 	state.map_index++;
 	// remove bullets and enemies
+	while (registry.hints.entities.size() > 0) {
+		Entity& entity = registry.hints.entities.back();
+		Hint& hint = registry.hints.get(entity);
+		if (hint.is_visible) {
+			// Remove the hint text entity if visible
+			renderer->text_renderer.removeText(hint.text_entity);
+		}
+		// Clear the hint component from the entity
+		registry.hints.remove(entity);
+	}
 	while (registry.bullets.entities.size() > 0)
 		registry.remove_all_components_of(registry.bullets.entities.back());
 	while (registry.enemies.entities.size() > 0)
 		registry.remove_all_components_of(registry.enemies.entities.back());
+	while (registry.healthBars.entities.size() > 0)
+		registry.remove_all_components_of(registry.healthBars.entities.back());
+
+	// remove hints
+	while (registry.invisibles.entities.size() > 0)
+		registry.remove_all_components_of(registry.invisibles.entities.back());
+
+	// remove chests
+	while (registry.healthChests.entities.size() > 0)
+		registry.remove_all_components_of(registry.healthChests.entities.back());
+	while (registry.ammoChests.entities.size() > 0)
+		registry.remove_all_components_of(registry.ammoChests.entities.back());
 
 	// also remove portals
 	while (registry.portals.entities.size() > 0)
 		registry.remove_all_components_of(registry.portals.entities.back());
+
+
 
 
 	MapState map_state = state.changeMap(map_name);
@@ -1349,6 +1525,11 @@ void GameScene::changeMap(std::string map_name) {
 
 // Add bullet creation
 void GameScene::shoot_bullet(vec2 position, vec2 direction) {
+	Player& player_component = registry.players.get(player);
+	if (player_component.ammo <= 0) {
+		return;
+	}
+	player_component.ammo -= 1;
 	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
@@ -1385,8 +1566,6 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	// Gun's ammo - 1
 	Gun& gun_component = registry.guns.get(gun);
 	//gun_component.current_ammo -= 1;
-	Player& player_component = registry.players.get(player);
-	player_component.ammo -= 1;
 
 	// Add a bounding box to the bullet entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -1554,6 +1733,7 @@ void GameScene::draw_fps() {
 		vec2 fps_position = vec2(10.f, 10.f);
 		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
 		registry.fpsTexts.emplace(text);
+		//registry.cameraTexts.emplace(text);
 	}
 }
 

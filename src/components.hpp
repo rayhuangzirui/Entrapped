@@ -35,6 +35,11 @@ struct Portal {
 	std::string next_map = "test";
 };
 
+// Distinguish between text displayed in orthogonal and camera matrix
+struct CameraText {
+
+};
+
 
 
 // Gun component
@@ -116,6 +121,16 @@ struct Health {
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
+};
+
+// placeholder entities that are invisible
+struct Invisibles {
+
+};
+
+// marker to mark a location on map;
+struct DirectionMarker {
+	vec2 exit_position = { 0, 0 };
 };
 
 struct Chest

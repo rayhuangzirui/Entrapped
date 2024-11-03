@@ -436,7 +436,7 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
 			}
-			else if (state.map[row][col] == 0 || state.map[row][col] == 3 || state.map[row][col] == 2) {
+			else if (state.map[row][col] == 0 || state.map[row][col] == 3 || state.map[row][col] == 2 || state.map[row][col] == 4) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
 			}
@@ -581,7 +581,10 @@ void RenderSystem::draw()
 	{
 		//if (!registry.motions.has(entity))
 		//	continue;
-		if (registry.texts.has(entity)) {
+		if (registry.cameraTexts.has(entity)) {
+			drawText(entity, camera_matrix);
+		}
+		else if (registry.texts.has(entity)) {
 			drawText(entity, projection_2D);
 		}
 		else if (registry.maps.has(entity)) {

@@ -51,6 +51,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	// TODO: remove bullets when hitting wall, enemy, or out of the screen
 
 
+
 	// Render bounding boxes for debugging (if enabled)
 	//if (show_bounding_boxes) {
 	//	render_bounding_boxes(renderer);

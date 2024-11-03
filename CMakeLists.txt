@@ -38,8 +38,14 @@ if (IS_OS_MAC)
   #include_directories(/opt/homebrew/include)
   #link_directories(/opt/homebrew/lib)
 
-  include_directories(/opt/homebrew/include /opt/homebrew/Cellar/freetype/2.13.3/include/freetype2)
+  #include_directories(/opt/homebrew/include /opt/homebrew/Cellar/freetype/2.13.3/include/freetype2)
   link_directories(/opt/homebrew/lib)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(FREETYPE2 REQUIRED freetype2)
+
+  include_directories(${FREETYPE2_INCLUDE_DIRS})
+  link_directories(${FREETYPE2_LIBRARY_DIRS})
+  link_libraries(${FREETYPE2_LIBRARIES})
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/camera_system.cpp")

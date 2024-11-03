@@ -20,7 +20,6 @@ public:
 	void on_mouse_click(int button, int action, int mod);
 	void draw_fps();
 
-
 private:
 	RenderSystem* renderer;
     // Player state

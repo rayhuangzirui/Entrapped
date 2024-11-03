@@ -37,6 +37,7 @@ public:
 	ComponentContainer<LightUp> lightups;
 	ComponentContainer<EnemyDeathTime> enemyDeathTimers;
 	ComponentContainer<HealthBar> healthBars;
+	ComponentContainer<Hint> hints;
 
 	// AI related
 	ComponentContainer<EnemyAI> enemyAIs;
@@ -107,9 +108,6 @@ public:
 
 		// portal
 		registry_list.push_back(&portals);
-
-		// health bar
-		registry_list.push_back(&healthBars);
 		
 	}
 

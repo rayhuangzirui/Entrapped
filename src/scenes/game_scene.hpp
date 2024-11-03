@@ -72,4 +72,10 @@ private:
 	void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& target_position);
 
 	Entity FPS_entity;
+
+	//void updateHints(Entity player);
+	void updateHints(Entity player, const CameraSystem& camera_system);
+
+	void renderCenteredText(const std::string& text, float screen_width, float screen_height, float scale, vec3 color);
+
 };

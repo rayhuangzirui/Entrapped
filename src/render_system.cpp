@@ -627,3 +627,7 @@ void RenderSystem::setTextPosition(Entity textEntity, vec2 newPosition) {
 		motion.position = newPosition;
 	}
 }
+
+CameraSystem& RenderSystem::getCameraSystem() {
+	return camera_system;
+}

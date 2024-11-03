@@ -12,7 +12,9 @@
 #include <map>
 
 #include "tiny_ecs.hpp"
+#include "camera_system.hpp"
 #include <glm/glm.hpp>
+#include <glm/vec2.hpp>
 
 
 /// Holds all state information relevant to a character as loaded using FreeType
@@ -37,6 +39,9 @@ public:
     int loadFont();
 
     Entity createText(std::string txt, glm::vec2 position, float scale, glm::vec3 color);
+    Entity createTextInView(const std::string& txt, vec2 world_position, float scale, vec3 color, const CameraSystem& camera_system);
+    void removeText(Entity text_entity);
+    void updateTextPosition(Entity text_entity, glm::vec2 new_position);
 };
 
 #endif 

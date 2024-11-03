@@ -39,20 +39,6 @@ void CameraSystem::adjustZoom(float delta) {
     }
 }
 
-mat3 CameraSystem::getProjectionMatrix() const {
-    float left = 0.f;
-    float top = 0.f;
-    float right = (float)window_width / zoom_level;
-    float bottom = (float)window_height / zoom_level;
-
-    float sx = 2.f / (right - left);
-    float sy = 2.f / (top - bottom);
-    float tx = -(right + left) / (right - left);
-    float ty = -(top + bottom) / (top - bottom);
-
-    return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
-}
-
 mat3 CameraSystem::getViewportMatrix(int window_width, int window_height) const {
     float half_width = (window_width / zoom_level) / 2.0f;
     float half_height = (window_height / zoom_level) / 2.0f;
@@ -70,4 +56,18 @@ mat3 CameraSystem::getViewportMatrix(int window_width, int window_height) const 
     float ty = -(top + bottom) / (top - bottom);
 
     return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
+}
+
+
+vec2 CameraSystem::worldToView(const vec2& world_position) const {
+    // Calculate the offset of the world position relative to the camera position
+    vec2 offset = world_position - position;
+
+    // Apply zoom scaling
+    vec2 screen_position = offset * zoom_level;
+
+    // Center the screen position within the window
+    screen_position += vec2(window_width / 2.0f, window_height / 2.0f);
+
+    return screen_position;
 }

@@ -17,6 +17,7 @@
 #include "tiny_ecs_registry.hpp"
 #include "tiny_ecs.hpp"
 #include "common.hpp"
+#include "camera_system.hpp"
 
 TextRenderer::TextRenderer() {
     std::cout << ">>> Text Renderer Initialized" << std::endl;
@@ -107,4 +108,54 @@ Entity TextRenderer::createText(std::string txt, vec2 position, float scale, vec
             GEOMETRY_BUFFER_ID::SPRITE });
     //std::cout << ">>> Text created: " << txt << std::endl;
     return entity;
+}
+
+Entity TextRenderer::createTextInView(const std::string& txt, vec2 world_position, float scale, vec3 color, const CameraSystem& camera_system) {
+    // Convert world position to screen position using the camera system's viewport matrix
+    mat3 viewport_matrix = camera_system.getViewportMatrix(camera_system.window_width, camera_system.window_height);
+
+    // Transform the world position to screen coordinates
+    vec3 position_in_world_space = vec3(world_position.x, world_position.y, 1.0f);
+    vec3 position_on_screen = viewport_matrix * position_in_world_space;
+
+    // Create the text entity at the transformed screen position
+    auto entity = Entity();
+    Motion& motion = registry.motions.emplace(entity);
+    motion.position = { position_on_screen.x, position_on_screen.y };
+    motion.angle = 0.f;
+    motion.velocity = { 0.f, 0.f };
+    motion.scale = { scale, scale };
+
+    // Initialize and configure the text component
+    Text& text = registry.texts.emplace(entity);
+    text.content = txt;
+    registry.colors.insert(entity, color);
+    registry.renderRequests.insert(
+        entity,
+        { TEXTURE_ASSET_ID::TEXTURE_COUNT, EFFECT_ASSET_ID::TEXT, GEOMETRY_BUFFER_ID::SPRITE }
+    );
+
+    return entity;
+}
+
+void TextRenderer::removeText(Entity text_entity) {
+    if (registry.texts.has(text_entity)) {
+        // Remove all components associated with the text entity
+        registry.remove_all_components_of(text_entity);
+        std::cout << ">>> Text removed" << std::endl;
+    }
+    else {
+        std::cout << ">>> Warning: Attempted to remove non-existent text entity" << std::endl;
+    }
+}
+
+void TextRenderer::updateTextPosition(Entity text_entity, glm::vec2 new_position) {
+    if (registry.motions.has(text_entity)) {
+        // Update the position of the Motion component
+        registry.motions.get(text_entity).position = new_position;
+        std::cout << ">>> Text position updated to: (" << new_position.x << ", " << new_position.y << ")" << std::endl;
+    }
+    else {
+        std::cout << ">>> Warning: Attempted to update position of non-existent text entity" << std::endl;
+    }
 }

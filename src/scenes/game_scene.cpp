@@ -678,6 +678,23 @@ void GameScene::on_key(int key, int action, int mod) {
 
 	}
 
+
+	// Handle interact key
+	if (action == GLFW_RELEASE && key == GLFW_KEY_E) {
+		// examine health chests
+		auto& health_chests = registry.healthChests;
+		for (Entity entity : health_chests.entities) {
+			HealthChest& health_chest = health_chests.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			Motion& player_motion = registry.motions.get(player);
+			Player& player_component = registry.players.get(player);
+			if (distance(motion.position, player_motion.position) < 48 && !health_chest.isOpen) {
+				player_component.health += health_chest.amount;
+				health_chest.isOpen = true;
+
+			}
+		}
+	}
 	motion.velocity = player_velocity;
 
 	// Apply sprint effect if active
@@ -922,6 +939,8 @@ Entity GameScene::createHealthChest(vec2 pos) {
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ 48.f ,48.f });
+
+	registry.healthChests.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,

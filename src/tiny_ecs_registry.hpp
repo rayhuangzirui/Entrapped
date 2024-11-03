@@ -63,6 +63,10 @@ public:
 	// Map transition
 	ComponentContainer<Portal> portals;
 
+	// Chest related
+	ComponentContainer<HealthChest> healthChests;
+	ComponentContainer<AmmoChest> ammoChests;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -108,6 +112,13 @@ public:
 
 		// portal
 		registry_list.push_back(&portals);
+
+		// health bar
+		registry_list.push_back(&healthBars);
+
+		// chest
+		registry_list.push_back(&healthChests);
+		registry_list.push_back(&ammoChests);
 		
 	}
 

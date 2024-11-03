@@ -109,7 +109,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			glUniform1f(opacity_uloc, 1.0f);
 		}
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::SALMON || render_request.used_effect == EFFECT_ASSET_ID::DEBUG_LINE || render_request.used_effect == EFFECT_ASSET_ID::RING || render_request.used_effect == EFFECT_ASSET_ID::BOX)
+	else if (render_request.used_effect == EFFECT_ASSET_ID::MESHED || render_request.used_effect == EFFECT_ASSET_ID::DEBUG_LINE || render_request.used_effect == EFFECT_ASSET_ID::RING || render_request.used_effect == EFFECT_ASSET_ID::BOX)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
@@ -124,7 +124,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
 							  sizeof(ColoredVertex), (void *)sizeof(vec3));
 		gl_has_errors();
-		if (render_request.used_effect == EFFECT_ASSET_ID::SALMON)
+		if (render_request.used_effect == EFFECT_ASSET_ID::MESHED)
 		{
 			// Light up?
 			GLint light_up_uloc = glGetUniformLocation(program, "light_up");

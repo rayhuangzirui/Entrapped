@@ -256,7 +256,7 @@ void GameScene::refreshUI(Entity player) {
 //	}
 //}
 
-void GameScene::updateHints(Entity player, const CameraSystem& camera_system) {
+void GameScene::updateHints(Entity player) {
 	vec2 player_position = registry.motions.get(player).position;
 
 	// Iterate over all entities with Hint components
@@ -301,7 +301,7 @@ void GameScene::updateHints(Entity player, const CameraSystem& camera_system) {
 void GameScene::initialize(RenderSystem* renderer) {
 	std::cout << registry.enemies.size() << std::endl;
 	this->renderer = renderer;
-	CameraSystem& camera = renderer->getCameraSystem();
+	camera = renderer->getCameraSystem();
 
 	// *Render the maze before initializing player and enemy entities*
 
@@ -353,7 +353,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 	player_velocity = { 0.0, 0.0 };
 
 	refreshUI(player);
-	std::cout << "here?" << std::endl;
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -363,7 +362,7 @@ void GameScene::step(float elapsed_ms) {
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
-	updateHints(player, camera);
+	updateHints(player);
 
 	// Update damage texts
 	auto& damage_texts = registry.damageTexts;
@@ -733,7 +732,7 @@ void GameScene::on_key(int key, int action, int mod) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
 					updateCamera_smoothing(motion.position, target_position);
 					Entity& gun = registry.guns.entities[0];
-					Motion& gun_motion = registry.motions.get(gun);
+					registry.motions.get(gun);
 					/*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
 					printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
 
@@ -751,7 +750,7 @@ void GameScene::on_key(int key, int action, int mod) {
 					updateCamera_smoothing(motion.position, target_position);
 
 					Entity& gun = registry.guns.entities[0];
-					Motion& gun_motion = registry.motions.get(gun);
+					registry.motions.get(gun);
 					Gun& gun_component = registry.guns.get(gun);
 					gun_component.offset.x = abs(gun_component.offset.x);
 				}
@@ -812,7 +811,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !health_chest.isOpen) {
 				Mix_PlayChannel(-1, health_pickup_sound, 0);
-				player_component.health += health_chest.amount;
+				player_component.health += (int) health_chest.amount;
 				player_component.health = min(player_component.health, player_component.max_health);
 				health_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
@@ -835,7 +834,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !ammo_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
-				player_component.ammo += ammo_chest.amount;
+				player_component.ammo += (int) ammo_chest.amount;
 				ammo_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
 				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
@@ -958,7 +957,7 @@ void GameScene::createMaze() {
 			EFFECT_ASSET_ID::MAP,
 			GEOMETRY_BUFFER_ID::SPRITE
 		});
-	Map& map = registry.maps.emplace(entity);
+	registry.maps.emplace(entity);
 
 }
 
@@ -1040,7 +1039,7 @@ Entity GameScene::createPlayer(vec2 pos) {
 		registry.renderRequests.insert(
 			entity,
 			{ TEXTURE_ASSET_ID::PLAYER_1,
-			  EFFECT_ASSET_ID::SALMON,
+			  EFFECT_ASSET_ID::MESHED,
 			  GEOMETRY_BUFFER_ID::PLAYER });
 	}
 	else {
@@ -1084,7 +1083,6 @@ Entity GameScene::createChest(RenderSystem* renderer, vec2 position) {
 }
 
 Entity GameScene::createHealthChest(vec2 pos) {
-	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
 
@@ -1107,7 +1105,6 @@ Entity GameScene::createHealthChest(vec2 pos) {
 }
 
 Entity GameScene::createAmmoChest(vec2 pos) {
-	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
 
@@ -1303,7 +1300,7 @@ Entity GameScene::createEnemy(vec2 pos) {
 	aiTimer.counter_ms = 0.f;
 
 	// Enemy AI
-	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	registry.enemyAIs.emplace(entity);
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -1316,7 +1313,7 @@ Entity GameScene::createEnemy(vec2 pos) {
 		registry.renderRequests.insert(
 			entity,
 			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
-			  EFFECT_ASSET_ID::SALMON,
+			  EFFECT_ASSET_ID::MESHED,
 			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
 	}
 	else {
@@ -1575,7 +1572,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	registry.parents.emplace(entity, Parent{ gun });
 
 	// Gun's ammo - 1
-	Gun& gun_component = registry.guns.get(gun);
+	registry.guns.get(gun);
 	//gun_component.current_ammo -= 1;
 
 	// Add a bounding box to the bullet entity
@@ -1587,7 +1584,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 		registry.renderRequests.insert(
 			entity,
 			{ TEXTURE_ASSET_ID::BULLET_1,
-			  EFFECT_ASSET_ID::SALMON,
+			  EFFECT_ASSET_ID::MESHED,
 			  GEOMETRY_BUFFER_ID::BULLET });
 	}
 	else {
@@ -1752,7 +1749,7 @@ void GameScene::draw_fps() {
 // void GameScene::drawHealthBars(RenderSystem* renderer) {
 
 
-void GameScene::drawHealthBars(RenderSystem* renderer) {
+void GameScene::drawHealthBars() {
     auto& health_container = registry.healths;
 
     // Iterate over all entities with Health components

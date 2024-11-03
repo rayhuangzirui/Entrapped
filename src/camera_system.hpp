@@ -20,9 +20,11 @@ public:
     mat3 getProjectionMatrix() const;
 
     mat3 getViewportMatrix(int window_width, int window_height) const;
+    vec2 worldToView(const vec2& world_position) const;
+
+    int window_width;
+    int window_height;
 private:
     vec2 position;
     float zoom_level;
-    int window_width;
-    int window_height;
 };

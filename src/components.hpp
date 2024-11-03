@@ -286,6 +286,14 @@ struct Map {
 	std::vector<std::vector<int>> grid;
 };
 
+struct Hint {
+	float radius;
+	std::string text;
+	bool is_visible = false;
+	Entity text_entity;        // Stores the entity of the rendered text
+};
+
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture

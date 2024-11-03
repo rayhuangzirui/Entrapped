@@ -37,6 +37,7 @@ public:
 	ComponentContainer<LightUp> lightups;
 	ComponentContainer<EnemyDeathTime> enemyDeathTimers;
 	ComponentContainer<HealthBar> healthBars;
+	ComponentContainer<Hint> hints;
 
 	// AI related
 	ComponentContainer<EnemyAI> enemyAIs;

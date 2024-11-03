@@ -527,7 +527,45 @@ void handle_wall_mesh_collision(Entity& entity, BoundingBox& bb, Motion& motion,
 	
 }
 
-
+//void handle_bullet_wall_collision(float step_seconds) {
+//    auto& motion_registry = registry.motions;
+//    auto& bbox_container = registry.boundingBoxes;
+//
+//    // Iterate over all bullet entities
+//    for (uint i = 0; i < registry.bullets.entities.size(); i++) {
+//        Entity bullet = registry.bullets.entities[i];
+//        Motion& bullet_motion = motion_registry.get(bullet);
+//
+//        // Move the bullet based on its current velocity
+//        bullet_motion.position += bullet_motion.velocity * step_seconds;
+//
+//        // Get the bullet's AABB
+//        vec2 bullet_aabb = get_aabb(bullet_motion);
+//
+//        // Flag to track collision
+//        bool collision_occurred = false;
+//
+//        // Check for collision with wall entities
+//        for (uint j = 0; j < bbox_container.components.size(); j++) {
+//            Entity wall_entity = bbox_container.entities[j];
+//            BoundingBox& wall_bbox = bbox_container.get(wall_entity);
+//
+//            // Skip non-wall entities by checking if they have the wall component (if applicable)
+//            if (registry.bullets.has(wall_entity)) continue;
+//
+//            // Get the wall's AABB
+//            vec2 wall_aabb = get_aabb(motion_registry.get(wall_entity));
+//
+//            // Check if the bullet intersects with the wall
+//            if (aabb_intersect(bullet_motion.position, bullet_aabb, motion_registry.get(wall_entity).position, wall_aabb)) {
+//                // Collision detected - stop the bullet by setting its velocity to zero
+//                bullet_motion.velocity = { 0.0f, 0.0f };
+//                collision_occurred = true;
+//                break;
+//            }
+//        }
+//    }
+//}
 
 const float DASH_MULTIPLIER = 5.0f;
 
@@ -538,6 +576,8 @@ void PhysicsSystem::step(float elapsed_ms)
     auto& motion_registry = registry.motions;
     auto& bbox_container = registry.boundingBoxes;
     float step_seconds = elapsed_ms / 1000.f;
+
+    /*handle_bullet_wall_collision(step_seconds);*/
 
     for (uint i = 0; i < motion_registry.components.size(); i++) {
         Motion& motion = motion_registry.components[i];

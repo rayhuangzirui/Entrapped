@@ -94,6 +94,12 @@ void GameScene::spawnEnemiesAndItems() {
 			if (state.map[row][col] == 2) {
 				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+
+				// Attach a hint to this enemy entity
+				Hint hint;
+				hint.text = "Left Click to shoot!";
+				hint.radius = 300.0f;  // Set the radius for the hint display
+				registry.hints.emplace(enemy, hint);
 			}
 			else if (state.map[row][col] == 3) {
 				Entity chest = createHealthChest(pos);
@@ -118,9 +124,84 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(ammo_text);
 }
 
+
+//void GameScene::updateHints(Entity player) {
+//	vec2 player_position = registry.motions.get(player).position;
+//
+//	// Iterate over all entities with Hint components
+//	for (Entity hint_entity : registry.hints.entities) {
+//		// Check if the hint entity still has a valid Hint component
+//		if (!registry.hints.has(hint_entity)) {
+//			continue; // Skip this entity if it has been removed (e.g., enemy is dead)
+//		}
+//
+//		Hint& hint = registry.hints.get(hint_entity);
+//		vec2 hint_position = registry.motions.get(hint_entity).position;
+//		/*std::cout << "Hint position: (" << hint_position.x << ", " << hint_position.y << ")" << std::endl;*/
+//
+//		// Check if player is within the hint radius
+//		float distance = glm::distance(player_position, hint_position);
+//		bool within_radius = distance <= hint.radius;
+//
+//		if (within_radius && !hint.is_visible) {
+//			// Display hint text above the entity if within radius
+//			hint.is_visible = true;
+//			vec2 text_position = hint_position + vec2(0, 50);  // Adjust as needed for position above entity
+//			/*vec2 text_position = { 1280 / 2.0f, 720 / 2.0f };*/
+//			hint.text_entity = renderer->text_renderer.createText(hint.text, text_position, 20.f, { 1.f, 1.f, 1.f });
+//		}
+//		else if (!within_radius && hint.is_visible) {
+//			// Hide hint text when outside radius
+//			hint.is_visible = false;
+//			renderer->text_renderer.removeText(hint.text_entity);  // Use the entity reference for removal
+//			hint.text_entity = Entity();  // Reset to indicate no active text entity
+//		}
+//	}
+//}
+
+void GameScene::updateHints(Entity player, const CameraSystem& camera_system) {
+	vec2 player_position = registry.motions.get(player).position;
+
+	// Iterate over all entities with Hint components
+	for (Entity hint_entity : registry.hints.entities) {
+		// Check if the hint entity still has a valid Hint component
+		if (!registry.hints.has(hint_entity)) {
+			continue; // Skip this entity if it has been removed (e.g., enemy is dead)
+		}
+
+		Hint& hint = registry.hints.get(hint_entity);
+		vec2 hint_position = registry.motions.get(hint_entity).position;
+
+		// Check if player is within the hint radius
+		float distance = glm::distance(player_position, hint_position);
+		bool within_radius = distance <= hint.radius;
+
+		// If within radius, display or update the hint text at a fixed screen position
+		if (within_radius && !hint.is_visible) {
+			hint.is_visible = true;
+
+			// Calculate the screen position based on the world position with an offset above the entity
+			vec2 screen_position = camera_system.worldToView(hint_position + vec2(140, -30));
+			hint.text_entity = renderer->text_renderer.createText(hint.text, screen_position, 20.f, { 1.f, 1.f, 1.f });
+		}
+		// Hide the hint text if the player moves outside the hint radius
+		else if (!within_radius && hint.is_visible) {
+			hint.is_visible = false;
+			renderer->text_renderer.removeText(hint.text_entity);
+			hint.text_entity = Entity();  // Reset to indicate no active text entity
+		}
+		// If already visible and within radius, update the text position to keep it above the moving entity
+		else if (within_radius && hint.is_visible) {
+			vec2 screen_position = camera_system.worldToView(hint_position + vec2(140, -30));
+			renderer->text_renderer.updateTextPosition(hint.text_entity, screen_position);
+		}
+	}
+}
+
 //bool show_bounding_boxes = true;
 void GameScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
+	CameraSystem& camera = renderer->getCameraSystem();
 
 	// *Render the maze before initializing player and enemy entities*
 
@@ -180,6 +261,8 @@ void GameScene::step(float elapsed_ms) {
 	// remove all debug component
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
+
+	updateHints(player, camera);
 
 	// Update damage texts
 	auto& damage_texts = registry.damageTexts;
@@ -705,27 +788,6 @@ bool GameScene::check_aabb_collision(const vec2& box1_min, const vec2& box1_max,
 		box1_max.y > box2_min.y);
 }
 
-// TODO: Remove this grid collision detection when aabb_collision is finished
-bool GameScene::check_player_wall_collision(const Motion& player_motion) {
-    // Calculate the player's bounding box for the new position
-    vec2 player_min = player_motion.position - (player_motion.scale / 2.0f);
-    vec2 player_max = player_motion.position + (player_motion.scale / 2.0f);
-
-    // Loop through all entities with bounding boxes (walls)
-    for (uint i = 0; i < registry.boundingBoxes.components.size(); i++) {
-        BoundingBox& bounding_box = registry.boundingBoxes.components[i];
-        vec2 wall_min = bounding_box.min;
-        vec2 wall_max = bounding_box.max;
-
-        // Use AABB collision check
-        if (check_aabb_collision(player_min, player_max, wall_min, wall_max)) {
-            return true; // Collision detected
-        }
-    }
-
-    return false; // No collision detected
-}
-
 void GameScene::createMaze() {
 	auto entity = Entity();
 	Motion& motion = registry.motions.emplace(entity);
@@ -1166,6 +1228,27 @@ void GameScene::handle_collisions() {
 			}
 		}
 
+		//// Bullet & Wall collision check for each bullet in the registry
+		//for (Entity bullet_entity : registry.bullets.entities) {
+		//	Motion& bullet_motion = registry.motions.get(bullet_entity);
+		//	vec2 bullet_min = bullet_motion.position - (bullet_motion.scale / 2.0f);
+		//	vec2 bullet_max = bullet_motion.position + (bullet_motion.scale / 2.0f);
+
+		//	// Loop through all entities with bounding boxes (assuming walls are part of this)
+		//	for (uint i = 0; i < registry.boundingBoxes.components.size(); i++) {
+		//		BoundingBox& wall_box = registry.boundingBoxes.components[i];
+		//		vec2 wall_min = wall_box.min;
+		//		vec2 wall_max = wall_box.max;
+
+		//		// Check AABB collision between the bullet and wall
+		//		if (check_aabb_collision(bullet_min, bullet_max, wall_min, wall_max)) {
+		//			// Collision detected, remove the bullet
+		//			registry.remove_all_components_of(bullet_entity);
+		//			break;  // Exit inner loop once bullet is removed
+		//		}
+		//	}
+		//}
+
 		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
 		// if (registry.bullets.has(entity)) {
 		// if (registry.enemies.has(entity_other)) {
@@ -1313,23 +1396,33 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 }
 
 void GameScene::apply_damage(Entity& target, int damage) {
-    // Check if the target has a Health component
-    if (registry.healths.has(target)) {
+	// Check if the target has a Health component
+	if (registry.healths.has(target)) {
 		Mix_PlayChannel(-1, monster_dead_sound, 0);
-        Health& health = registry.healths.get(target);
-        health.current_health -= damage;  // Apply the damage
-        std::cout << "Enemy lost " << damage << " health. Current health: " << health.current_health << std::endl;
+		Health& health = registry.healths.get(target);
+		health.current_health -= damage;  // Apply the damage
+		std::cout << "Enemy lost " << damage << " health. Current health: " << health.current_health << std::endl;
 
-        // Get the target position for the damage number display
-        vec2 position = registry.motions.get(target).position;
+		// Get the target position for the damage number display
+		vec2 position = registry.motions.get(target).position;
 
-        // Show the damage number at the target's position
-        /*show_damage_number(renderer, position, damage);*/
+		// Show the damage number at the target's position
+		// show_damage_number(renderer, position, damage);
 
-        // If health falls to 0 or below, remove the entity
-        if (health.current_health == 0) {
-			// health.current_health = 1;
+		// If health falls to 0 or below, remove the entity
+		if (health.current_health <= 0) {
+			// Check if the enemy has a hint component
+			if (registry.hints.has(target)) {
+				Hint& hint = registry.hints.get(target);
+				if (hint.is_visible) {
+					// Remove the hint text entity if visible
+					renderer->text_renderer.removeText(hint.text_entity);
+				}
+				// Clear the hint component from the entity
+				registry.hints.remove(target);
+			}
 
+			// Insert death animation timer or other removal actions
 			// Remove the hp bar
 			auto& enemy = registry.enemies.get(target);
 			std::cout << registry.healthBars.size() << std::endl;
@@ -1337,14 +1430,12 @@ void GameScene::apply_damage(Entity& target, int damage) {
 
 			std::cout << registry.healthBars.size() << std::endl;
 			registry.enemies.remove(target);
-
-			registry.enemyDeathTimers.insert(target, { 3000.0f , 3000.0f });
+			registry.enemyDeathTimers.insert(target, { 3000.0f, 3000.0f });
 			Mix_PlayChannel(-1, monster_hurt_sound, 0);
 
-            // registry.remove_all_components_of(target);
-            std::cout << "Enemy is dead!" << std::endl;
-        }
-    }
+			std::cout << "Enemy is dead!" << std::endl;
+		}
+	}
 }
 
 void GameScene::show_damage_number(vec2 position, int damage) {

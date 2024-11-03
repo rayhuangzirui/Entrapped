@@ -590,7 +590,7 @@ void RenderSystem::draw()
 		else if (registry.maps.has(entity)) {
 			drawMap(entity, camera_matrix);
 		}
-		else if (registry.UIs.has(entity)) {
+		else if (registry.UIs.has(entity) || registry.backgrounds.has(entity)) {
 			drawTexturedMesh(entity, projection_2D);
 		}
 		else {

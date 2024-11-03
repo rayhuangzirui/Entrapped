@@ -74,6 +74,8 @@ public:
 	// Other functionality
 	ComponentContainer<DirectionMarker> directionMarkers;
 
+	ComponentContainer<Background> backgrounds;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -135,6 +137,9 @@ public:
 
 		// direction marker
 		registry_list.push_back(&directionMarkers);
+
+		// background
+		registry_list.push_back(&backgrounds);
 
 	}
 

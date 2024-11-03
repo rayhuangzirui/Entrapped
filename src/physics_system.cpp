@@ -363,6 +363,7 @@ void handle_mesh_box_collision_new() {
         }
     }
 }
+
 vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
     bb.min = motion.position - (abs(motion.scale) / 2.0f);
     bb.max = motion.position + (abs(motion.scale) / 2.0f);
@@ -426,7 +427,7 @@ vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
     return result;
 }
 
-void handle_wall_mesh_collision(BoundingBox& bb, Motion& motion, Mesh& mesh) {
+void handle_wall_mesh_collision(Entity& entity, BoundingBox& bb, Motion& motion, Mesh& mesh) {
     const int TILE_SIZE = 48;
     bb.min = motion.position - (abs(motion.scale) / 2.0f);
     bb.max = motion.position + (abs(motion.scale) / 2.0f);
@@ -457,6 +458,12 @@ void handle_wall_mesh_collision(BoundingBox& bb, Motion& motion, Mesh& mesh) {
 					vec2 v0 = transform_vertex(mesh.vertices[mesh.vertex_indices[k]].position, motion);
 					if (point_in_aabb(v0, wall_pos, wall_size)) {
 						//printf("collision detected\n");
+                        // remove if bullet
+                        if (registry.bullets.has(entity)) {
+                            registry.remove_all_components_of(entity);
+                            return;
+                        }
+
 						float wall_left = wall_pos.x - TILE_SIZE / 2;
 						float wall_right = wall_pos.x + TILE_SIZE / 2;
 						float wall_top = wall_pos.y + TILE_SIZE / 2;
@@ -556,7 +563,7 @@ void PhysicsSystem::step(float elapsed_ms)
 			Mesh& mesh = *registry.meshPtrs.get(entity);
 			BoundingBox& bb = bbox_container.get(entity);
 
-			handle_wall_mesh_collision(bb, motion, mesh);
+			handle_wall_mesh_collision(entity, bb, motion, mesh);
         }
 
 		// Handle wall collision

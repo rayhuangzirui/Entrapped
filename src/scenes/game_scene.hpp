@@ -37,6 +37,7 @@ private:
 	Entity createEnemy(vec2 pos);
 	Entity createWall(vec2 position, vec2 size);
 	Entity createPlayerHPBar(vec2 position, float ratio);
+	//Entity createHealthPickup(vec2 position);
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
@@ -49,7 +50,7 @@ private:
 
 	void restart_game();
 
-	float PLAYER_SPEED = 100.0f;
+	float PLAYER_SPEED = 200.0f;
 	const int TILE_SIZE = 48;
 	Mix_Music* background_music;
 	Mix_Chunk* player_dead_sound;

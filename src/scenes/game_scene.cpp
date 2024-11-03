@@ -87,6 +87,7 @@ Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 
 // spawn enemies
 void GameScene::spawnEnemiesAndItems() {
+	std::cout << "spawned enemies" << std::endl;
 	for (int row = 0; row < state.map_height; ++row) {
 		for (int col = 0; col < state.map_width; ++col) {
 			if (state.map[row][col] == 2) {
@@ -292,58 +293,58 @@ void GameScene::step(float elapsed_ms) {
 	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 
-	if (registry.enemies.size() > 0) {
-		// Enemy walking frames and animations
-		for (int i = 0; i < registry.enemies.size(); i++) {
-			static int enemy_frame = 0;
-			static float frame_delay = 150.f;
-			static float frame_timer = 0.f;
+	//if (registry.enemies.size() > 0) {
+	//	// Enemy walking frames and animations
+	//	for (int i = 0; i < registry.enemies.size(); i++) {
+	//		static int enemy_frame = 0;
+	//		static float frame_delay = 150.f;
+	//		static float frame_timer = 0.f;
 
-			auto& enemy = registry.enemies.entities[i];
-			auto& motion = registry.motions.get(enemy);
+	//		auto& enemy = registry.enemies.entities[i];
+	//		auto& motion = registry.motions.get(enemy);
 
-			TEXTURE_ASSET_ID enemy_walking_frames[4] = {
-				TEXTURE_ASSET_ID::WOMAN_WALK_1,
-				TEXTURE_ASSET_ID::WOMAN_WALK_2,
-				TEXTURE_ASSET_ID::WOMAN_WALK_3,
-				TEXTURE_ASSET_ID::WOMAN_WALK_4
-			};
+	//		TEXTURE_ASSET_ID enemy_walking_frames[4] = {
+	//			TEXTURE_ASSET_ID::WOMAN_WALK_1,
+	//			TEXTURE_ASSET_ID::WOMAN_WALK_2,
+	//			TEXTURE_ASSET_ID::WOMAN_WALK_3,
+	//			TEXTURE_ASSET_ID::WOMAN_WALK_4
+	//		};
 
-			frame_timer += elapsed_ms;
-			if (frame_timer >= frame_delay) {
-				frame_timer = 0.f;
-				enemy_frame = (enemy_frame + 1) % 4;
-			}
+	//		frame_timer += elapsed_ms;
+	//		if (frame_timer >= frame_delay) {
+	//			frame_timer = 0.f;
+	//			enemy_frame = (enemy_frame + 1) % 4;
+	//		}
 
-			auto& texture = registry.renderRequests.get(enemy);
-			texture.used_texture = enemy_walking_frames[enemy_frame];
+	//		auto& texture = registry.renderRequests.get(enemy);
+	//		texture.used_texture = enemy_walking_frames[enemy_frame];
 
-			static float last_direction_x = motion.velocity.x;
-			static float flip_cooldown = 1000.f;
-			static float flip_timer = 0.f;
+	//		static float last_direction_x = motion.velocity.x;
+	//		static float flip_cooldown = 1000.f;
+	//		static float flip_timer = 0.f;
 
-			flip_timer += elapsed_ms;
+	//		flip_timer += elapsed_ms;
 
-			if (flip_timer >= flip_cooldown) {
-				if (motion.velocity.x < 0 && last_direction_x >= 0) {
-					motion.scale.x = -abs(motion.scale.x);
-					last_direction_x = motion.velocity.x;
-					flip_timer = 0.f; 
-				}
-				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
-					motion.scale.x = abs(motion.scale.x);
-					last_direction_x = motion.velocity.x;
-					flip_timer = 0.f;
-				}
-			}
+	//		if (flip_timer >= flip_cooldown) {
+	//			if (motion.velocity.x < 0 && last_direction_x >= 0) {
+	//				motion.scale.x = -abs(motion.scale.x);
+	//				last_direction_x = motion.velocity.x;
+	//				flip_timer = 0.f; 
+	//			}
+	//			else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+	//				motion.scale.x = abs(motion.scale.x);
+	//				last_direction_x = motion.velocity.x;
+	//				flip_timer = 0.f;
+	//			}
+	//		}
 
-			if (motion.velocity.x == 0) {
-				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
-			}
+	//		if (motion.velocity.x == 0) {
+	//			texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
+	//		}
 
-			// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
-		}
-	}
+	//		// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
+	//	}
+	//}
 
 	// deal with enemy death animation
 	if (registry.enemyDeathTimers.size() > 0) {
@@ -768,7 +769,7 @@ Entity GameScene::createPlayer(vec2 pos) {
 	// Create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
 	// Initialize health and ammo
-	player.health = 5;
+	player.health = 100;
 	player.ammo = 30;
 
 	// Add the Health component to the player entity with initial health of 100
@@ -917,7 +918,6 @@ Entity GameScene::createHealthBar(RenderSystem* renderer, Entity entity, vec2 of
     return health_bar_entity;
 
 }
-
 
 // Portal Component
 Entity GameScene::createPortal(vec2 pos, std::string map_name) {
@@ -1133,6 +1133,12 @@ void GameScene::handle_collisions() {
 }
 
 void GameScene::changeMap(std::string map_name) {
+	std::cout << state.map_index << std::endl;
+	if (state.map_index >= state.map_lists.size()) {
+		std::cout << "game over" << std::endl;
+		return;
+	}
+	state.map_index++;
 	// remove bullets and enemies
 	while (registry.bullets.entities.size() > 0)
 		registry.remove_all_components_of(registry.bullets.entities.back());
@@ -1145,19 +1151,18 @@ void GameScene::changeMap(std::string map_name) {
 
 
 	MapState map_state = state.changeMap(map_name);
-	state.map_index++;
-	if (state.map_index >= state.map_lists.size()) {
-		std::cout << "game over" << std::endl;
-		return;
-	}
 	
 	// spawn player
 	Entity& player_entity = registry.players.entities[0];
 	Motion& player_motion = registry.motions.get(player_entity);
 	player_motion.position = { (map_state.player_spawn.x + 0.5) * 48,(map_state.player_spawn.y + 0.5) * 48 };
-
 	// spawn exit
-	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+	if (state.map_index >= state.map_lists.size()) {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
+	}
+	else {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+	}
 
 	// spawn enemies
 	spawnEnemiesAndItems();
@@ -1175,7 +1180,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = position;
-	motion.velocity = direction * 300.f;
+	motion.velocity = direction * 500.f;
 	motion.angle = atan2(direction.y, direction.x); // Calculate angle from direction, in radians for sprite rotation
 	motion.scale = vec2({ 15.f, 15.f });
 

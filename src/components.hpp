@@ -16,9 +16,9 @@ struct Parent
 struct Player
 {
 	// Player's health
-	int health = 5;
+	int health = 100;
 
-	int max_health = 5;
+	int max_health = 100;
 
 	// Hit cooldown
 	float hit_cooldown = 0.f;

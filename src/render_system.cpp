@@ -4,7 +4,7 @@
 
 #include "tiny_ecs_registry.hpp"
 
-
+#include "scenes/main_menu.hpp"
 #include "camera_system.hpp"
 #include "text_renderer.hpp"
 #include <iostream>
@@ -375,18 +375,29 @@ void RenderSystem::draw()
 
 	//--------------------------Camera--------------------------//
 	// Ensure player entity is valid and retrieve its position
-	if (registry.players.entities.size() > 0) {
-		Entity player = registry.players.entities[0];
-		if (registry.motions.has(player)) {
-			vec2 player_position = registry.motions.get(player).position;
+	mat3 camera_matrix;
+	if (!MainMenu::in_main_menu) {
+		// Only update the camera if not in the main menu
+		if (registry.players.entities.size() > 0) {
+			Entity player = registry.players.entities[0];
+			if (registry.motions.has(player)) {
+				vec2 player_position = registry.motions.get(player).position;
 
-			// Update the camera to center on the player¡¯s position
-			camera_system.updateCamera(player_position, w, h);
+				// Update the camera to center on the player¡¯s position
+				camera_system.updateCamera(player_position, w, h);
+			}
 		}
-	}
 
-	// Get the camera matrix after update
-	mat3 camera_matrix = camera_system.getViewportMatrix(w, h);
+		// Log after updating the camera
+		std::cout << "Camera updated, MainMenu::in_main_menu = false" << std::endl;
+		// Get the camera matrix after update
+		camera_matrix = camera_system.getViewportMatrix(w, h);
+	}
+	else {
+		std::cout << "Camera not updated, MainMenu::in_main_menu = true" << std::endl;
+		// Use the default 1920x1080 matrix for the main menu
+		camera_matrix = camera_system.getDefaultMatrix();
+	}
 	//--------------------------Camera--------------------------//
 
 	// First render to the custom framebuffer

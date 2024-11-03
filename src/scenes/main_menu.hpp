@@ -14,6 +14,7 @@ public:
 	void on_mouse_move(vec2 mouse_position);
 	void on_mouse_click(RenderSystem* renderer, int button, int action, int mod);
 	void draw_fps(RenderSystem* renderer);
+	static bool in_main_menu; // Start in main menu
 private:
 	std::string next_scene = "";
 };

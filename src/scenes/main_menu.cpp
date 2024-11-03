@@ -1,6 +1,9 @@
 #include "main_menu.hpp"
+#include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <iostream>
 
+bool MainMenu::in_main_menu = true;
 
 void MainMenu::initialize(RenderSystem* renderer) {
 	renderer->text_renderer.createText("Entrapped", { 50.f, window_height_px - 200.f }, 40.f, { 1.f, 1.f, 1.f });
@@ -24,6 +27,9 @@ void MainMenu::on_key(RenderSystem* renderer, int key, int action, int mod) {
 	(int)mod;
 	if (action == GLFW_RELEASE) {
 		next_scene = "game_scene";
+		std::cout << "GameScene::in_main_menu = " << (MainMenu::in_main_menu ? "true" : "false") << std::endl;
+		MainMenu::in_main_menu = false;
+		std::cout << "GameScene::in_main_menu = " << (MainMenu::in_main_menu ? "true" : "false") << std::endl;
 		return;
 	}
 }

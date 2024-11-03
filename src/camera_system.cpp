@@ -1,5 +1,6 @@
 // camera_system.cpp
 #include "camera_system.hpp"
+#include "scenes/main_menu.hpp"
 #include <algorithm>
 #include <iostream>
 
@@ -8,7 +9,9 @@ CameraSystem::CameraSystem() : position(vec2(0.f, 0.f)), zoom_level(1.0f), windo
 
 void CameraSystem::updateCamera(const vec2& player_position, int window_width, int window_height) {
     // Center the camera on the player's position
-    position = player_position;
+    if (!MainMenu::in_main_menu) {
+        position = player_position;
+    }
 }
 
 
@@ -64,6 +67,20 @@ mat3 CameraSystem::getViewportMatrix(int window_width, int window_height) const 
     float top = position.y - half_height;
 
     // Create transformation matrix
+    float sx = 2.f / (right - left);
+    float sy = 2.f / (top - bottom);
+    float tx = -(right + left) / (right - left);
+    float ty = -(top + bottom) / (top - bottom);
+
+    return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
+}
+
+mat3 CameraSystem::getDefaultMatrix() const {
+    float left = 0.f;
+    float top = 0.f;
+    float right = 1280.f;
+    float bottom = 720.f;
+
     float sx = 2.f / (right - left);
     float sy = 2.f / (top - bottom);
     float tx = -(right + left) / (right - left);

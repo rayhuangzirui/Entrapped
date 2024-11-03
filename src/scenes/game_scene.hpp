@@ -45,4 +45,6 @@ private:
 	std::string next_scene = "";
 	CameraSystem camera;
 	void updateCamera(const vec2& player_position);
+
+	RenderSystem* renderer;
 };

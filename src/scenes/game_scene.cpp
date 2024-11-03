@@ -626,6 +626,13 @@ void GameScene::on_key(int key, int action, int mod) {
 			if (motion.scale.x > 0) {
 				vec2 target_position = motion.position - motion.scale / 2.0f;
 				updateCamera_smoothing(motion.position, target_position);
+				Entity& gun = registry.guns.entities[0];
+				Motion& gun_motion = registry.motions.get(gun);
+				/*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
+				printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
+
+				Gun& gun_component = registry.guns.get(gun);
+				gun_component.offset.x = -abs(gun_component.offset.x);
 			}
 			motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
@@ -636,6 +643,11 @@ void GameScene::on_key(int key, int action, int mod) {
 			if (motion.scale.x < 0) {
 				vec2 target_position = motion.position - motion.scale / 2.0f;
 				updateCamera_smoothing(motion.position, target_position);
+
+				Entity& gun = registry.guns.entities[0];
+				Motion& gun_motion = registry.motions.get(gun);
+				Gun& gun_component = registry.guns.get(gun);
+				gun_component.offset.x = abs(gun_component.offset.x);
 			}
 			// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 			motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
@@ -974,7 +986,7 @@ Entity GameScene::createGun(Entity player) {
 	gun_motion.position = player_motion.position + gun.offset;
 	gun_motion.angle = 0;
 	gun_motion.velocity = {0,0};
-	gun_motion.scale = {37.5, 37.5};
+	gun_motion.scale = {35, 30};
 	
 	// gun's states
 	gun.ammo_capacity = 30;
@@ -999,7 +1011,7 @@ Entity GameScene::createGun(Entity player) {
 	// Render request
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::PISTOL,
+		{ TEXTURE_ASSET_ID::SMG,
 		  EFFECT_ASSET_ID::TEXTURED,
 		  GEOMETRY_BUFFER_ID::SPRITE });
 

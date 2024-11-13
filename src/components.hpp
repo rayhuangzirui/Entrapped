@@ -106,6 +106,50 @@ struct Enemy
 	Entity health_bar_entity;
 };
 
+// A fast enemy with high damage and low health
+struct EnemyFast
+{
+	// Enemy's health
+	int health = 2;
+
+	// Enemy's damage
+	int damage = 5;
+    
+	float speed = 200.f;
+
+
+	Entity health_bar_entity;
+};
+
+// A tanky enemy with high health and low damage
+struct EnemyTank
+{
+	// Enemy's health
+	int health = 7;
+
+	// Enemy's damage
+	int damage = 2;
+
+	float speed = 50.f;
+
+	Entity health_bar_entity;
+};
+
+struct EnemyBoss
+{
+	// Enemy's health
+	int health = 25;
+
+	// Enemy's damage
+	int damage = 10;
+
+	float speed = 80.f;
+
+	Entity health_bar_entity;
+};
+
+
+
 // Enemy AI component
 struct EnemyAI {
 	vec2 last_player_position = { 0,0 };

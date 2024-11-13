@@ -56,7 +56,8 @@ vec2 worldToMapCoords(vec2 v) {
 	return coords;
 }
 
-
+// Modified A* Path Finding
+// On the basis of classic path finding, the entity will prefer open areas
 std::vector<vec2> AISystem::findPath(vec2 start, vec2 end) {
 
 	std::vector<vec2> open_set;
@@ -106,6 +107,7 @@ std::vector<vec2> AISystem::findPath(vec2 start, vec2 end) {
 			// fill in info
 			PathNode& neighbour_node = cell_info[neighbour.y][neighbour.x];
 			PathNode& current_node = cell_info[current_coords.y][current_coords.x];
+			// 
 			neighbour_node.g = current_node.g + distance(neighbour, current_coords);
 			neighbour_node.h = distance(end, neighbour);
 			neighbour_node.p = current_coords;
@@ -208,6 +210,14 @@ void AISystem::step(float elapsed_ms_since_last_update)
 				enemyAI.path_finding_timer -= elapsed_ms_since_last_update;
 			}
 
+			// find path to the last seen position
+			if (enemyAI.path_finding_timer <= 0) {
+				vec2 start = worldToMapCoords(motion.position);
+				vec2 end = worldToMapCoords(enemyAI.last_player_position);
+				enemyAI.path = findPath(start, end);
+				enemyAI.path_finding_timer = 750.f;
+			}
+
 			// if the player is outside of the radius for 3 seconds
 			// return to the wander state
 			if (distance(player_motion.position, motion.position) >= enemyAI.detection_radius) {
@@ -219,13 +229,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 				}
 			}
 			else { // else, update the position of the player for the AI
-				//enemyAI.last_player_position = player_motion.position;
-				if (enemyAI.path_finding_timer <= 0) {
-					vec2 start = worldToMapCoords(motion.position);
-					vec2 end = worldToMapCoords(player_motion.position);
-					enemyAI.path = findPath(start, end);
-					enemyAI.path_finding_timer = 750.f;
-				}
+				enemyAI.last_player_position = player_motion.position;
 				enemyAI.chase_timer = 3000.f;
 			}
 

@@ -203,20 +203,6 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
-int clamp_m(int n, int min_v, int max_v) {
-    return min(max(n, min_v), max_v);
-}
-
-// borrowed from https://stackoverflow.com/questions/13094224/a-c-routine-to-round-a-float-to-n-significant-digits
-float round_to_digits(float value, int digits)
-{
-    if (value == 0.0) // otherwise it will return 'nan' due to the log10() of zero
-        return 0.0;
-
-    float factor = pow(10.0, digits - ceil(log10(fabs(value))));
-    return round(value * factor) / factor;
-}
-
 // Mesh-mesh collision
 void handle_mesh_box_collision() {
     auto& motion_registry = registry.motions;

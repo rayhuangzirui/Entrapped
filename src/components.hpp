@@ -157,7 +157,9 @@ struct EnemyAI {
 	float chase_timer = 3000;
 	float wander_timer = 0;
 	float flee_timer = 3000;
+	float path_finding_timer = 0;
 	int state = 0;
+	std::vector<vec2> path;
 };
 
 struct Health {

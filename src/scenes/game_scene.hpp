@@ -81,4 +81,6 @@ private:
 
 	//void renderCenteredText(const std::string& text, float screen_width, float screen_height, float scale, vec3 color);
 
+	// Create inventory
+	void createInventorySlots(Entity player);
 };

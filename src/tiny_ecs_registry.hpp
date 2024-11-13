@@ -76,6 +76,10 @@ public:
 
 	ComponentContainer<Background> backgrounds;
 
+	//Inventory Related
+	ComponentContainer<InventoryItem> inventoryItems;
+	ComponentContainer<Inventory> inventories;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -141,6 +145,9 @@ public:
 		// background
 		registry_list.push_back(&backgrounds);
 
+		// Inventory
+		registry_list.push_back(&inventoryItems);
+		registry_list.push_back(&inventories);
 	}
 
 	void clear_all_components() {

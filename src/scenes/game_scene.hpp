@@ -32,7 +32,7 @@ private:
 	//Entity createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size);
 	Entity createHealthBarNew(Entity entity);
 	Entity createChest(RenderSystem* renderer, vec2 pos);
-	Entity createPlayer(vec2 pos);
+	Entity createPlayer(vec2 pos, std::string profession);
 	Entity createGun(Entity player);
 	Entity createPortal(vec2 pos, std::string map_name);
 	Entity createEnemy(vec2 pos);

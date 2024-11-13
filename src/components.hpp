@@ -26,8 +26,7 @@ struct Player
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
 
-	// Player's Profession may be used in the future
-	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+	std::string profession;
 };
 
 // Portal to the next map
@@ -391,7 +390,13 @@ enum class TEXTURE_ASSET_ID {
 	CHEST_OPENED = CHEST_CLOSED + 1,
 
 	SPACE_BACKGROUND = CHEST_OPENED + 1,
-	TEXTURE_COUNT = SPACE_BACKGROUND + 1
+	CHOOSE_PROFESSION_TITLE = SPACE_BACKGROUND + 1,
+	SOLDIER_PAGE = CHOOSE_PROFESSION_TITLE + 1,
+	SOLDIER_PAGE_CLICKED = SOLDIER_PAGE + 1,
+	CONFIRM_BUTTON = SOLDIER_PAGE_CLICKED + 1,
+	CONFIRM_BUTTON_CLICKED = CONFIRM_BUTTON + 1,
+	CONFIRM_BUTTON_DISABLED = CONFIRM_BUTTON_CLICKED + 1,
+	TEXTURE_COUNT = CONFIRM_BUTTON_DISABLED + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

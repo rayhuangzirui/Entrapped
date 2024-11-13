@@ -28,17 +28,9 @@ void MainMenu::on_key(int key, int action, int mod) {
 	(int)key;
 	(int)action;
 	(int)mod;
-	// Press ; to enter debug mode before initializing player, enemies, and bullets
-	// in order to visualize the meshes by rendering .obj rather than sprites 
-	if (key == GLFW_KEY_SEMICOLON) {
-		if (action == GLFW_PRESS)
-			debugging.in_debug_mode = false;
-		else
-			debugging.in_debug_mode = true;
-	}
 
 	if (action == GLFW_RELEASE) {
-		next_scene = "game_scene";
+		next_scene = "profession_menu";
 		return;
 	}
 }

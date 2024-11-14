@@ -360,6 +360,18 @@ struct Hint {
 	Entity text_entity;        // Stores the entity of the rendered text
 };
 
+//-------------------- Inventory system --------------------
+struct InventoryItem {
+	enum class Type { AmmoPack } type;
+	int count = 0;
+};
+
+struct Inventory {
+	std::vector<InventoryItem> items;
+	int max_slots = 4;
+};
+//-------------------- Inventory system --------------------
+
 
 /**
  * The following enumerators represent global identifiers refering to graphic

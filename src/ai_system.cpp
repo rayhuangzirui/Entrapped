@@ -36,7 +36,7 @@ std::vector<vec2> findNeighbours(vec2 v) {
 }
 
 int countAgainstWall(vec2 v) {
-	int walls = 0;
+	int walls = 1;
 	for (int i = v.y - 1; i <= v.y + 1; i++) {
 		for (int j = v.x - 1; j <= v.x + 1; j++) {
 			if (j >= 0 && j < state.map_width && i >= 0 && i < state.map_height && vec2(j, i) != v) {

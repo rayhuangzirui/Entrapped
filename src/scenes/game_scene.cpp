@@ -983,6 +983,7 @@ void GameScene::createMaze() {
 			GEOMETRY_BUFFER_ID::SPRITE
 		});
 	registry.maps.emplace(entity);
+	std::cout << "called createMaze after: " << (unsigned int)entity << std::endl;
 
 }
 

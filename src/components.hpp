@@ -348,9 +348,7 @@ struct BoundingBox {
 
 // The map
 struct Map {
-	int width;
-	int height;
-	std::vector<std::vector<int>> grid;
+
 };
 
 struct Hint {

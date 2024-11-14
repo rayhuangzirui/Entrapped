@@ -19,8 +19,7 @@ public:
 	ComponentContainer<AITimer> aiTimers;
 	ComponentContainer<Gun> guns;
 	ComponentContainer<Parent> parents;
-	ComponentContainer<FPS> fps;
-	
+	ComponentContainer<FPS> fps;	
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;

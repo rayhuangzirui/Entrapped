@@ -86,6 +86,13 @@ class RenderSystem {
 			textures_path("chest_opened.png"),
 
 			textures_path("Space Background.png"),
+			textures_path("choose_profession_title.png"),
+			textures_path("Soldier_page.png"),
+			textures_path("Soldier_page_clicked.png"),
+			textures_path("confirm_button.png"),
+			textures_path("confirm_button_clicked.png"),
+			textures_path("confirm_button_disabled.png"),
+
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -144,6 +151,8 @@ public:
 	void setTextPosition(Entity textEntity, vec2 newPosition);
 
 	CameraSystem& getCameraSystem();
+	// Window handle
+	GLFWwindow* window;
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
@@ -151,8 +160,6 @@ private:
 	void drawMap(Entity entity, const mat3& projection);
 	void drawToScreen();
 
-	// Window handle
-	GLFWwindow* window;
 
 	// Text renderer
 	//TextRenderer text_renderer;

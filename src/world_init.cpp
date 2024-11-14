@@ -281,5 +281,3 @@ Entity createConfirmButton(RenderSystem* renderer, vec2 pos, bool is_enabled, bo
 
 	return entity;
 }
-
-

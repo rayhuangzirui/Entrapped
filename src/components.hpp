@@ -40,6 +40,10 @@ struct CameraText {
 };
 
 
+struct Button {
+
+};
+
 
 // Gun component
 struct Gun

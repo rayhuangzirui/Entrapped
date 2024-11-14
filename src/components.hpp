@@ -26,8 +26,7 @@ struct Player
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
 
-	// Player's Profession may be used in the future
-	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+	std::string profession;
 };
 
 // Portal to the next map
@@ -106,6 +105,50 @@ struct Enemy
 	Entity health_bar_entity;
 };
 
+// A fast enemy with high damage and low health
+struct EnemyFast
+{
+	// Enemy's health
+	int health = 2;
+
+	// Enemy's damage
+	int damage = 5;
+    
+	float speed = 200.f;
+
+
+	Entity health_bar_entity;
+};
+
+// A tanky enemy with high health and low damage
+struct EnemyTank
+{
+	// Enemy's health
+	int health = 7;
+
+	// Enemy's damage
+	int damage = 2;
+
+	float speed = 50.f;
+
+	Entity health_bar_entity;
+};
+
+struct EnemyBoss
+{
+	// Enemy's health
+	int health = 25;
+
+	// Enemy's damage
+	int damage = 10;
+
+	float speed = 80.f;
+
+	Entity health_bar_entity;
+};
+
+
+
 // Enemy AI component
 struct EnemyAI {
 	vec2 last_player_position = { 0,0 };
@@ -113,7 +156,9 @@ struct EnemyAI {
 	float chase_timer = 3000;
 	float wander_timer = 0;
 	float flee_timer = 3000;
+	float path_finding_timer = 0;
 	int state = 0;
+	std::vector<vec2> path;
 };
 
 struct Health {
@@ -403,7 +448,13 @@ enum class TEXTURE_ASSET_ID {
 	CHEST_OPENED = CHEST_CLOSED + 1,
 
 	SPACE_BACKGROUND = CHEST_OPENED + 1,
-	TEXTURE_COUNT = SPACE_BACKGROUND + 1
+	CHOOSE_PROFESSION_TITLE = SPACE_BACKGROUND + 1,
+	SOLDIER_PAGE = CHOOSE_PROFESSION_TITLE + 1,
+	SOLDIER_PAGE_CLICKED = SOLDIER_PAGE + 1,
+	CONFIRM_BUTTON = SOLDIER_PAGE_CLICKED + 1,
+	CONFIRM_BUTTON_CLICKED = CONFIRM_BUTTON + 1,
+	CONFIRM_BUTTON_DISABLED = CONFIRM_BUTTON_CLICKED + 1,
+	TEXTURE_COUNT = CONFIRM_BUTTON_DISABLED + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

@@ -166,3 +166,120 @@ Entity createWall(RenderSystem* renderer, vec2 position, vec2 size)
     return entity;
 }
 
+
+Entity createBackground(RenderSystem* renderer) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = { window_width_px / 2.f, window_height_px / 2.f };
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ window_width_px , window_height_px });
+
+	registry.backgrounds.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::SPACE_BACKGROUND,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createChooseProfessionTitle(RenderSystem* renderer) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = { window_width_px / 2.f, 100.f };
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 800 , 300 });
+
+	registry.backgrounds.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::CHOOSE_PROFESSION_TITLE,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createProfessionLayer(RenderSystem* renderer, vec2 pos, std::string profession, bool is_clicked) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 550 , 550 });
+
+	registry.backgrounds.emplace(entity);
+
+	if (profession == "Soldier") {
+		if (!is_clicked) {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::SOLDIER_PAGE,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+		}
+		else {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::SOLDIER_PAGE_CLICKED,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+		}
+	}
+
+
+	return entity;
+}
+
+// create a confirm button
+Entity createConfirmButton(RenderSystem* renderer, vec2 pos, bool is_enabled, bool is_clicked) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 250 , 250 }); //165, 82.5
+
+	registry.backgrounds.emplace(entity);
+
+	if (is_enabled) {
+		if (is_clicked) {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::CONFIRM_BUTTON_CLICKED,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+		}
+		else {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::CONFIRM_BUTTON,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+		}
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::CONFIRM_BUTTON_DISABLED,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+
+	return entity;
+}
+
+

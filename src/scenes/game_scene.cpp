@@ -334,7 +334,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	state.map_index++;
 	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 
-	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE });
+	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
 
@@ -423,6 +423,12 @@ void GameScene::step(float elapsed_ms) {
 			}
 			else if (enemyAI.state == 2) {
 				registry.colors.insert(ring, { 0.0, 0.0f, 1.0f });
+			}
+
+			if (enemyAI.path.size() > 0) {
+				for (vec2 path_node : enemyAI.path) {
+					createBox((path_node + 0.5f) * 48.f, {10,10});
+				}
 			}
 		}
 
@@ -1040,7 +1046,7 @@ Entity GameScene::createWall(vec2 position, vec2 size)
 	return entity;
 }
 
-Entity GameScene::createPlayer(vec2 pos) {
+Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
@@ -1050,6 +1056,7 @@ Entity GameScene::createPlayer(vec2 pos) {
 
 	// Mesh original size : 0.009457, 0.017041
 	printf("Player mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+	printf("Selected profession: %s\n", profession.c_str());
 	// Adjusted the position of verticies to match the size of player in Mesh::loadFromOBJFile
 
 	// Setting initial motion values
@@ -1064,6 +1071,8 @@ Entity GameScene::createPlayer(vec2 pos) {
 	// Initialize health and ammo
 	player.health = 20;
 	player.ammo = 50;
+	player.profession = profession;
+
 
 	// Initialize player's inventory
 	Inventory& inventory = registry.inventories.emplace(entity);

@@ -83,4 +83,5 @@ private:
 
 	// Create inventory
 	void createInventorySlots(Entity player);
+	void refreshInventorySlots(Entity player);
 };

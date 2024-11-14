@@ -79,6 +79,8 @@ public:
 	ComponentContainer<InventoryItem> inventoryItems;
 	ComponentContainer<Inventory> inventories;
 
+	ComponentContainer<Refreshable> refreshables;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -119,6 +121,7 @@ public:
 
 		// UI related
 		registry_list.push_back(&UIs);
+		registry_list.push_back(&refreshables);
 		registry_list.push_back(&playerHPBars);
 		registry_list.push_back(&fps);
 		registry_list.push_back(&fpsTexts);

@@ -307,6 +307,11 @@ struct UI {
 
 };
 
+// UI component that requires refreshing
+struct Refreshable {
+
+};
+
 // Text that displays FPS
 struct FPSText {
 

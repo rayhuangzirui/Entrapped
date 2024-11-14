@@ -150,6 +150,7 @@ Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 	motion.scale = {200*ratio, 30};
 
 	registry.UIs.emplace(entity);
+	registry.refreshables.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity, {
@@ -225,8 +226,8 @@ void GameScene::spawnEnemiesAndItems() {
 }
 
 void GameScene::refreshUI(Entity player) {
-	while (registry.UIs.entities.size() > 0)
-		registry.remove_all_components_of(registry.UIs.entities.back());
+	while (registry.refreshables.entities.size() > 0)
+		registry.remove_all_components_of(registry.refreshables.entities.back());
 
 	Player& player_component = registry.players.get(player);
 
@@ -234,13 +235,15 @@ void GameScene::refreshUI(Entity player) {
 	createPlayerHPBar({ 120.f - 100*(1-ratio), 35.f}, ratio);
 	Entity health_text = renderer->text_renderer.createText(std::to_string(player_component.health) + "/" + std::to_string(player_component.max_health), { 35.f, 32.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.UIs.emplace(health_text);
+	registry.refreshables.emplace(health_text);
 
 	// create ammo text
 	Entity ammo_text = renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), { 35.f, 72.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.UIs.emplace(ammo_text);
+	registry.refreshables.emplace(ammo_text);
 
-	// Draw inventory slots
-	createInventorySlots(player);
+	// refresh inventory
+	refreshInventorySlots(player);
 
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
@@ -375,6 +378,8 @@ void GameScene::initialize(RenderSystem* renderer) {
 	current_speed = 5.0f;
 	player_velocity = { 0.0, 0.0 };
 
+	// Draw inventory slots
+	createInventorySlots(player);
 	refreshUI(player);
 }
 
@@ -1905,8 +1910,49 @@ void GameScene::createInventorySlots(Entity player) {
 				});
 
 			// Display the item count as text
+			//std::string count_text = std::to_string(inventory.items[i].count);
+			//renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
+		}
+	}
+}
+
+void GameScene::refreshInventorySlots(Entity player) {
+	Inventory& inventory = registry.inventories.get(player);
+
+	float slot_size = 48.f;
+	float spacing = 10.f;
+	float x_offset = window_width_px / 2.0f - 2 * slot_size;
+	float y_offset = 50.f;
+
+	for (int i = 0; i < inventory.max_slots; ++i) {
+		float x_position = x_offset + i * (slot_size + spacing);
+		vec2 position = { x_position, y_offset };
+
+		// Render item icon if slot is not empty
+		if (inventory.items[i].count > 0) {
+			// Create a new icon entity for the item
+			Entity icon = Entity();
+
+			// Add a Motion component for position and scale
+			Motion& icon_motion = registry.motions.emplace(icon);
+			icon_motion.position = position; // Use screen position, not world position
+			icon_motion.scale = { slot_size - 10, slot_size - 10 };
+
+			// Mark this entity as a UI element so it renders on the UI layer
+			registry.UIs.emplace(icon);
+			registry.refreshables.emplace(icon);
+
+			// Render the icon with the appropriate texture
+			registry.renderRequests.insert(icon, {
+				TEXTURE_ASSET_ID::CHEST_CLOSED,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE
+				});
+
+			// Display the item count as text
 			std::string count_text = std::to_string(inventory.items[i].count);
-			renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
+			Entity count_text_entity = renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
+			registry.refreshables.emplace(count_text_entity);
 		}
 	}
 }

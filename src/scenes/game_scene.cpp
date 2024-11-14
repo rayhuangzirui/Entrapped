@@ -421,6 +421,12 @@ void GameScene::step(float elapsed_ms) {
 			else if (enemyAI.state == 2) {
 				registry.colors.insert(ring, { 0.0, 0.0f, 1.0f });
 			}
+
+			if (enemyAI.path.size() > 0) {
+				for (vec2 path_node : enemyAI.path) {
+					createBox((path_node + 0.5f) * 48.f, {10,10});
+				}
+			}
 		}
 
 		auto& bbox_container = registry.boundingBoxes;

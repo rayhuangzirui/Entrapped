@@ -47,10 +47,10 @@ void ProfessionMenu::step(float elapsed_ms) {
 
 	// Create a confirm button
 	if (selection_delay_complete) {
-		createConfirmButton(renderer, { window_width_px / 2, window_height_px - 80 }, confirm_button_enabled, confirm_button_clicked);
+		createConfirmButton(renderer, { window_width_px / 2, window_height_px - 100 }, confirm_button_enabled, confirm_button_clicked);
 	}
 	else {
-		createConfirmButton(renderer, { window_width_px / 2, window_height_px - 80 }, false, false);
+		createConfirmButton(renderer, { window_width_px / 2, window_height_px - 100 }, false, false);
 	}
 
 	if (transition_complete) {
@@ -104,8 +104,8 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 		vec2 mouse_position = { (float)xpos, (float)ypos };
 
 		for (auto& profession : professions) {
-			if (mouse_position.x > profession.position.x - profession.size.x / 2 && mouse_position.x < profession.position.x + profession.size.x/2 &&
-				mouse_position.y > profession.position.y - profession.size.y / 2 && mouse_position.y < profession.position.y + profession.size.y/2) {
+			if (mouse_position.x > profession.position.x - profession.size.x / 2 - 10.f && mouse_position.x < profession.position.x + profession.size.x/2 - 10.f &&
+				mouse_position.y > profession.position.y - profession.size.y / 2 - 15.f && mouse_position.y < profession.position.y + profession.size.y/2 - 16.f) {
 				on_profession_selected(profession.name);
 				time_since_selection = 0.f;
 				selection_delay_complete = false;
@@ -113,8 +113,8 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 		}
 		
 		// Confirm button
-		if (mouse_position.x > window_width_px / 2 - 82.5f && mouse_position.x < window_width_px / 2 + 82.5f &&
-			mouse_position.y > window_height_px - 80 - 41.f && mouse_position.y < window_height_px - 80 + 41.f) {
+		if (mouse_position.x > window_width_px / 2 - 75.f && mouse_position.x < window_width_px / 2 + 58.f &&
+			mouse_position.y > window_height_px - 100 - 25.f && mouse_position.y < window_height_px - 100 + 33.f) {
 			confirm_button_clicked = true;
 			printf("Confirm button clicked\n");
 			time_since_last_click = 0.f;

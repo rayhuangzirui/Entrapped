@@ -182,6 +182,15 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
                              sizeof(ColoredVertex), (void*)0);
     }
 
+	  GLint isTextLoc = glGetUniformLocation(program, "is_text");
+    if (isTextLoc >= 0) {
+        // Check if this specific entity is text
+        bool isText = registry.texts.has(entity);
+        glUniform1i(isTextLoc, isText);
+       }
+
+	
+
     // Set uniforms
    if (!registry.players.entities.empty()) {
     Entity player_entity = registry.players.entities[0];
@@ -216,7 +225,6 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
     }
 }
 
-    // Draw the quad (exactly 6 indices for 2 triangles)
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
 
     //glDisable(GL_BLEND);
@@ -272,6 +280,11 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 	transform.scale(motion.scale);
 	// !!! TODO A1: add rotation to the chain of transformations, mind the order
 	// of transformations
+
+	// Entity text_fov_entity = Entity();
+    // Motion& text_fov_motion = registry.motions.emplace(text_fov_entity);
+    // registry.fovs.emplace(text_fov_entity);
+    // text_fov_motion = registry.motions.get(text_fov_entity);
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
@@ -635,33 +648,33 @@ void RenderSystem::draw()
 
 
 
-
-for (Entity entity : registry.renderRequests.entities)
-{
-    // everything drawn but not visible
-    if (!registry.fovs.has(entity)) {  
-        if (registry.cameraTexts.has(entity)) {
-            drawText(entity, camera_matrix);
-        }
-        else if (registry.texts.has(entity)) {
-            drawText(entity, projection_2D);
-        }
-        else if (registry.maps.has(entity)) {
+for (Entity entity : registry.renderRequests.entities) {
+    if (!registry.fovs.has(entity) && !registry.texts.has(entity)) {
+        if (registry.maps.has(entity)) {
             drawMap(entity, camera_matrix);
-        }
-        else if (registry.UIs.has(entity) || registry.backgrounds.has(entity)) {
+        } else if (registry.UIs.has(entity) || registry.backgrounds.has(entity)) {
             drawTexturedMesh(entity, projection_2D);
-        }
-        else {
+        } else {
             drawTexturedMesh(entity, camera_matrix);
         }
     }
 }
 
-for (Entity entity : registry.renderRequests.entities)
-{    //only visible portion of the entity
-    if (registry.fovs.has(entity)) {  
+
+for (Entity entity : registry.renderRequests.entities) {
+    if (registry.fovs.has(entity)) {
         drawTexturedMesh(entity, camera_matrix);
+    }
+}
+
+
+for (Entity entity : registry.renderRequests.entities) {
+    if (registry.texts.has(entity)) {
+        if (registry.cameraTexts.has(entity)) {
+            drawText(entity, camera_matrix);
+        } else {
+            drawText(entity, projection_2D);
+        }
     }
 }
 

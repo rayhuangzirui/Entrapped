@@ -4,31 +4,45 @@ out vec4 FragColor;
 uniform vec2 playerPosition;
 uniform float circleRadius;
 uniform vec2 windowSize;
-uniform mat3 view;
-uniform mat3 projection;
+uniform bool is_text;
 
 void main() {
+    
+    if (is_text) {
+        discard;  
+        return;
+    }
+    
     vec2 fragPos = gl_FragCoord.xy;
+    float dist = length(fragPos - playerPosition);
     
-    // Use camera-adjusted player position
-    vec2 adjustedPlayerPos = playerPosition;
-    
-    // Calculate distance from fragment to player position
-    float dist = length(fragPos - adjustedPlayerPos);
-    
-    float fadeWidth = 100.0;
+    float fadeWidth = 50.0;  // Can adjust this for softer/harder edges
     float fadeStart = circleRadius - fadeWidth;
     
-    // Calculate visibility
-    float visibility = 1.0 - smoothstep(fadeStart, circleRadius, dist);
-    
-    // Create the fog of war effect
     if (dist > circleRadius) {
+        // Outside circle - fully dark
         FragColor = vec4(0.0, 0.0, 0.0, 0.98);
     } else if (dist > fadeStart) {
-        float fade = smoothstep(fadeStart, circleRadius, dist);
+        // Edge fade
+       float fade = smoothstep(fadeStart, circleRadius, dist);
         FragColor = vec4(0.0, 0.0, 0.0, 0.98 * fade);
     } else {
+        // Inside circle - fully transparent
         FragColor = vec4(0.0, 0.0, 0.0, 0.0);
     }
 }
+
+//void main() {
+    // Get current fragment position
+  //  vec2 fragPos = gl_FragCoord.xy;
+    //float dist = length(fragPos - playerPosition);
+    
+    // If this is text OR within circle radius, make transparent
+    //if (is_text || dist <= circleRadius) {
+      //  discard;  // Make completely transparent
+       // return;
+    //}
+    
+    // Everything else gets the darkness
+    //FragColor = vec4(0.0, 0.0, 0.0, 0.98);
+//}

@@ -8,8 +8,6 @@
 void ProfessionMenu::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 	create_profession();
-
-	state.map_index = 0;
 }
 
 void ProfessionMenu::step(float elapsed_ms) {

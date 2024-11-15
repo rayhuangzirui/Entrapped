@@ -34,3 +34,61 @@ MapState StateManager::changeMap(std::string map_name) {
 
 	return map_state;
 }
+
+//int GameScene::load_high_score() {
+//	std::string filepath = std::string(PROJECT_SOURCE_DIR) + "highscore.txt";
+//
+//	FILE* file = fopen(filepath.c_str(), "r");
+//	if (file == NULL) {
+//		std::cerr << "Failed to open the file: " << filepath << std::endl;
+//		return 0;
+//	}
+//
+//	int content = 0;
+//	// read the first word of the line
+//	int res = fscanf(file, "%d", &content);
+//	if (res == EOF) {
+//		std::cerr << "Unable to read the high score" << std::endl;
+//		return 0;
+//	}
+//	std::cout << "loaded high score: " << content << std::endl;
+//	fclose(file);
+//	return content;
+//}
+
+
+void StateManager::save() {
+	std::string filepath = std::string(PROJECT_SOURCE_DIR) + "save.dat";
+
+	FILE* file = fopen(filepath.c_str(), "w");
+	if (file == NULL) {
+		std::cerr << "Failed to open the file: " << filepath << std::endl;
+		return;
+	}
+	std::cout << "Game saved" << std::endl;
+	fprintf(file, "map_index=%d", map_index);
+	fclose(file);
+	return;
+
+}
+
+void StateManager::load() {
+	std::string filepath = std::string(PROJECT_SOURCE_DIR) + "save.dat";
+
+	FILE* file = fopen(filepath.c_str(), "r");
+	if (file == NULL) {
+		std::cerr << "Failed to open the file: " << filepath << std::endl;
+		return;
+	}
+
+	int res = fscanf(file, "map_index=%d", &map_index);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	std::cout << "Game loaded: " << map_index << std::endl;
+	fclose(file);
+	return;
+
+}

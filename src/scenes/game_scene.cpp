@@ -48,6 +48,7 @@ Entity createBox(vec2 position, vec2 scale)
 	motion.scale = scale;
 
 	registry.debugComponents.emplace(entity);
+	registry.colors.insert(entity, { 1, 0, 0 });
 
 	registry.renderRequests.insert(
 		entity, {
@@ -151,6 +152,7 @@ Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 
 	registry.UIs.emplace(entity);
 	registry.refreshables.emplace(entity);
+	registry.colors.insert(entity, { 1, 0, 0 });
 
 	registry.renderRequests.insert(
 		entity, {
@@ -333,9 +335,15 @@ void GameScene::initialize(RenderSystem* renderer) {
 	createBackground();
 	std::string map_name = state.map_lists[state.map_index];
 	MapState map_state = state.changeMap(map_name);
+	state.save();
 	createMaze(); 
 	state.map_index++;
-	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+	if (state.map_index >= state.map_lists.size()) {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
+	}
+	else {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+	}
 
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
@@ -1294,6 +1302,7 @@ Entity GameScene::createHealthBarNew(Entity enemy) {
 	HealthBar& hp_bar = registry.healthBars.emplace(entity);
 	hp_bar.owner = enemy;
 
+	registry.colors.insert(entity, { 1, 0, 0 });
 	registry.renderRequests.insert(
 		entity, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -1544,6 +1553,8 @@ void GameScene::changeMap(std::string map_name) {
 		next_scene = "over_scene";
 		return;
 	}
+	state.save();
+	MapState map_state = state.changeMap(map_name);
 	state.map_index++;
 	// remove bullets and enemies
 	while (registry.hints.entities.size() > 0) {
@@ -1576,11 +1587,6 @@ void GameScene::changeMap(std::string map_name) {
 	// also remove portals
 	while (registry.portals.entities.size() > 0)
 		registry.remove_all_components_of(registry.portals.entities.back());
-
-
-
-
-	MapState map_state = state.changeMap(map_name);
 	
 	// spawn player
 	Entity& player_entity = registry.players.entities[0];
@@ -1881,6 +1887,7 @@ void GameScene::createInventorySlots(Entity player) {
 		motion.position = position;
 		motion.scale = { slot_size, slot_size };
 		registry.UIs.emplace(slot);
+		registry.colors.insert(slot, { 1, 0, 0 });
 
 		// Render slot background
 		registry.renderRequests.insert(slot, {

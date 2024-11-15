@@ -82,7 +82,12 @@ void MainMenu::on_mouse_click(int button, int action, int mod) {
 		vec2 mouse_position = { (float)xpos, (float)ypos };
 
 		Motion& new_game_motion = registry.motions.get(new_game_button);
+		Motion& continue_motion = registry.motions.get(continue_game_button);
 		if (point_in_box(new_game_motion, mouse_position)) {
+			next_scene = "profession_menu";
+		}
+		else if (point_in_box(continue_motion, mouse_position)) {
+			state.load();
 			next_scene = "profession_menu";
 		}
 

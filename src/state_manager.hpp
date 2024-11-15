@@ -33,6 +33,8 @@ public:
 	}
 
 	MapState changeMap(std::string map_name);
+	void save();
+	void load();
 };
 
 extern StateManager state;

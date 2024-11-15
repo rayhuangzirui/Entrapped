@@ -156,36 +156,71 @@ void RenderSystem::drawTexturedMesh(Entity entity,
     }
 }
 
-//    else if (render_request.used_effect == EFFECT_ASSET_ID::RECTANGLE)
-// {
-//     GLint in_position_loc = glGetAttribLocation(program, "in_position");
-//     gl_has_errors();
 
-//     glEnableVertexAttribArray(in_position_loc);
-//     glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(ColoredVertex), (void *)0);
-//     gl_has_errors();
+//2
 
-//     // Setting the color using a uniform
-//     if (registry.colors.has(entity))
-//     {
-//         const vec3 color = registry.colors.get(entity);
-//         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&color);
-//     }
-//     else
-//     {
-//         vec3 default_color = vec3(1.f, 1.f, 0.f);  // Default to yellow for the chest
-//         glUniform3fv(glGetUniformLocation(program, "color"), 1, (float *)&default_color);
-//     }
-    
-//     // Bind the transformation matrix
-//     Transform transform;
-//     transform.translate(motion.position);
-//     transform.scale(motion.scale);
-//     glUniformMatrix3fv(glGetUniformLocation(program, "transform"), 1, GL_FALSE, (float *)&transform.mat);
-//     gl_has_errors();
+else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2) 
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    glUseProgram(program);
 
-// }
+    // Use FOV quad geometry
+    const GLuint vbo = vertex_buffers[(GLuint)GEOMETRY_BUFFER_ID::FOV_QUAD];
+    const GLuint ibo = index_buffers[(GLuint)GEOMETRY_BUFFER_ID::FOV_QUAD];
+
+    // Bind buffers
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+    // Set up vertex attribute
+    GLint in_position_loc = glGetAttribLocation(program, "in_position");
+    if (in_position_loc >= 0) {
+        glEnableVertexAttribArray(in_position_loc);
+        glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+                             sizeof(ColoredVertex), (void*)0);
+    }
+
+    // Set uniforms
+   if (!registry.players.entities.empty()) {
+    Entity player_entity = registry.players.entities[0];
+    if (registry.motions.has(player_entity)) {
+        Motion& player_motion = registry.motions.get(player_entity);
+        
+        // Get window size
+        int window_width, window_height;
+        glfwGetFramebufferSize(window, &window_width, &window_height);
+        
+        // Calculate player's screen position
+        vec2 player_screen_pos = vec2(
+            window_width/2,  // Center of screen X
+            window_height/2  // Center of screen Y
+        );
+        
+        GLint playerPosLoc = glGetUniformLocation(program, "playerPosition");
+        if (playerPosLoc >= 0) {
+            glUniform2f(playerPosLoc, player_screen_pos.x, player_screen_pos.y);
+        }
+
+        GLint radiusLoc = glGetUniformLocation(program, "circleRadius");
+        if (radiusLoc >= 0) {
+            float circle_radius = 150.0f;
+            glUniform1f(radiusLoc, circle_radius);
+        }
+
+        GLint windowSizeLoc = glGetUniformLocation(program, "windowSize");
+        if (windowSizeLoc >= 0) {
+            glUniform2f(windowSizeLoc, (float)window_width, (float)window_height);
+        }
+    }
+}
+
+    // Draw the quad (exactly 6 indices for 2 triangles)
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+
+    //glDisable(GL_BLEND);
+}
 
 
   
@@ -577,26 +612,59 @@ void RenderSystem::draw()
 	//}
 
 	// Use the camera matrix for all entities
-	for (Entity entity : registry.renderRequests.entities)
-	{
-		//if (!registry.motions.has(entity))
-		//	continue;
-		if (registry.cameraTexts.has(entity)) {
-			drawText(entity, camera_matrix);
-		}
-		else if (registry.texts.has(entity)) {
-			drawText(entity, projection_2D);
-		}
-		else if (registry.maps.has(entity)) {
-			drawMap(entity, camera_matrix);
-		}
-		else if (registry.UIs.has(entity) || registry.backgrounds.has(entity)) {
-			drawTexturedMesh(entity, projection_2D);
-		}
-		else {
-			drawTexturedMesh(entity, camera_matrix);
-		}
-	}
+	// for (Entity entity : registry.renderRequests.entities)
+	// {
+	// 	//if (!registry.motions.has(entity))
+	// 	//	continue;
+	// 	if (registry.cameraTexts.has(entity)) {
+	// 		drawText(entity, camera_matrix);
+	// 	}
+	// 	else if (registry.texts.has(entity)) {
+	// 		drawText(entity, projection_2D);
+	// 	}
+	// 	else if (registry.maps.has(entity)) {
+	// 		drawMap(entity, camera_matrix);
+	// 	}
+	// 	else if (registry.UIs.has(entity) || registry.backgrounds.has(entity)) {
+	// 		drawTexturedMesh(entity, projection_2D);
+	// 	}
+	// 	else {
+	// 		drawTexturedMesh(entity, camera_matrix);
+	// 	}
+	// }
+
+
+
+
+for (Entity entity : registry.renderRequests.entities)
+{
+    // everything drawn but not visible
+    if (!registry.fovs.has(entity)) {  
+        if (registry.cameraTexts.has(entity)) {
+            drawText(entity, camera_matrix);
+        }
+        else if (registry.texts.has(entity)) {
+            drawText(entity, projection_2D);
+        }
+        else if (registry.maps.has(entity)) {
+            drawMap(entity, camera_matrix);
+        }
+        else if (registry.UIs.has(entity) || registry.backgrounds.has(entity)) {
+            drawTexturedMesh(entity, projection_2D);
+        }
+        else {
+            drawTexturedMesh(entity, camera_matrix);
+        }
+    }
+}
+
+for (Entity entity : registry.renderRequests.entities)
+{    //only visible portion of the entity
+    if (registry.fovs.has(entity)) {  
+        drawTexturedMesh(entity, camera_matrix);
+    }
+}
+
 
 
 	// Truely render to the screen
@@ -605,6 +673,22 @@ void RenderSystem::draw()
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
 	gl_has_errors();
+}
+
+void RenderSystem::initializeFullscreenQuad() {
+    std::vector<ColoredVertex> vertices = {
+        {{-1.0f, -1.0f, 0.0f}},  // Bottom left
+        {{1.0f, -1.0f, 0.0f}},   // Bottom right
+        {{1.0f, 1.0f, 0.0f}},    // Top right
+        {{-1.0f, 1.0f, 0.0f}}    // Top left
+    };
+    
+    std::vector<uint16_t> indices = {
+        0, 1, 2,    // First triangle
+        0, 2, 3     // Second triangle
+    };
+    
+    bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, vertices, indices);
 }
 
 mat3 RenderSystem::createProjectionMatrix()
@@ -622,6 +706,58 @@ mat3 RenderSystem::createProjectionMatrix()
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+}
+
+
+// Add this function to initialize the fullscreen quad
+// void RenderSystem::initializeFOVQuad() {
+//     // Create and bind VAO
+//     glGenVertexArrays(1, &fov_vao);
+//     glBindVertexArray(fov_vao);
+
+//     // Vertices for a fullscreen quad
+//     float quad_vertices[] = {
+//         -1.0f, -1.0f, 0.0f,
+//          1.0f, -1.0f, 0.0f,
+//          1.0f,  1.0f, 0.0f,
+//         -1.0f,  1.0f, 0.0f
+//     };
+
+//     // Indices
+//     unsigned int quad_indices[] = {
+//         0, 1, 2,
+//         0, 2, 3
+//     };
+
+//     // Create and bind buffers
+//     glGenBuffers(1, &fov_vbo);
+//     glGenBuffers(1, &fov_ibo);
+
+//     // Set up vertex buffer
+//     glBindBuffer(GL_ARRAY_BUFFER, fov_vbo);
+//     glBufferData(GL_ARRAY_BUFFER, sizeof(quad_vertices), quad_vertices, GL_STATIC_DRAW);
+
+//     // Set up index buffer
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, fov_ibo);
+//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quad_indices), quad_indices, GL_STATIC_DRAW);
+// }
+
+void RenderSystem::initializeFOVQuad() {
+    // Define the quad vertices for a fullscreen quad
+    std::vector<ColoredVertex> vertices = {
+        {{-1.0f, -1.0f, 0.0f}}, // Bottom left
+        {{ 1.0f, -1.0f, 0.0f}}, // Bottom right
+        {{ 1.0f,  1.0f, 0.0f}}, // Top right
+        {{-1.0f,  1.0f, 0.0f}}  // Top left
+    };
+
+    std::vector<uint16_t> indices = {
+        0, 1, 2,  // First triangle
+        0, 2, 3   // Second triangle
+    };
+
+    // Add new geometry buffer ID for FOV quad
+    bindVBOandIBO(GEOMETRY_BUFFER_ID::FOV_QUAD, vertices, indices);
 }
 
 void RenderSystem::setTextPosition(Entity textEntity, vec2 newPosition) {

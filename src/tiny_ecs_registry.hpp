@@ -76,6 +76,9 @@ public:
 
 	ComponentContainer<Background> backgrounds;
 
+	//FOV shader 
+	ComponentContainer<FOV> fovs;
+
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -140,6 +143,9 @@ public:
 
 		// background
 		registry_list.push_back(&backgrounds);
+
+		//FOV
+		registry_list.push_back(&fovs);
 
 	}
 

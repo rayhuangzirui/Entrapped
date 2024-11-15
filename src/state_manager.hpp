@@ -16,8 +16,12 @@ public:
 	int map_width;
 	std::vector<std::vector<int>> map;
 	uint map_index;
+	uint saved_map_index;
 	std::vector<std::string> map_lists;
 	MapState current_map_state;
+
+	// experience
+	int exp;
 
 	StateManager()
 	{
@@ -29,7 +33,10 @@ public:
 			{7, 8, 9}
 		};
 		map_index = 0;
+		saved_map_index = 0;
+		exp = 0;
 		map_lists = { "tutorial", "map_1" };
+
 	}
 
 	MapState changeMap(std::string map_name);

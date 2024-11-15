@@ -21,7 +21,8 @@ void MainMenu::initialize(RenderSystem* renderer) {
 	new_game_button = createButton({ 50.f, window_height_px - 240.f }, { 200.f, 30.f }, "New Game");
 	continue_game_button = createButton({ 50.f, window_height_px - 200.f }, { 200.f, 30.f }, "Continue Game");
 	upgrade_button = createButton({ 50.f, window_height_px - 160.f }, { 200.f, 30.f }, "Upgrades");
-	exit_game_button = createButton({ 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Exit Game");
+	state.load();
+	//exit_game_button = createButton({ 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Exit Game");
 	//(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
@@ -83,12 +84,16 @@ void MainMenu::on_mouse_click(int button, int action, int mod) {
 
 		Motion& new_game_motion = registry.motions.get(new_game_button);
 		Motion& continue_motion = registry.motions.get(continue_game_button);
+		Motion& upgrade_motion = registry.motions.get(upgrade_button);
 		if (point_in_box(new_game_motion, mouse_position)) {
 			next_scene = "profession_menu";
 		}
 		else if (point_in_box(continue_motion, mouse_position)) {
-			state.load();
+			state.map_index = state.saved_map_index;
 			next_scene = "profession_menu";
+		}
+		else if (point_in_box(upgrade_motion, mouse_position)) {
+			next_scene = "upgrade_menu";
 		}
 
 		std::cout << mouse_position.x << " : " << mouse_position.y << std::endl;

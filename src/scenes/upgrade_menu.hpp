@@ -3,7 +3,7 @@
 #include "base_scene.hpp"
 #include "render_system.hpp"
 
-class MainMenu : public BaseScene {
+class UpgradeMenu : public BaseScene {
 public:
 	void initialize(RenderSystem* renderer);
 	void step(float elapsed_ms);
@@ -17,12 +17,4 @@ public:
 private:
 	RenderSystem* renderer;
 	std::string next_scene = "";
-	
-	// Buttons
-	Entity new_game_button;
-	Entity continue_game_button;
-	Entity upgrade_button;
-	Entity exit_game_button;
-
-	Entity createButton(vec2 pos, vec2 scale, std::string text);
 };

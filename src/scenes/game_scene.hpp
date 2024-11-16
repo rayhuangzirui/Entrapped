@@ -42,6 +42,7 @@ private:
 	Entity createAmmoChest(vec2 position);
 	Entity createDirectionMarker(vec2 position);
 	Entity createBackground();
+	Entity createTape(vec2 pos, int tape_num);
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
@@ -67,6 +68,8 @@ private:
 	Mix_Chunk* item_pickup_sound;
 	Mix_Chunk* reload_sound;
 	Mix_Chunk* stab_sound;
+	Mix_Chunk* tape1_recording;
+	
 	vec2 player_velocity;
 
 	std::string next_scene = "";

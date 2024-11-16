@@ -20,6 +20,7 @@ public:
 	ComponentContainer<Gun> guns;
 	ComponentContainer<Parent> parents;
 	ComponentContainer<FPS> fps;	
+	ComponentContainer<Tape> tapes;
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -97,6 +98,7 @@ public:
 		registry_list.push_back(&aiTimers);
 		registry_list.push_back(&guns);
 		registry_list.push_back(&parents);
+		registry_list.push_back(&tapes);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

@@ -7,27 +7,24 @@ uniform vec2 windowSize;
 uniform bool is_text;
 
 void main() {
-    
-    if (is_text) {
-        discard;  
+    // Always make text visible by not applying darkness to it
+    if (is_text) {  // Changed from is_text == 1 to just is_text
+        discard;    // Makes the FOV effect completely transparent for text
         return;
     }
     
     vec2 fragPos = gl_FragCoord.xy;
     float dist = length(fragPos - playerPosition);
     
-    float fadeWidth = 50.0;  // Can adjust this for softer/harder edges
+    float fadeWidth = 100.0;
     float fadeStart = circleRadius - fadeWidth;
     
     if (dist > circleRadius) {
-        // Outside circle - fully dark
         FragColor = vec4(0.0, 0.0, 0.0, 0.98);
     } else if (dist > fadeStart) {
-        // Edge fade
-       float fade = smoothstep(fadeStart, circleRadius, dist);
+        float fade = smoothstep(fadeStart, circleRadius, dist);
         FragColor = vec4(0.0, 0.0, 0.0, 0.98 * fade);
     } else {
-        // Inside circle - fully transparent
         FragColor = vec4(0.0, 0.0, 0.0, 0.0);
     }
 }

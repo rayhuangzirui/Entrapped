@@ -182,52 +182,49 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
                              sizeof(ColoredVertex), (void*)0);
     }
 
-	  GLint isTextLoc = glGetUniformLocation(program, "is_text");
+    // Check for text first, independent of player
+    GLint isTextLoc = glGetUniformLocation(program, "is_text");
     if (isTextLoc >= 0) {
         // Check if this specific entity is text
         bool isText = registry.texts.has(entity);
         glUniform1i(isTextLoc, isText);
-       }
+    }
 
-	
+    // Set player-related uniforms
+    if (!registry.players.entities.empty()) {
+        Entity player_entity = registry.players.entities[0];
+        if (registry.motions.has(player_entity)) {
+            Motion& player_motion = registry.motions.get(player_entity);
+            
+            // Get window size
+            int window_width, window_height;
+            glfwGetFramebufferSize(window, &window_width, &window_height);
+            
+            // Calculate player's screen position
+            vec2 player_screen_pos = vec2(
+                window_width/2,  // Center of screen X
+                window_height/2  // Center of screen Y
+            );
+            
+            GLint playerPosLoc = glGetUniformLocation(program, "playerPosition");
+            if (playerPosLoc >= 0) {
+                glUniform2f(playerPosLoc, player_screen_pos.x, player_screen_pos.y);
+            }
 
-    // Set uniforms
-   if (!registry.players.entities.empty()) {
-    Entity player_entity = registry.players.entities[0];
-    if (registry.motions.has(player_entity)) {
-        Motion& player_motion = registry.motions.get(player_entity);
-        
-        // Get window size
-        int window_width, window_height;
-        glfwGetFramebufferSize(window, &window_width, &window_height);
-        
-        // Calculate player's screen position
-        vec2 player_screen_pos = vec2(
-            window_width/2,  // Center of screen X
-            window_height/2  // Center of screen Y
-        );
-        
-        GLint playerPosLoc = glGetUniformLocation(program, "playerPosition");
-        if (playerPosLoc >= 0) {
-            glUniform2f(playerPosLoc, player_screen_pos.x, player_screen_pos.y);
-        }
+            GLint radiusLoc = glGetUniformLocation(program, "circleRadius");
+            if (radiusLoc >= 0) {
+                float circle_radius = 150.0f;
+                glUniform1f(radiusLoc, circle_radius);
+            }
 
-        GLint radiusLoc = glGetUniformLocation(program, "circleRadius");
-        if (radiusLoc >= 0) {
-            float circle_radius = 150.0f;
-            glUniform1f(radiusLoc, circle_radius);
-        }
-
-        GLint windowSizeLoc = glGetUniformLocation(program, "windowSize");
-        if (windowSizeLoc >= 0) {
-            glUniform2f(windowSizeLoc, (float)window_width, (float)window_height);
+            GLint windowSizeLoc = glGetUniformLocation(program, "windowSize");
+            if (windowSizeLoc >= 0) {
+                glUniform2f(windowSizeLoc, (float)window_width, (float)window_height);
+            }
         }
     }
-}
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
-
-    //glDisable(GL_BLEND);
 }
 
 
@@ -388,6 +385,28 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 	}
 
 	gl_has_errors();
+}
+
+
+bool RenderSystem::checkWallNearby(vec2 position, float check_radius) {
+    
+    int col = static_cast<int>(position.x / 48.f);
+    int row = static_cast<int>(position.y / 48.f); 
+    int radius_tiles = static_cast<int>(check_radius / 48.f);
+    for (int r = row - radius_tiles; r <= row + radius_tiles; r++) {
+        for (int c = col - radius_tiles; c <= col + radius_tiles; c++) { 
+            if (r >= 0 && r < state.map_height && c >= 0 && c < state.map_width) { 
+                if (state.map[r][c] == 1) {
+                    vec2 wall_pos = vec2(c * 48.f + 24.f, r * 48.f + 24.f);
+                    float dist = length(position - wall_pos);
+                    if (dist < check_radius) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 void RenderSystem::drawMap(Entity entity, const mat3& projection) {

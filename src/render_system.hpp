@@ -158,6 +158,8 @@ private:
 	void drawMap(Entity entity, const mat3& projection);
 	void drawToScreen();
 
+	bool checkWallNearby(vec2 position, float check_radius);
+
 	// Window handle
 	GLFWwindow* window;
 

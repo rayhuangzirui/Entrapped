@@ -282,4 +282,31 @@ Entity createConfirmButton(RenderSystem* renderer, vec2 pos, bool is_enabled, bo
 	return entity;
 }
 
+Entity createButton(RenderSystem* renderer, vec2 pos, vec2 scale, std::string text) {
+	Entity entity = Entity();
 
+	// Create motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	vec2 position = pos;
+	position.x += (scale.x / 2.f - 15.f);
+	motion.position = position;
+	motion.scale = scale;
+
+	registry.UIs.emplace(entity);
+	registry.buttons.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+	registry.colors.insert(entity, { 1.0f, 0.0f, 0.0f });
+
+	Entity text_entity = renderer->text_renderer.createText(text, pos, 20.f, { 1.f, 1.f, 1.f });
+
+	return entity;
+}

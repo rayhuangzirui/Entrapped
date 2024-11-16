@@ -2,7 +2,6 @@
 #include "ai_system.hpp"
 #include "state_manager.hpp"
 #include <iostream>
-#include <unordered_set>
 #include <sstream>
 
 struct PathNode {

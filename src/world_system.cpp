@@ -118,6 +118,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->scene_system.step(elapsed_ms_since_last_update);
 	this->scene_system.handle_collisions();
+
+	this->ui_system.step(elapsed_ms_since_last_update);
 	return true;
 }
 
@@ -133,8 +135,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	scene_system.on_mouse_move(mouse_position);
+
+	ui_system.on_mouse_move(mouse_position);
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mod) {
 	scene_system.on_mouse_click(button, action, mod);
+
+	ui_system.on_mouse_click(renderer, button, action, mod);
 }

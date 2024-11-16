@@ -57,6 +57,8 @@ public:
 	ComponentContainer<UI> UIs;
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
+	ComponentContainer<Button> buttons;
+	ComponentContainer<PressedButton> pressedButtons;
 
 	// Map transition
 	ComponentContainer<Portal> portals;
@@ -125,6 +127,8 @@ public:
 		registry_list.push_back(&playerHPBars);
 		registry_list.push_back(&fps);
 		registry_list.push_back(&fpsTexts);
+		registry_list.push_back(&buttons);
+		registry_list.push_back(&pressedButtons);
 
 		// portal
 		registry_list.push_back(&portals);

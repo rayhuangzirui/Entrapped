@@ -48,8 +48,4 @@ void OverScene::on_mouse_click(int button, int action, int mod) {
 	(int)mod;
 }
 
-void OverScene::draw_fps() {
-	// pass
-}
-
 

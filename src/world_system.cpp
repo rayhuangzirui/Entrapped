@@ -112,6 +112,8 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	this->scene_system.initialize(this->renderer);
 	this->scene_system.pushScene();
+
+	this->ui_system.initialize(this->renderer);
 }
 
 // Update our game world
@@ -132,8 +134,7 @@ bool WorldSystem::is_over() const {
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	scene_system.on_key(key, action, mod);
 
-	int state = glfwGetKey(window, GLFW_KEY_A);
-	std::cout << "state: " << state << " action: " << action << std::endl;
+	ui_system.on_key(key, action, mod);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -145,5 +146,5 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 void WorldSystem::on_mouse_click(int button, int action, int mod) {
 	scene_system.on_mouse_click(button, action, mod);
 
-	ui_system.on_mouse_click(renderer, button, action, mod);
+	ui_system.on_mouse_click(button, action, mod);
 }

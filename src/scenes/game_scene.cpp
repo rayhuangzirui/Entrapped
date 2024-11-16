@@ -365,9 +365,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
-	// fps entity
-	FPS_entity = Entity();
-
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	player_hurt_sound = Mix_LoadWAV(audio_path("male-hurt.wav").c_str());
@@ -516,24 +513,6 @@ void GameScene::step(float elapsed_ms) {
 
 	}
 
-	// FPS counter
-	if (registry.fps.entities.size() == 0) {
-		registry.fps.emplace(FPS_entity);
-	}
-
-	FPS& fps_counter = registry.fps.get(FPS_entity);
-
-	fps_counter.elapsed_time += elapsed_ms;
-	fps_counter.frame_count++;
-
-	if (fps_counter.elapsed_time >= 1000) {
-		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
-		fps_counter.frame_count = 0;
-		fps_counter.elapsed_time = 0.0;
-	}
-
-	draw_fps();
-
 	// Update HP and ammo
 	refreshUI(player);
 
@@ -553,7 +532,6 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 
-	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 
 	//if (registry.enemies.size() > 0) {
@@ -823,15 +801,6 @@ void GameScene::on_key(int key, int action, int mod) {
 					registry.dashTimers.emplace(player, DashTimer{ 200.f });
 					motion.velocity *= 2.5f;
 				}
-				break;
-			case GLFW_KEY_F:
-				// get the fps entity
-				Entity fps_entity = registry.fps.entities[0];
-				FPS& fps_counter = registry.fps.get(fps_entity);
-				// visialize fps
-				fps_counter.visible = !fps_counter.visible;
-				printf("FPS counter visibility: %d\n", fps_counter.visible);
-				printf("FPS: %f\n", fps_counter.fps);
 				break;
 			}
 
@@ -1851,25 +1820,6 @@ void GameScene::on_mouse_click(int button, int action, int mod) {
 	(int)action;
 	(int)mod;
 	(RenderSystem*)renderer;
-}
-
-void GameScene::draw_fps() {
-	RenderSystem* renderer = this->renderer;
-	if (registry.fpsTexts.entities.size() > 0) {
-		registry.remove_all_components_of(registry.fpsTexts.entities.back());
-	}
-	Entity fps_entity = registry.fps.entities[0];
-	FPS& fps_counter = registry.fps.get(fps_entity);
-	if (fps_counter.visible) {
-		std::string fps_string = "FPS: " + std::to_string(static_cast<int> (fps_counter.fps));
-
-		// Update the text content
-		//fps_text.content = fps_string;
-		vec2 fps_position = vec2(10.f, 10.f);
-		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
-		registry.fpsTexts.emplace(text);
-		//registry.cameraTexts.emplace(text);
-	}
 }
 
 

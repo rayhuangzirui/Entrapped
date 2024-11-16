@@ -93,7 +93,3 @@ void MainMenu::on_mouse_click(int button, int action, int mod) {
 	(int)action;
 	(int)mod;
 }
-
-void MainMenu::draw_fps() {
-	(RenderSystem*)renderer;
-}

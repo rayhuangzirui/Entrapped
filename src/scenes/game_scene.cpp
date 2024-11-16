@@ -174,7 +174,7 @@ void GameScene::spawnEnemiesAndItems() {
 				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
-				if (state.map_index == 1) { // tutorial 
+				if (state.map_index == 0) { // tutorial 
 					// Attach a hint to this enemy entity
 					Hint hint;
 					hint.text = "Left click to shoot!";
@@ -184,7 +184,7 @@ void GameScene::spawnEnemiesAndItems() {
 			}
 			else if (state.map[row][col] == 3) {
 				Entity chest = createHealthChest(pos);
-				if (state.map_index == 1) {
+				if (state.map_index == 0) {
 					Hint hint;
 					hint.text = "Chest with healing item. Press E to open";
 					hint.radius = 200.0f;  // Set the radius for the hint display
@@ -193,7 +193,7 @@ void GameScene::spawnEnemiesAndItems() {
 			}
 			else if (state.map[row][col] == 4) {
 				Entity chest = createAmmoChest(pos);
-				if (state.map_index == 1) {
+				if (state.map_index == 0) {
 					Hint hint;
 					hint.text = "Chest with ammo. Press E to open";
 					hint.radius = 200.0f;  // Set the radius for the hint display
@@ -204,7 +204,7 @@ void GameScene::spawnEnemiesAndItems() {
 	}
 
 	// tutorial specific elements
-	if (state.map_index == 1) {
+	if (state.map_index == 0) {
 		Entity marker = createInvisible({ 10, 10 });
 		Hint hint1;
 		hint1.text = "WASD to move player";

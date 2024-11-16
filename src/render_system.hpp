@@ -169,9 +169,6 @@ private:
 
 	bool checkWallNearby(vec2 position, float check_radius);
 
-	// Window handle
-	GLFWwindow* window;
-
 	// Text renderer
 	//TextRenderer text_renderer;
 

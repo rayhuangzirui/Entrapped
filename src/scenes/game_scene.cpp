@@ -772,15 +772,18 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y += -PLAYER_SPEED;
+				//player_velocity.y += -PLAYER_SPEED;
+				player_movement_state.x = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y += PLAYER_SPEED;
+				//player_velocity.y += PLAYER_SPEED;
+				player_movement_state.y = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x += -PLAYER_SPEED;
+				//player_velocity.x += -PLAYER_SPEED;
+				player_movement_state.z = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x > 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -797,7 +800,8 @@ void GameScene::on_key(int key, int action, int mod) {
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x += PLAYER_SPEED;
+				//player_velocity.x += PLAYER_SPEED;
+				player_movement_state.w = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x < 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -835,16 +839,20 @@ void GameScene::on_key(int key, int action, int mod) {
 		else if (action == GLFW_RELEASE) {
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y -= -PLAYER_SPEED;
+				player_movement_state.x = 0;
+				//player_velocity.y -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y -= PLAYER_SPEED;
+				player_movement_state.y = 0;
+				//player_velocity.y -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x -= -PLAYER_SPEED;
+				player_movement_state.z = 0;
+				//player_velocity.x -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x -= PLAYER_SPEED;
+				player_movement_state.w = 0;
+				//player_velocity.x -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_LEFT_SHIFT:
 				isSprinting = false;
@@ -852,6 +860,8 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 
 		}
+		vec2 dir = { player_movement_state.w - player_movement_state.z, player_movement_state.y - player_movement_state.x };
+		player_velocity = dir * PLAYER_SPEED;
 		motion.velocity = player_velocity;
 
 		// Apply sprint effect if active
@@ -1161,12 +1171,12 @@ if (debugging.in_debug_mode) {
     fov_motion = registry.motions.get(entity); // Copy player's motion
     
     // Add the FOV render request to the new entity
-    registry.renderRequests.insert( 			
-        fov_entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::FOV2, 			  
-          GEOMETRY_BUFFER_ID::SPRITE }
-    ); 	
+    //registry.renderRequests.insert( 			
+    //    fov_entity, 			
+    //    { TEXTURE_ASSET_ID::PLAYER_1, 			  
+    //      EFFECT_ASSET_ID::FOV2, 			  
+    //      GEOMETRY_BUFFER_ID::SPRITE }
+    //); 	
 }
 
 	// Attach a gun to the player entity

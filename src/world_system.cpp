@@ -131,6 +131,9 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	scene_system.on_key(key, action, mod);
+
+	int state = glfwGetKey(window, GLFW_KEY_A);
+	std::cout << "state: " << state << " action: " << action << std::endl;
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

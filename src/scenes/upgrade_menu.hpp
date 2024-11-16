@@ -17,4 +17,9 @@ public:
 private:
 	RenderSystem* renderer;
 	std::string next_scene = "";
+
+	void refreshUI();
+
+	// Buttons
+	Entity health_button;
 };

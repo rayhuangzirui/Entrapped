@@ -244,6 +244,11 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(ammo_text);
 	registry.refreshables.emplace(ammo_text);
 
+	// create exp text
+	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), {window_width_px - 175.f, 20.f}, 20.f, {1.f, 1.f, 1.f});
+	registry.UIs.emplace(exp_text);
+	registry.refreshables.emplace(exp_text);
+
 	// refresh inventory
 	refreshInventorySlots(player);
 
@@ -1707,6 +1712,7 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			registry.remove_all_components_of(enemy.health_bar_entity);
 			registry.enemies.remove(target);
 			registry.enemyDeathTimers.insert(target, { 3000.0f, 3000.0f });
+			state.exp += 1;
 			Mix_PlayChannel(-1, monster_hurt_sound, 0);
 
 			std::cout << "Enemy is dead!" << std::endl;

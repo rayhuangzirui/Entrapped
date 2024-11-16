@@ -23,6 +23,4 @@ private:
 	Entity continue_game_button;
 	Entity upgrade_button;
 	Entity exit_game_button;
-
-	Entity createButton(vec2 pos, vec2 scale, std::string text);
 };

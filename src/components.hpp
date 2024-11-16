@@ -44,6 +44,11 @@ struct Button {
 
 };
 
+// button that is pressed
+struct PressedButton{
+
+};
+
 
 // Gun component
 struct Gun

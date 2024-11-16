@@ -66,7 +66,8 @@ void StateManager::save() {
 		return;
 	}
 	std::cout << "Game saved" << std::endl;
-	fprintf(file, "map_index=%d\nexp=%d", map_index, exp);
+	fprintf(file, "map_index=%d\n", map_index);
+	fprintf(file, "exp=%d\n", exp);
 	fclose(file);
 	return;
 
@@ -81,7 +82,13 @@ void StateManager::load() {
 		return;
 	}
 
-	int res = fscanf(file, "map_index=%d\nexp=%d", &saved_map_index, &exp);
+	int res = fscanf(file, "map_index=%d\n", &saved_map_index);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	res = fscanf(file, "exp=%d\n",&exp);
 	if (res == EOF) {
 		std::cerr << "Unable to read the save data" << std::endl;
 		return;

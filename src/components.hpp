@@ -41,7 +41,7 @@ struct CameraText {
 
 
 struct Button {
-
+	Entity text;
 };
 
 // button that is pressed

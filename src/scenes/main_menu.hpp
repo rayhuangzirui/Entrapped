@@ -23,4 +23,5 @@ private:
 	Entity continue_game_button;
 	Entity upgrade_button;
 	Entity exit_game_button;
+	Entity debug_button;
 };

@@ -295,7 +295,7 @@ Entity createButton(RenderSystem* renderer, vec2 pos, vec2 scale, std::string te
 	motion.scale = scale;
 
 	registry.UIs.emplace(entity);
-	registry.buttons.emplace(entity);
+	Button& button = registry.buttons.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity, {
@@ -307,6 +307,7 @@ Entity createButton(RenderSystem* renderer, vec2 pos, vec2 scale, std::string te
 	registry.colors.insert(entity, { 1.0f, 0.0f, 0.0f });
 
 	Entity text_entity = renderer->text_renderer.createText(text, pos, 20.f, { 1.f, 1.f, 1.f });
+	button.text = text_entity;
 
 	return entity;
 }

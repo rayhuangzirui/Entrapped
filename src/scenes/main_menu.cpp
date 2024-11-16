@@ -21,6 +21,8 @@ void MainMenu::initialize(RenderSystem* renderer) {
 	new_game_button = createButton(renderer, { 50.f, window_height_px - 240.f }, { 200.f, 30.f }, "New Game");
 	continue_game_button = createButton(renderer, { 50.f, window_height_px - 200.f }, { 200.f, 30.f }, "Continue Game");
 	upgrade_button = createButton(renderer, { 50.f, window_height_px - 160.f }, { 200.f, 30.f }, "Upgrades");
+	debug_button = createButton(renderer, { 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Debug: Off");
+	debugging.in_debug_mode = false;
 	state.load();
 	//exit_game_button = createButton({ 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Exit Game");
 	//(vec2)mouse_position; // dummy to avoid compiler warning
@@ -40,6 +42,17 @@ void MainMenu::step(float elapsed_ms) {
 		else if (button_entity == upgrade_button) {
 			next_scene = "upgrade_menu";
 			break;
+		}
+		else if (button_entity == debug_button) {
+			debugging.in_debug_mode = !debugging.in_debug_mode;
+			Button& btn = registry.buttons.get(debug_button);
+			Text& txt = registry.texts.get(btn.text);
+			if (debugging.in_debug_mode) {
+				txt.content = "Debug: On";
+			}
+			else {
+				txt.content = "Debug: Off";
+			}
 		}
 	}
 }

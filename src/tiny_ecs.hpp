@@ -7,6 +7,7 @@
 #include <functional>
 #include <typeindex>
 #include <assert.h>
+#include <iostream>
 
 // Unique identifyer for all entities
 class Entity

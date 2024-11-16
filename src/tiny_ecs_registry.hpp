@@ -19,8 +19,7 @@ public:
 	ComponentContainer<AITimer> aiTimers;
 	ComponentContainer<Gun> guns;
 	ComponentContainer<Parent> parents;
-	ComponentContainer<FPS> fps;
-	
+	ComponentContainer<FPS> fps;	
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -58,6 +57,8 @@ public:
 	ComponentContainer<UI> UIs;
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
+	ComponentContainer<Button> buttons;
+	ComponentContainer<PressedButton> pressedButtons;
 
 	// Map transition
 	ComponentContainer<Portal> portals;
@@ -78,6 +79,11 @@ public:
 
 	//FOV shader 
 	ComponentContainer<FOV> fovs;
+	//Inventory Related
+	ComponentContainer<InventoryItem> inventoryItems;
+	ComponentContainer<Inventory> inventories;
+
+	ComponentContainer<Refreshable> refreshables;
 
 
 	// constructor that adds all containers for looping over them
@@ -119,9 +125,12 @@ public:
 
 		// UI related
 		registry_list.push_back(&UIs);
+		registry_list.push_back(&refreshables);
 		registry_list.push_back(&playerHPBars);
 		registry_list.push_back(&fps);
 		registry_list.push_back(&fpsTexts);
+		registry_list.push_back(&buttons);
+		registry_list.push_back(&pressedButtons);
 
 		// portal
 		registry_list.push_back(&portals);
@@ -147,6 +156,9 @@ public:
 		//FOV
 		registry_list.push_back(&fovs);
 
+		// Inventory
+		registry_list.push_back(&inventoryItems);
+		registry_list.push_back(&inventories);
 	}
 
 	void clear_all_components() {

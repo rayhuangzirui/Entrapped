@@ -4,6 +4,8 @@
 #include "game_scene.hpp"
 #include "death_scene.hpp"
 #include "over_scene.hpp"
+#include "profession_menu.hpp"
+#include "upgrade_menu.hpp"
 #include "tiny_ecs_registry.hpp"
 
 SceneSystem::SceneSystem() {
@@ -73,8 +75,10 @@ void SceneSystem::changeScene(std::string name) {
 	}
 	else if (name.compare("game_scene") == 0) {
 		this->popScene();
+		this->profession = static_cast<ProfessionMenu*>(this->current_scene)->selected_profession;
 		delete this->current_scene;
 		this->current_scene = new GameScene();
+		this->current_scene->selected_profession = this->profession;
 	}
 	else if (name.compare("death_scene") == 0) {
 		this->popScene();
@@ -85,6 +89,16 @@ void SceneSystem::changeScene(std::string name) {
 		this->popScene();
 		delete this->current_scene;
 		this->current_scene = new OverScene();
+	}
+	else if (name.compare("profession_menu") == 0) {
+		this->popScene();
+		delete this->current_scene;
+		this->current_scene = new ProfessionMenu();
+	}
+	else if (name.compare("upgrade_menu") == 0) {
+		this->popScene();
+		delete this->current_scene;
+		this->current_scene = new UpgradeMenu();
 	}
 	else {
 		std::cout << "Error: Unknow Scene Name" << std::endl;

@@ -13,6 +13,7 @@
 
 #include "render_system.hpp"
 #include <scenes/scene_system.hpp>
+#include <ui_system.hpp>
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -42,6 +43,7 @@ private:
 	void on_mouse_move(vec2 pos);
 	void on_mouse_click(int button, int action, int mod);
 	SceneSystem scene_system;
+	UISystem ui_system;
 
 	// OpenGL window handle
 	GLFWwindow* window;

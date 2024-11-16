@@ -14,6 +14,7 @@ public:
 	SceneSystem();
 	~SceneSystem();
 	BaseScene* current_scene;
+	std::string profession;
 	void initialize(RenderSystem* renderer);
 	void pushScene();
 	void step(float elapsed_ms);

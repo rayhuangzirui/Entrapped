@@ -26,8 +26,7 @@ struct Player
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
 
-	// Player's Profession may be used in the future
-	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+	std::string profession;
 };
 
 // Portal to the next map
@@ -40,6 +39,15 @@ struct CameraText {
 
 };
 
+
+struct Button {
+
+};
+
+// button that is pressed
+struct PressedButton{
+
+};
 
 
 // Gun component
@@ -157,7 +165,9 @@ struct EnemyAI {
 	float chase_timer = 3000;
 	float wander_timer = 0;
 	float flee_timer = 3000;
+	float path_finding_timer = 0;
 	int state = 0;
+	std::vector<vec2> path;
 };
 
 struct Health {
@@ -306,6 +316,11 @@ struct UI {
 
 };
 
+// UI component that requires refreshing
+struct Refreshable {
+
+};
+
 // Text that displays FPS
 struct FPSText {
 
@@ -347,9 +362,7 @@ struct BoundingBox {
 
 // The map
 struct Map {
-	int width;
-	int height;
-	std::vector<std::vector<int>> grid;
+
 };
 
 struct Hint {
@@ -363,6 +376,18 @@ struct Hint {
 struct FOV {
     
 };
+//-------------------- Inventory system --------------------
+struct InventoryItem {
+	enum class Type { AmmoPack } type;
+	int count = 0;
+};
+
+struct Inventory {
+	std::vector<InventoryItem> items;
+	int max_slots = 4;
+};
+//-------------------- Inventory system --------------------
+
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -439,7 +464,13 @@ enum class TEXTURE_ASSET_ID {
 	CHEST_OPENED = CHEST_CLOSED + 1,
 
 	SPACE_BACKGROUND = CHEST_OPENED + 1,
-	TEXTURE_COUNT = SPACE_BACKGROUND + 1
+	CHOOSE_PROFESSION_TITLE = SPACE_BACKGROUND + 1,
+	SOLDIER_PAGE = CHOOSE_PROFESSION_TITLE + 1,
+	SOLDIER_PAGE_CLICKED = SOLDIER_PAGE + 1,
+	CONFIRM_BUTTON = SOLDIER_PAGE_CLICKED + 1,
+	CONFIRM_BUTTON_CLICKED = CONFIRM_BUTTON + 1,
+	CONFIRM_BUTTON_DISABLED = CONFIRM_BUTTON_CLICKED + 1,
+	TEXTURE_COUNT = CONFIRM_BUTTON_DISABLED + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

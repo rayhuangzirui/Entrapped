@@ -177,6 +177,7 @@ struct Health {
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
+	float cooldown_ms; // Cooldown of dahs in milliseconds
 };
 
 // placeholder entities that are invisible

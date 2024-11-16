@@ -797,8 +797,8 @@ void GameScene::on_key(int key, int action, int mod) {
 				isSprinting = true;
 				break;
 			case GLFW_KEY_SPACE:
-				if (!registry.dashTimers.has(player)) {
-					registry.dashTimers.emplace(player, DashTimer{ 200.f });
+				if (!registry.dashTimers.has(player) && !isSprinting) {
+					registry.dashTimers.emplace(player, DashTimer{ 200.f, 1200.f });
 					motion.velocity *= 2.5f;
 				}
 				break;

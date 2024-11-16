@@ -9,6 +9,8 @@
 #include "tiny_ecs.hpp"
 #include <text_renderer.hpp>
 
+
+
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
 class RenderSystem {
@@ -108,7 +110,8 @@ class RenderSystem {
 		shader_path("box"),
 		shader_path("global"),
 		//shader_path("textured")
-		shader_path("map")
+		shader_path("map"),
+		shader_path("fovShader"),
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -144,7 +147,11 @@ public:
 	// Draw all entities
 	void draw();
 
+	void initializeFullscreenQuad();
+
 	mat3 createProjectionMatrix();
+
+	void initializeFOVQuad();
 
 	// Text renderer
 	TextRenderer text_renderer;
@@ -160,6 +167,10 @@ private:
 	void drawMap(Entity entity, const mat3& projection);
 	void drawToScreen();
 
+	bool checkWallNearby(vec2 position, float check_radius);
+
+	// Window handle
+	GLFWwindow* window;
 
 	// Text renderer
 	//TextRenderer text_renderer;
@@ -172,6 +183,11 @@ private:
 	// map buffer
 	GLuint m_map_VAO;
 	GLuint m_map_VBO;
+
+	//FOV
+	GLuint fov_vbo;
+    GLuint fov_ibo;
+    GLuint fov_vao;
 
 	Entity screen_state_entity;
 };

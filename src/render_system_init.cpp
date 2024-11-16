@@ -20,6 +20,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1); // vsync
+	
 
 	// Load OpenGL function pointers
 	const int is_fine = gl3w_init();
@@ -59,6 +60,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 	//initializeMap();
+	initializeFOVQuad();
 
     // text renderer
 	this->text_renderer.loadFont();

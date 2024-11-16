@@ -1123,21 +1123,51 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	printf("Player bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	// Debug mode: visualize meshes
-	if (debugging.in_debug_mode) {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::PLAYER_1,
-			  EFFECT_ASSET_ID::MESHED,
-			  GEOMETRY_BUFFER_ID::PLAYER });
-	}
-	else {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::PLAYER_1,
-			  EFFECT_ASSET_ID::TEXTURED,
-			  GEOMETRY_BUFFER_ID::SPRITE });
-	}
+	//Debug mode: visualize meshes
+	// if (debugging.in_debug_mode) {
+	// 	registry.renderRequests.insert(
+	// 		entity,
+	// 		{ TEXTURE_ASSET_ID::PLAYER_1,
+	// 		  EFFECT_ASSET_ID::MESHED,
+	// 		  GEOMETRY_BUFFER_ID::PLAYER });
+	// }
+	// else {
+	// 	registry.renderRequests.insert(
+	// 		entity,
+	// 		{ TEXTURE_ASSET_ID::PLAYER_1,
+	// 		  EFFECT_ASSET_ID::FOV2,
+	// 		  GEOMETRY_BUFFER_ID::SPRITE });
+	// }
+
+if (debugging.in_debug_mode) { 		
+    registry.renderRequests.insert( 			
+        entity, 			
+        { TEXTURE_ASSET_ID::PLAYER_1, 			  
+          EFFECT_ASSET_ID::MESHED, 			  
+          GEOMETRY_BUFFER_ID::PLAYER }
+    ); 	
+} else { 		
+    // Player entity gets the textured effect
+    registry.renderRequests.insert( 			
+        entity, 			
+        { TEXTURE_ASSET_ID::PLAYER_1, 			  
+          EFFECT_ASSET_ID::TEXTURED, 			  
+          GEOMETRY_BUFFER_ID::SPRITE }
+    );
+    
+    Entity fov_entity = Entity();
+    Motion& fov_motion = registry.motions.emplace(fov_entity);
+	registry.fovs.emplace(fov_entity);
+    fov_motion = registry.motions.get(entity); // Copy player's motion
+    
+    // Add the FOV render request to the new entity
+    registry.renderRequests.insert( 			
+        fov_entity, 			
+        { TEXTURE_ASSET_ID::PLAYER_1, 			  
+          EFFECT_ASSET_ID::FOV2, 			  
+          GEOMETRY_BUFFER_ID::SPRITE }
+    ); 	
+}
 
 	// Attach a gun to the player entity
 	createGun(entity);

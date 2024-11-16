@@ -77,6 +77,8 @@ public:
 
 	ComponentContainer<Background> backgrounds;
 
+	//FOV shader 
+	ComponentContainer<FOV> fovs;
 	//Inventory Related
 	ComponentContainer<InventoryItem> inventoryItems;
 	ComponentContainer<Inventory> inventories;
@@ -150,6 +152,9 @@ public:
 
 		// background
 		registry_list.push_back(&backgrounds);
+
+		//FOV
+		registry_list.push_back(&fovs);
 
 		// Inventory
 		registry_list.push_back(&inventoryItems);

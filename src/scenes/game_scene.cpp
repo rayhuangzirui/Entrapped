@@ -342,6 +342,18 @@ void GameScene::initialize(RenderSystem* renderer) {
 	MapState map_state = state.changeMap(map_name);
 	state.save();
 	createMaze(); 
+
+	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
+	registry.colors.insert(player, { 1, 0.8f, 0.8f });
+	spawnEnemiesAndItems();
+	// apply upgrade effect
+	if (state.map_index == 0) { // first level
+		Player& player_component = registry.players.get(player);
+		player_component.max_health += state.health_upgrade.curVal;
+		player_component.health = player_component.max_health;
+		player_component.ammo += state.ammo_upgrade.curVal;
+	}
+
 	state.map_index++;
 	if (state.map_index >= state.map_lists.size()) {
 		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
@@ -349,10 +361,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 	else {
 		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 	}
-
-	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
-	registry.colors.insert(player, { 1, 0.8f, 0.8f });
-	spawnEnemiesAndItems();
 
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });

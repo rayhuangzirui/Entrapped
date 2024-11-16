@@ -22,4 +22,6 @@ private:
 
 	// Buttons
 	Entity health_button;
+	Entity ammo_button;
+	Entity exit_button;
 };

@@ -1,7 +1,8 @@
 #include "ui_system.hpp"
 
 void UISystem::step(float elapsed_ms_since_last_update)
-{
+{	
+	registry.pressedButtons.clear();
 	(float)elapsed_ms_since_last_update;
 }
 

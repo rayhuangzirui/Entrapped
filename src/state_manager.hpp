@@ -29,6 +29,7 @@ public:
 	// experience and upgrade
 	int exp;
 	UpgradeState health_upgrade;
+	UpgradeState ammo_upgrade;
 
 	StateManager()
 	{
@@ -44,6 +45,7 @@ public:
 		exp = 0;
 		map_lists = { "tutorial", "map_1" };
 		health_upgrade = { 0, 10, 1 };
+		ammo_upgrade = { 0, 10, 1 };
 	}
 
 	MapState changeMap(std::string map_name);

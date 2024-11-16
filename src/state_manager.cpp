@@ -35,27 +35,6 @@ MapState StateManager::changeMap(std::string map_name) {
 	return map_state;
 }
 
-//int GameScene::load_high_score() {
-//	std::string filepath = std::string(PROJECT_SOURCE_DIR) + "highscore.txt";
-//
-//	FILE* file = fopen(filepath.c_str(), "r");
-//	if (file == NULL) {
-//		std::cerr << "Failed to open the file: " << filepath << std::endl;
-//		return 0;
-//	}
-//
-//	int content = 0;
-//	// read the first word of the line
-//	int res = fscanf(file, "%d", &content);
-//	if (res == EOF) {
-//		std::cerr << "Unable to read the high score" << std::endl;
-//		return 0;
-//	}
-//	std::cout << "loaded high score: " << content << std::endl;
-//	fclose(file);
-//	return content;
-//}
-
 
 void StateManager::save() {
 	std::string filepath = std::string(PROJECT_SOURCE_DIR) + "save.dat";
@@ -68,6 +47,10 @@ void StateManager::save() {
 	std::cout << "Game saved" << std::endl;
 	fprintf(file, "map_index=%d\n", map_index);
 	fprintf(file, "exp=%d\n", exp);
+	// health upgrades
+	fprintf(file, "heath_upgrades=%d\n", health_upgrade.curVal);
+	// ammo upgrades
+	fprintf(file, "ammo_upgrades=%d\n", ammo_upgrade.curVal);
 	fclose(file);
 	return;
 
@@ -89,6 +72,18 @@ void StateManager::load() {
 	}
 
 	res = fscanf(file, "exp=%d\n",&exp);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	res = fscanf(file, "heath_upgrades=%d\n", &health_upgrade.curVal);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	res = fscanf(file, "ammo_upgrades=%d\n", &ammo_upgrade.curVal);
 	if (res == EOF) {
 		std::cerr << "Unable to read the save data" << std::endl;
 		return;

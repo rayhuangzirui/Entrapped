@@ -198,6 +198,16 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
+			else if (state.map[row][col] == 5) { // Tape 1
+				// change the tape number in different maps or rooms
+				Entity tape1 = createTape(pos, 2);
+				if (state.map_index == 1) {
+					Hint hint;
+					hint.text = "Press E to pick up and play the tape";
+					hint.radius = 200.0f;  // Set the radius for the hint display
+					registry.hints.emplace(tape1, hint);
+				}
+			}
 		}
 	}
 
@@ -936,6 +946,138 @@ void GameScene::on_key(int key, int action, int mod) {
 				}
 			}
 		}
+
+		auto& tapes = registry.tapes;
+		for (Entity entity : tapes.entities) {
+			Tape& tape = tapes.get(entity);
+
+			Motion& motion = registry.motions.get(entity);
+			Motion& player_motion = registry.motions.get(player);
+			Player& player_component = registry.players.get(player);
+
+			if (distance(motion.position, player_motion.position) < 200.f && !tape.is_played) {
+				std::string subtitle1;
+				std::string subtitle2;
+				std::string subtitle3;
+				std::string subtitle4;
+				std::string subtitle5;
+				std::string subtitle6;
+				// Play the recording based on the tape number
+				switch (tape.tape_num)
+				{
+				case 1:
+					subtitle1 = "This is Dr.Wang, lead biologist from the second Mars settlement crew... ";
+					subtitle2 = "or at least that is what I thought. If you are hearing this, ";
+					subtitle3 = "something is gone horribly wrong. I do not know how long I have been unconscious, ";
+					subtitle4 = "but... I woke up alone. The others... they are missing.";
+					subtitle5 = "If you are awake too, you need to get out of here. Something is... off.";
+					subtitle6 = "This place... it is not what we were told.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape1_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+
+					break;
+				case 2:
+					subtitle1 = "Security Officer Ali, reporting. I do not have much time...";
+					subtitle2 = "This is not Mars. I do not know where the hell we are, but it is not Mars.";
+					subtitle3 = "The... creatures. They look like... us. I shot one down, and... it... ";
+					subtitle4 = "it screamed like a human. God, what have they done to us? Dr.Smack... ";
+					subtitle5 = "he lied to us. This whole mission... was a setup. If you are still alive...";
+					subtitle6 = "don¡¯t trust anything you see.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape2_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+					break;
+				case 3:
+					subtitle1 = "This is Dr. , geneticist. I found... logs, data... things I wasn¡¯t meant to see.";
+					subtitle2 = "Dr. Smack... he¡¯s not human. None of them are. They¡¯ve been using us... experimenting on us... ";
+					subtitle3 = "I don¡¯t know what they want, but they¡¯re... breeding something. ";
+					subtitle4 = "I tried to warn the others, but... they took them. If you find this...";
+					subtitle5 = "please, get out while you can. Don¡¯t end up like the rest of us.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape3_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					
+					break;
+				case 4:
+					subtitle1 = "Engineer Xu here. I managed to hack into the mainframe.";
+					subtitle2 = "It¡¯s all here. Mars... the whole program... it¡¯s a lie. ";
+					subtitle3 = "We were never on Mars. This place... it¡¯s a lab designed to study us, ";
+					subtitle4 = "to... harvest us. Dr. Smack and his team... they¡¯re Martians. ";
+					subtitle5 = "They need our DNA to save their dying race. It¡¯s... it¡¯s all about survival for them.";
+					subtitle6 = "They lured the best of us here to breed a new hybrid species.If you¡¯re still alive... find a way to destroy this place.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape4_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+
+					break;
+				case 5: 
+					subtitle1 = "This is Commander Blake. This message is my last stand.";
+					subtitle2 = "They¡¯re using our bodies, our DNA... to create some... abomination. ";
+					subtitle3 = "We were never meant to return to Earth. This whole facility... it¡¯s a breeding ground. ";
+					subtitle4 = "I¡¯ve set the facility to self-destruct. If you¡¯re hearing this, you still have a chance.";
+					subtitle5 = "Get to the control room, stop the countdown, or... use it to destroy everything here.";
+					subtitle6 = " It¡¯s your call... but whatever you do... don¡¯t let them win.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape5_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+					break;
+				case 6:
+					subtitle1 = "To whoever finds this... I hope you¡¯ve made it this far.";
+					subtitle2 = "We failed, but you... you can still escape. The Martians are desperate... ";
+					subtitle3 = "they¡¯ll stop at nothing to survive. But if you destroy this facility... ";
+					subtitle4 = "you might be able to stop them... for good. Whatever happens...";
+					subtitle5 = "don¡¯t forget us. Don¡¯t let them do this... to anyone else.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape6_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+				default:
+					break;
+				}
+
+				tape.is_played = true;
+
+				// remove tape from the map
+				
+				if (registry.hints.has(entity)) {
+					Hint& hint = registry.hints.get(entity);
+					if (hint.is_visible) {
+						// Remove the hint text entity if visible
+						renderer->text_renderer.removeText(hint.text_entity);
+					}
+					registry.hints.remove(entity);
+				}
+				registry.remove_all_components_of(entity);
+			}
+		}
 	}
 	
 	// Handle inventory slot usage with '1' '2' '3' '4'
@@ -1190,6 +1332,59 @@ Entity GameScene::createAmmoChest(vec2 pos) {
 		{ TEXTURE_ASSET_ID::CHEST_CLOSED,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity GameScene::createTape(vec2 pos, int tape_num) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 100.f ,100.f });
+
+	registry.tapes.emplace(entity);
+	Tape& tape = registry.tapes.get(entity);
+	tape.tape_num = tape_num;
+	tape.is_played = false;
+	if (tape_num == 1) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_1,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 2) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_2,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 3 || tape_num == 6) { // 3 and 6 use the same texture
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_3,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 4) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_4,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 5) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_5,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	return entity;
 }
@@ -1857,9 +2052,6 @@ void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& 
 	camera.updateCamera(pivot_corrected_position, window_width_px, window_height_px);
 
 }
-
-// TODO: Reloading logic
-
 
 
 // Inventory creation

@@ -89,9 +89,9 @@ class RenderSystem {
 			textures_path("choose_profession_title.png"),
 			textures_path("Soldier_page.png"),
 			textures_path("Soldier_page_clicked.png"),
-			textures_path("confirm_button.png"),
-			textures_path("confirm_button_clicked.png"),
-			textures_path("confirm_button_disabled.png"),
+			textures_path("confirm_button1.png"),
+			textures_path("confirm_button3.png"),
+			textures_path("confirm_button2.png"),
 
 	};
 

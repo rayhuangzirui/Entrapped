@@ -251,7 +251,7 @@ Entity createConfirmButton(RenderSystem* renderer, vec2 pos, bool is_enabled, bo
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 250 , 250 }); //165, 82.5
+	motion.scale = vec2({ 550 , 550 }); //165, 82.5
 
 	registry.backgrounds.emplace(entity);
 

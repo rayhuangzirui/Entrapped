@@ -50,6 +50,7 @@ Entity createBox(vec2 position, vec2 scale)
 	motion.scale = scale;
 
 	registry.debugComponents.emplace(entity);
+	registry.colors.insert(entity, { 1, 0, 0 });
 
 	registry.renderRequests.insert(
 		entity, {
@@ -152,6 +153,8 @@ Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
 	motion.scale = {200*ratio, 30};
 
 	registry.UIs.emplace(entity);
+	registry.refreshables.emplace(entity);
+	registry.colors.insert(entity, { 1, 0, 0 });
 
 	registry.renderRequests.insert(
 		entity, {
@@ -173,7 +176,7 @@ void GameScene::spawnEnemiesAndItems() {
 				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
-				if (state.map_index == 1) { // tutorial 
+				if (state.map_index == 0) { // tutorial 
 					// Attach a hint to this enemy entity
 					Hint hint;
 					hint.text = "Left click to shoot!";
@@ -183,7 +186,7 @@ void GameScene::spawnEnemiesAndItems() {
 			}
 			else if (state.map[row][col] == 3) {
 				Entity chest = createHealthChest(pos);
-				if (state.map_index == 1) {
+				if (state.map_index == 0) {
 					Hint hint;
 					hint.text = "Chest with healing item. Press E to open";
 					hint.radius = 200.0f;  // Set the radius for the hint display
@@ -192,18 +195,28 @@ void GameScene::spawnEnemiesAndItems() {
 			}
 			else if (state.map[row][col] == 4) {
 				Entity chest = createAmmoChest(pos);
-				if (state.map_index == 1) {
+				if (state.map_index == 0) {
 					Hint hint;
 					hint.text = "Chest with ammo. Press E to open";
 					hint.radius = 200.0f;  // Set the radius for the hint display
 					registry.hints.emplace(chest, hint);
 				}
 			}
+			else if (state.map[row][col] == 5) { // Tape 1
+				// change the tape number in different maps or rooms
+				Entity tape1 = createTape(pos, 2);
+				if (state.map_index == 1) {
+					Hint hint;
+					hint.text = "Press E to pick up and play the tape";
+					hint.radius = 200.0f;  // Set the radius for the hint display
+					registry.hints.emplace(tape1, hint);
+				}
+			}
 		}
 	}
 
 	// tutorial specific elements
-	if (state.map_index == 1) {
+	if (state.map_index == 0) {
 		Entity marker = createInvisible({ 10, 10 });
 		Hint hint1;
 		hint1.text = "WASD to move player";
@@ -227,8 +240,8 @@ void GameScene::spawnEnemiesAndItems() {
 }
 
 void GameScene::refreshUI(Entity player) {
-	while (registry.UIs.entities.size() > 0)
-		registry.remove_all_components_of(registry.UIs.entities.back());
+	while (registry.refreshables.entities.size() > 0)
+		registry.remove_all_components_of(registry.refreshables.entities.back());
 
 	Player& player_component = registry.players.get(player);
 
@@ -236,15 +249,22 @@ void GameScene::refreshUI(Entity player) {
 	createPlayerHPBar({ 120.f - 100*(1-ratio), 35.f}, ratio);
 	Entity health_text = renderer->text_renderer.createText(std::to_string(player_component.health) + "/" + std::to_string(player_component.max_health), { 35.f, 32.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.UIs.emplace(health_text);
+	registry.refreshables.emplace(health_text);
 
 	// create ammo text
 	Entity ammo_text = renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), { 35.f, 72.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.UIs.emplace(ammo_text);
+	registry.refreshables.emplace(ammo_text);
 
 	// Refresh inventory display
 	refreshInventoryUI(player);
 	// Draw inventory slots
 	/*createInventorySlots(player);*/
+  
+	// create exp text
+	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), {window_width_px - 175.f, 20.f}, 20.f, {1.f, 1.f, 1.f});
+	registry.UIs.emplace(exp_text);
+	registry.refreshables.emplace(exp_text);
 
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
@@ -334,13 +354,27 @@ void GameScene::initialize(RenderSystem* renderer) {
 	createBackground();
 	std::string map_name = state.map_lists[state.map_index];
 	MapState map_state = state.changeMap(map_name);
+	state.save();
 	createMaze(); 
-	state.map_index++;
-	createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 
-	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE });
+	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
+	// apply upgrade effect
+	if (state.map_index == 0) { // first level
+		Player& player_component = registry.players.get(player);
+		player_component.max_health += state.health_upgrade.curVal;
+		player_component.health = player_component.max_health;
+		player_component.ammo += state.ammo_upgrade.curVal;
+	}
+
+	state.map_index++;
+	if (state.map_index >= state.map_lists.size()) {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
+	}
+	else {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+	}
 
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
@@ -361,10 +395,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	//createInventorySlots(player);
 	//------- Inventory -------//
-
-	// fps entity
-	FPS_entity = Entity();
-
+  
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	player_hurt_sound = Mix_LoadWAV(audio_path("male-hurt.wav").c_str());
@@ -396,6 +427,8 @@ void GameScene::initialize(RenderSystem* renderer) {
 	current_speed = 5.0f;
 	player_velocity = { 0.0, 0.0 };
 
+	// Draw inventory slots
+	createInventorySlots(player);
 	refreshUI(player);
 }
 
@@ -444,6 +477,12 @@ void GameScene::step(float elapsed_ms) {
 			}
 			else if (enemyAI.state == 2) {
 				registry.colors.insert(ring, { 0.0, 0.0f, 1.0f });
+			}
+
+			if (enemyAI.path.size() > 0) {
+				for (vec2 path_node : enemyAI.path) {
+					createBox((path_node + 0.5f) * 48.f, {10,10});
+				}
 			}
 		}
 
@@ -505,24 +544,6 @@ void GameScene::step(float elapsed_ms) {
 
 	}
 
-	// FPS counter
-	if (registry.fps.entities.size() == 0) {
-		registry.fps.emplace(FPS_entity);
-	}
-
-	FPS& fps_counter = registry.fps.get(FPS_entity);
-
-	fps_counter.elapsed_time += elapsed_ms;
-	fps_counter.frame_count++;
-
-	if (fps_counter.elapsed_time >= 1000) {
-		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
-		fps_counter.frame_count = 0;
-		fps_counter.elapsed_time = 0.0;
-	}
-
-	draw_fps();
-
 	// Update HP and ammo
 	refreshUI(player);
 
@@ -542,7 +563,6 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 
-	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 
 	//if (registry.enemies.size() > 0) {
@@ -764,15 +784,18 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y += -PLAYER_SPEED;
+				//player_velocity.y += -PLAYER_SPEED;
+				player_movement_state.x = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y += PLAYER_SPEED;
+				//player_velocity.y += PLAYER_SPEED;
+				player_movement_state.y = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x += -PLAYER_SPEED;
+				//player_velocity.x += -PLAYER_SPEED;
+				player_movement_state.z = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x > 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -789,7 +812,8 @@ void GameScene::on_key(int key, int action, int mod) {
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x += PLAYER_SPEED;
+				//player_velocity.x += PLAYER_SPEED;
+				player_movement_state.w = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x < 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -807,19 +831,10 @@ void GameScene::on_key(int key, int action, int mod) {
 				isSprinting = true;
 				break;
 			case GLFW_KEY_SPACE:
-				if (!registry.dashTimers.has(player)) {
-					registry.dashTimers.emplace(player, DashTimer{ 200.f });
+				if (!registry.dashTimers.has(player) && !isSprinting) {
+					registry.dashTimers.emplace(player, DashTimer{ 200.f, 1200.f });
 					motion.velocity *= 2.5f;
 				}
-				break;
-			case GLFW_KEY_F:
-				// get the fps entity
-				Entity fps_entity = registry.fps.entities[0];
-				FPS& fps_counter = registry.fps.get(fps_entity);
-				// visialize fps
-				fps_counter.visible = !fps_counter.visible;
-				printf("FPS counter visibility: %d\n", fps_counter.visible);
-				printf("FPS: %f\n", fps_counter.fps);
 				break;
 			}
 
@@ -827,16 +842,20 @@ void GameScene::on_key(int key, int action, int mod) {
 		else if (action == GLFW_RELEASE) {
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y -= -PLAYER_SPEED;
+				player_movement_state.x = 0;
+				//player_velocity.y -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y -= PLAYER_SPEED;
+				player_movement_state.y = 0;
+				//player_velocity.y -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x -= -PLAYER_SPEED;
+				player_movement_state.z = 0;
+				//player_velocity.x -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x -= PLAYER_SPEED;
+				player_movement_state.w = 0;
+				//player_velocity.x -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_LEFT_SHIFT:
 				isSprinting = false;
@@ -844,6 +863,8 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 
 		}
+		vec2 dir = { player_movement_state.w - player_movement_state.z, player_movement_state.y - player_movement_state.x };
+		player_velocity = dir * PLAYER_SPEED;
 		motion.velocity = player_velocity;
 
 		// Apply sprint effect if active
@@ -949,6 +970,138 @@ void GameScene::on_key(int key, int action, int mod) {
 				}
 			}
 		}
+
+		auto& tapes = registry.tapes;
+		for (Entity entity : tapes.entities) {
+			Tape& tape = tapes.get(entity);
+
+			Motion& motion = registry.motions.get(entity);
+			Motion& player_motion = registry.motions.get(player);
+			Player& player_component = registry.players.get(player);
+
+			if (distance(motion.position, player_motion.position) < 200.f && !tape.is_played) {
+				std::string subtitle1;
+				std::string subtitle2;
+				std::string subtitle3;
+				std::string subtitle4;
+				std::string subtitle5;
+				std::string subtitle6;
+				// Play the recording based on the tape number
+				switch (tape.tape_num)
+				{
+				case 1:
+					subtitle1 = "This is Dr.Wang, lead biologist from the second Mars settlement crew... ";
+					subtitle2 = "or at least that is what I thought. If you are hearing this, ";
+					subtitle3 = "something is gone horribly wrong. I do not know how long I have been unconscious, ";
+					subtitle4 = "but... I woke up alone. The others... they are missing.";
+					subtitle5 = "If you are awake too, you need to get out of here. Something is... off.";
+					subtitle6 = "This place... it is not what we were told.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape1_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+
+					break;
+				case 2:
+					subtitle1 = "Security Officer Ali, reporting. I do not have much time...";
+					subtitle2 = "This is not Mars. I do not know where the hell we are, but it is not Mars.";
+					subtitle3 = "The... creatures. They look like... us. I shot one down, and... it... ";
+					subtitle4 = "it screamed like a human. God, what have they done to us? Dr.Smack... ";
+					subtitle5 = "he lied to us. This whole mission... was a setup. If you are still alive...";
+					subtitle6 = "don¡¯t trust anything you see.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape2_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+					break;
+				case 3:
+					subtitle1 = "This is Dr. , geneticist. I found... logs, data... things I wasn¡¯t meant to see.";
+					subtitle2 = "Dr. Smack... he¡¯s not human. None of them are. They¡¯ve been using us... experimenting on us... ";
+					subtitle3 = "I don¡¯t know what they want, but they¡¯re... breeding something. ";
+					subtitle4 = "I tried to warn the others, but... they took them. If you find this...";
+					subtitle5 = "please, get out while you can. Don¡¯t end up like the rest of us.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape3_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					
+					break;
+				case 4:
+					subtitle1 = "Engineer Xu here. I managed to hack into the mainframe.";
+					subtitle2 = "It¡¯s all here. Mars... the whole program... it¡¯s a lie. ";
+					subtitle3 = "We were never on Mars. This place... it¡¯s a lab designed to study us, ";
+					subtitle4 = "to... harvest us. Dr. Smack and his team... they¡¯re Martians. ";
+					subtitle5 = "They need our DNA to save their dying race. It¡¯s... it¡¯s all about survival for them.";
+					subtitle6 = "They lured the best of us here to breed a new hybrid species.If you¡¯re still alive... find a way to destroy this place.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape4_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+
+					break;
+				case 5: 
+					subtitle1 = "This is Commander Blake. This message is my last stand.";
+					subtitle2 = "They¡¯re using our bodies, our DNA... to create some... abomination. ";
+					subtitle3 = "We were never meant to return to Earth. This whole facility... it¡¯s a breeding ground. ";
+					subtitle4 = "I¡¯ve set the facility to self-destruct. If you¡¯re hearing this, you still have a chance.";
+					subtitle5 = "Get to the control room, stop the countdown, or... use it to destroy everything here.";
+					subtitle6 = " It¡¯s your call... but whatever you do... don¡¯t let them win.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape5_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+					break;
+				case 6:
+					subtitle1 = "To whoever finds this... I hope you¡¯ve made it this far.";
+					subtitle2 = "We failed, but you... you can still escape. The Martians are desperate... ";
+					subtitle3 = "they¡¯ll stop at nothing to survive. But if you destroy this facility... ";
+					subtitle4 = "you might be able to stop them... for good. Whatever happens...";
+					subtitle5 = "don¡¯t forget us. Don¡¯t let them do this... to anyone else.";
+					// add recording here
+					//Mix_PlayChannel(-1, tape6_recording, 0);
+					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
+					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+				default:
+					break;
+				}
+
+				tape.is_played = true;
+
+				// remove tape from the map
+				
+				if (registry.hints.has(entity)) {
+					Hint& hint = registry.hints.get(entity);
+					if (hint.is_visible) {
+						// Remove the hint text entity if visible
+						renderer->text_renderer.removeText(hint.text_entity);
+					}
+					registry.hints.remove(entity);
+				}
+				registry.remove_all_components_of(entity);
+			}
+		}
 	}
 	
 	// Handle inventory slot usage with '1' '2' '3' '4'
@@ -1035,6 +1188,7 @@ void GameScene::createMaze() {
 			GEOMETRY_BUFFER_ID::SPRITE
 		});
 	registry.maps.emplace(entity);
+	std::cout << "called createMaze after: " << (unsigned int)entity << std::endl;
 
 }
 
@@ -1073,7 +1227,7 @@ Entity GameScene::createWall(vec2 position, vec2 size)
 	return entity;
 }
 
-Entity GameScene::createPlayer(vec2 pos) {
+Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	RenderSystem* renderer = this->renderer;
 	auto entity = Entity();
 
@@ -1083,6 +1237,7 @@ Entity GameScene::createPlayer(vec2 pos) {
 
 	// Mesh original size : 0.009457, 0.017041
 	printf("Player mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+	printf("Selected profession: %s\n", profession.c_str());
 	// Adjusted the position of verticies to match the size of player in Mesh::loadFromOBJFile
 
 	// Setting initial motion values
@@ -1097,6 +1252,8 @@ Entity GameScene::createPlayer(vec2 pos) {
 	// Initialize health and ammo
 	player.health = 20;
 	player.ammo = 50;
+	player.profession = profession;
+
 
 	// Add the Health component to the player entity with initial health of 100
 	Health& health = registry.healths.emplace(entity);
@@ -1111,24 +1268,57 @@ Entity GameScene::createPlayer(vec2 pos) {
 	printf("Player bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	// Debug mode: visualize meshes
-	if (debugging.in_debug_mode) {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::PLAYER_1,
-			  EFFECT_ASSET_ID::MESHED,
-			  GEOMETRY_BUFFER_ID::PLAYER });
-	}
-	else {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::PLAYER_1,
-			  EFFECT_ASSET_ID::TEXTURED,
-			  GEOMETRY_BUFFER_ID::SPRITE });
-	}
+	//Debug mode: visualize meshes
+	// if (debugging.in_debug_mode) {
+	// 	registry.renderRequests.insert(
+	// 		entity,
+	// 		{ TEXTURE_ASSET_ID::PLAYER_1,
+	// 		  EFFECT_ASSET_ID::MESHED,
+	// 		  GEOMETRY_BUFFER_ID::PLAYER });
+	// }
+	// else {
+	// 	registry.renderRequests.insert(
+	// 		entity,
+	// 		{ TEXTURE_ASSET_ID::PLAYER_1,
+	// 		  EFFECT_ASSET_ID::FOV2,
+	// 		  GEOMETRY_BUFFER_ID::SPRITE });
+	// }
+
+	if (debugging.in_debug_mode) { 		
+		registry.renderRequests.insert( 			
+			entity, 			
+			{ TEXTURE_ASSET_ID::PLAYER_1, 			  
+			  EFFECT_ASSET_ID::MESHED, 			  
+			  GEOMETRY_BUFFER_ID::PLAYER }
+		); 	
+	} else { 		
+    // Player entity gets the textured effect
+    registry.renderRequests.insert( 			
+        entity, 			
+        { TEXTURE_ASSET_ID::PLAYER_1, 			  
+          EFFECT_ASSET_ID::TEXTURED, 			  
+          GEOMETRY_BUFFER_ID::SPRITE }
+    );
+    
+    Entity fov_entity = Entity();
+    Motion& fov_motion = registry.motions.emplace(fov_entity);
+	registry.fovs.emplace(fov_entity);
+    fov_motion = registry.motions.get(entity); // Copy player's motion
+    
+    // Add the FOV render request to the new entity
+    //registry.renderRequests.insert( 			
+    //    fov_entity, 			
+    //    { TEXTURE_ASSET_ID::PLAYER_1, 			  
+    //      EFFECT_ASSET_ID::FOV2, 			  
+    //      GEOMETRY_BUFFER_ID::SPRITE }
+    //); 	
+}
 
 	// Attach a gun to the player entity
 	createGun(entity);
+
+	// Enable collision
+	registry.collidables.emplace(entity);
 
 	return entity;
 }
@@ -1199,6 +1389,59 @@ Entity GameScene::createAmmoChest(vec2 pos) {
 		{ TEXTURE_ASSET_ID::CHEST_CLOSED,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity GameScene::createTape(vec2 pos, int tape_num) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 100.f ,100.f });
+
+	registry.tapes.emplace(entity);
+	Tape& tape = registry.tapes.get(entity);
+	tape.tape_num = tape_num;
+	tape.is_played = false;
+	if (tape_num == 1) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_1,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 2) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_2,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 3 || tape_num == 6) { // 3 and 6 use the same texture
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_3,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 4) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_4,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
+	else if (tape_num == 5) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::TAPE_5,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	return entity;
 }
@@ -1303,6 +1546,7 @@ Entity GameScene::createHealthBarNew(Entity enemy) {
 	HealthBar& hp_bar = registry.healthBars.emplace(entity);
 	hp_bar.owner = enemy;
 
+	registry.colors.insert(entity, { 1, 0, 0 });
 	registry.renderRequests.insert(
 		entity, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT,
@@ -1404,6 +1648,9 @@ Entity GameScene::createEnemy(vec2 pos) {
 	Entity hp_bar = createHealthBarNew(entity);
 
 	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
 
 	return entity;
 }
@@ -1577,6 +1824,8 @@ void GameScene::changeMap(std::string map_name) {
 		next_scene = "over_scene";
 		return;
 	}
+	state.save();
+	MapState map_state = state.changeMap(map_name);
 	state.map_index++;
 	// remove bullets and enemies
 	while (registry.hints.entities.size() > 0) {
@@ -1609,11 +1858,6 @@ void GameScene::changeMap(std::string map_name) {
 	// also remove portals
 	while (registry.portals.entities.size() > 0)
 		registry.remove_all_components_of(registry.portals.entities.back());
-
-
-
-
-	MapState map_state = state.changeMap(map_name);
 	
 	// spawn player
 	Entity& player_entity = registry.players.entities[0];
@@ -1683,6 +1927,9 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	vec2 max = motion.position + (motion.scale / 2.0f);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
+	// Enable collision
+	registry.collidables.emplace(entity);
+
 	if (debugging.in_debug_mode) {
 		registry.renderRequests.insert(
 			entity,
@@ -1734,6 +1981,7 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			registry.remove_all_components_of(enemy.health_bar_entity);
 			registry.enemies.remove(target);
 			registry.enemyDeathTimers.insert(target, { 3000.0f, 3000.0f });
+			state.exp += 1;
 			Mix_PlayChannel(-1, monster_hurt_sound, 0);
 
 			std::cout << "Enemy is dead!" << std::endl;
@@ -1826,25 +2074,6 @@ void GameScene::on_mouse_click(int button, int action, int mod) {
 	(RenderSystem*)renderer;
 }
 
-void GameScene::draw_fps() {
-	RenderSystem* renderer = this->renderer;
-	if (registry.fpsTexts.entities.size() > 0) {
-		registry.remove_all_components_of(registry.fpsTexts.entities.back());
-	}
-	Entity fps_entity = registry.fps.entities[0];
-	FPS& fps_counter = registry.fps.get(fps_entity);
-	if (fps_counter.visible) {
-		std::string fps_string = "FPS: " + std::to_string(static_cast<int> (fps_counter.fps));
-
-		// Update the text content
-		//fps_text.content = fps_string;
-		vec2 fps_position = vec2(10.f, 10.f);
-		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
-		registry.fpsTexts.emplace(text);
-		//registry.cameraTexts.emplace(text);
-	}
-}
-
 
 // void GameScene::drawHealthBars(RenderSystem* renderer) {
 
@@ -1892,8 +2121,6 @@ void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& 
 }
 
 // TODO: Reloading logic
-
-
 void GameScene::refreshInventoryUI(Entity player) {
 	// Clear all existing UI elements related to the inventory
 	while (registry.inventorySlots.entities.size() > 0) {
@@ -1919,6 +2146,7 @@ void GameScene::refreshInventoryUI(Entity player) {
 		slot_motion.position = position;
 		slot_motion.scale = { slot_size, slot_size };
 		registry.UIs.emplace(slot);
+		registry.colors.insert(slot, { 1, 0, 0 });
 
 		// Render the slot background
 		registry.renderRequests.insert(slot, {
@@ -1952,6 +2180,49 @@ void GameScene::refreshInventoryUI(Entity player) {
 			std::string count_text = std::to_string(item.count);
 			Entity text_entity = renderer->text_renderer.createText(count_text, position + vec2(10, -15), 20.f, { 1.f, 1.f, 1.f });
 			registry.UIs.emplace(text_entity);
+			//std::string count_text = std::to_string(inventory.items[i].count);
+			//renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
+		}
+	}
+}
+
+void GameScene::refreshInventorySlots(Entity player) {
+	Inventory& inventory = registry.inventories.get(player);
+
+	float slot_size = 48.f;
+	float spacing = 10.f;
+	float x_offset = window_width_px / 2.0f - 2 * slot_size;
+	float y_offset = 50.f;
+
+	for (int i = 0; i < inventory.max_slots; ++i) {
+		float x_position = x_offset + i * (slot_size + spacing);
+		vec2 position = { x_position, y_offset };
+
+		// Render item icon if slot is not empty
+		if (inventory.items[i].count > 0) {
+			// Create a new icon entity for the item
+			Entity icon = Entity();
+
+			// Add a Motion component for position and scale
+			Motion& icon_motion = registry.motions.emplace(icon);
+			icon_motion.position = position; // Use screen position, not world position
+			icon_motion.scale = { slot_size - 10, slot_size - 10 };
+
+			// Mark this entity as a UI element so it renders on the UI layer
+			registry.UIs.emplace(icon);
+			registry.refreshables.emplace(icon);
+
+			// Render the icon with the appropriate texture
+			registry.renderRequests.insert(icon, {
+				TEXTURE_ASSET_ID::CHEST_CLOSED,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE
+				});
+
+			// Display the item count as text
+			std::string count_text = std::to_string(inventory.items[i].count);
+			Entity count_text_entity = renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
+			registry.refreshables.emplace(count_text_entity);
 		}
 	}
 }

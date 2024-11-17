@@ -1,5 +1,6 @@
 #include "over_scene.hpp"
 #include "tiny_ecs_registry.hpp"
+#include "state_manager.hpp"
 
 
 void OverScene::initialize(RenderSystem* renderer) {
@@ -8,6 +9,10 @@ void OverScene::initialize(RenderSystem* renderer) {
 	renderer->text_renderer.createText("Press Q to return to the main menu", { window_width_px / 2 - 160.f, window_height_px / 2 + 40.f }, 20.f, { 1.f, 1.f, 1.f });
 	//renderer->text_renderer.createText("Main Menu", { window_width_px / 2 + 40.f, window_height_px/2+40.f }, 20.f, { 1.f, 1.f, 1.f });
 	//(vec2)mouse_position; // dummy to avoid compiler warning
+	
+	// game is over, reset save
+	state.map_index = 0;
+	state.save();
 }
 
 void OverScene::step(float elapsed_ms) {
@@ -46,10 +51,6 @@ void OverScene::on_mouse_click(int button, int action, int mod) {
 	(int)button;
 	(int)action;
 	(int)mod;
-}
-
-void OverScene::draw_fps() {
-	// pass
 }
 
 

@@ -26,8 +26,7 @@ struct Player
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
 
-	// Player's Profession may be used in the future
-	//enum Profession { SOLDIER, DOCTOR, HACKER } profession;
+	std::string profession;
 };
 
 // Portal to the next map
@@ -40,6 +39,15 @@ struct CameraText {
 
 };
 
+
+struct Button {
+	Entity text;
+};
+
+// button that is pressed
+struct PressedButton{
+
+};
 
 
 // Gun component
@@ -106,6 +114,50 @@ struct Enemy
 	Entity health_bar_entity;
 };
 
+// A fast enemy with high damage and low health
+struct EnemyFast
+{
+	// Enemy's health
+	int health = 2;
+
+	// Enemy's damage
+	int damage = 5;
+    
+	float speed = 200.f;
+
+
+	Entity health_bar_entity;
+};
+
+// A tanky enemy with high health and low damage
+struct EnemyTank
+{
+	// Enemy's health
+	int health = 7;
+
+	// Enemy's damage
+	int damage = 2;
+
+	float speed = 50.f;
+
+	Entity health_bar_entity;
+};
+
+struct EnemyBoss
+{
+	// Enemy's health
+	int health = 25;
+
+	// Enemy's damage
+	int damage = 10;
+
+	float speed = 80.f;
+
+	Entity health_bar_entity;
+};
+
+
+
 // Enemy AI component
 struct EnemyAI {
 	vec2 last_player_position = { 0,0 };
@@ -113,7 +165,9 @@ struct EnemyAI {
 	float chase_timer = 3000;
 	float wander_timer = 0;
 	float flee_timer = 3000;
+	float path_finding_timer = 0;
 	int state = 0;
+	std::vector<vec2> path;
 };
 
 struct Health {
@@ -123,6 +177,7 @@ struct Health {
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
+	float cooldown_ms; // Cooldown of dahs in milliseconds
 };
 
 // placeholder entities that are invisible
@@ -174,6 +229,10 @@ struct HealthBar {
 	
 };
 
+// Structure to store collidable entities
+struct Collidable {
+
+};
 
 // Stucture to store collision information
 struct Collision
@@ -262,9 +321,25 @@ struct UI {
 
 };
 
+// Component that shows as a floating message
+struct Message {
+
+};
+
+// UI component that requires refreshing
+struct Refreshable {
+
+};
+
 // Text that displays FPS
 struct FPSText {
 
+};
+
+// Tape component
+struct Tape {
+	int tape_num;
+	bool is_played = false;
 };
 
 // Component for the Player hp bar
@@ -303,9 +378,7 @@ struct BoundingBox {
 
 // The map
 struct Map {
-	int width;
-	int height;
-	std::vector<std::vector<int>> grid;
+
 };
 
 struct Hint {
@@ -315,6 +388,10 @@ struct Hint {
 	Entity text_entity;        // Stores the entity of the rendered text
 };
 
+//For draw order of FOV shader
+struct FOV {
+    
+};
 //-------------------- Inventory system --------------------
 // Inventory item definition
 struct InventoryItem {
@@ -437,7 +514,18 @@ enum class TEXTURE_ASSET_ID {
 	CHEST_OPENED = CHEST_CLOSED + 1,
 
 	SPACE_BACKGROUND = CHEST_OPENED + 1,
-	TEXTURE_COUNT = SPACE_BACKGROUND + 1
+	CHOOSE_PROFESSION_TITLE = SPACE_BACKGROUND + 1,
+	SOLDIER_PAGE = CHOOSE_PROFESSION_TITLE + 1,
+	SOLDIER_PAGE_CLICKED = SOLDIER_PAGE + 1,
+	CONFIRM_BUTTON = SOLDIER_PAGE_CLICKED + 1,
+	CONFIRM_BUTTON_CLICKED = CONFIRM_BUTTON + 1,
+	CONFIRM_BUTTON_DISABLED = CONFIRM_BUTTON_CLICKED + 1,
+	TAPE_1 = CONFIRM_BUTTON_DISABLED + 1,
+	TAPE_2 = TAPE_1 + 1,
+	TAPE_3 = TAPE_2 + 1,
+	TAPE_4 = TAPE_3 + 1,
+	TAPE_5 = TAPE_4 + 1,
+	TEXTURE_COUNT = TAPE_5 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -452,7 +540,8 @@ enum class EFFECT_ASSET_ID {
 	BOX = RECTANGLE + 1,
 	GLOBAL = BOX+1,
 	MAP = GLOBAL + 1,
-	EFFECT_COUNT = MAP + 1,
+	FOV2 = MAP + 1,
+	EFFECT_COUNT = FOV2 + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -467,7 +556,8 @@ enum class GEOMETRY_BUFFER_ID {
 	ENEMY_WOMAN = BULLET + 1,
 	MAZE = ENEMY_WOMAN  + 1,
 	SQUARE = MAZE + 1,
-	GEOMETRY_COUNT = SQUARE + 1
+	FOV_QUAD = SQUARE + 1,
+	GEOMETRY_COUNT = FOV_QUAD + 1
 
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;

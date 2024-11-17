@@ -58,6 +58,20 @@ mat3 CameraSystem::getViewportMatrix(int window_width, int window_height) const 
     return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
 }
 
+mat3 CameraSystem::getProjectionMatrix() const {
+    float left = -window_width/2.0f/zoom_level;
+    float right = window_width/2.0f/zoom_level;
+    float bottom = -window_height/2.0f/zoom_level;
+    float top = window_height/2.0f/zoom_level;
+    
+    // Create orthographic projection matrix
+    return mat3(
+        2.0f/(right-left), 0.0f, -(right+left)/(right-left),
+        0.0f, 2.0f/(top-bottom), -(top+bottom)/(top-bottom),
+        0.0f, 0.0f, 1.0f
+    );
+}
+
 
 vec2 CameraSystem::worldToView(const vec2& world_position) const {
     // Calculate the offset of the world position relative to the camera position

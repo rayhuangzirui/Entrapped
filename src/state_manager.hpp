@@ -8,6 +8,12 @@ struct MapState {
 	vec2 exit = { 2, 2 };
 };
 
+struct UpgradeState {
+	int curVal = 0;
+	int upgrade_amount = 0;
+	int upgrade_cost = 0;
+};
+
 class StateManager
 {
 public:
@@ -16,8 +22,15 @@ public:
 	int map_width;
 	std::vector<std::vector<int>> map;
 	uint map_index;
+	uint saved_map_index;
 	std::vector<std::string> map_lists;
 	MapState current_map_state;
+	
+
+	// experience and upgrade
+	int exp;
+	UpgradeState health_upgrade;
+	UpgradeState ammo_upgrade;
 
 	StateManager()
 	{
@@ -29,10 +42,20 @@ public:
 			{7, 8, 9}
 		};
 		map_index = 0;
-		map_lists = { "tutorial", "map_1" };
+		saved_map_index = 0;
+		exp = 0;
+		map_lists = { "tutorial", "map_1", "map_2" };
+		health_upgrade = { 0, 10, 1 };
+		ammo_upgrade = { 0, 10, 1 };
+	}
+
+	~StateManager() {
+		std::cout << "state destroyed" << std::endl;
 	}
 
 	MapState changeMap(std::string map_name);
+	void save();
+	void load();
 };
 
 extern StateManager state;

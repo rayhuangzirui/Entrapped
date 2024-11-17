@@ -9,6 +9,8 @@
 #include "tiny_ecs.hpp"
 #include <text_renderer.hpp>
 
+
+
 // System responsible for setting up OpenGL and for rendering all the
 // visual entities in the game
 class RenderSystem {
@@ -86,6 +88,18 @@ class RenderSystem {
 			textures_path("chest_opened.png"),
 
 			textures_path("Space Background.png"),
+			textures_path("choose_profession_title.png"),
+			textures_path("Soldier_page.png"),
+			textures_path("Soldier_page_clicked.png"),
+			textures_path("confirm_button1.png"),
+			textures_path("confirm_button3.png"),
+			textures_path("confirm_button2.png"),
+			textures_path("Tape_blue.png"),
+			textures_path("Tape_green.png"),
+			textures_path("Tape_light_blue.png"),
+			textures_path("Tape_orange.png"),
+			textures_path("Tape_rainbow.png"),
+
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -101,7 +115,8 @@ class RenderSystem {
 		shader_path("box"),
 		shader_path("global"),
 		//shader_path("textured")
-		shader_path("map")
+		shader_path("map"),
+		shader_path("fovShader"),
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -137,13 +152,19 @@ public:
 	// Draw all entities
 	void draw();
 
+	void initializeFullscreenQuad();
+
 	mat3 createProjectionMatrix();
+
+	void initializeFOVQuad();
 
 	// Text renderer
 	TextRenderer text_renderer;
 	void setTextPosition(Entity textEntity, vec2 newPosition);
 
 	CameraSystem& getCameraSystem();
+	// Window handle
+	GLFWwindow* window;
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
@@ -151,8 +172,7 @@ private:
 	void drawMap(Entity entity, const mat3& projection);
 	void drawToScreen();
 
-	// Window handle
-	GLFWwindow* window;
+	bool checkWallNearby(vec2 position, float check_radius);
 
 	// Text renderer
 	//TextRenderer text_renderer;
@@ -165,6 +185,11 @@ private:
 	// map buffer
 	GLuint m_map_VAO;
 	GLuint m_map_VBO;
+
+	//FOV
+	GLuint fov_vbo;
+    GLuint fov_ibo;
+    GLuint fov_vao;
 
 	Entity screen_state_entity;
 };

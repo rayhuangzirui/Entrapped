@@ -43,7 +43,7 @@ public:
 		map_index = 0;
 		saved_map_index = 0;
 		exp = 0;
-		map_lists = { "tutorial", "map_1" };
+		map_lists = { "tutorial", "map_1", "map_2" };
 		health_upgrade = { 0, 10, 1 };
 		ammo_upgrade = { 0, 10, 1 };
 	}

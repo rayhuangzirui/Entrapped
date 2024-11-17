@@ -428,7 +428,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	player_velocity = { 0.0, 0.0 };
 
 	// Draw inventory slots
-	createInventorySlots(player);
+	//createInventorySlots(player);
 	refreshUI(player);
 }
 

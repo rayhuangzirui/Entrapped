@@ -6,6 +6,7 @@
 #include "camera_system.hpp"
 #include <SDL.h>
 #include <SDL_mixer.h>
+#include <random>
 
 class GameScene : public BaseScene {
 public:
@@ -96,4 +97,8 @@ private:
 	void createInventorySlots(Entity player);
 	void refreshPowerUpUI(Entity player);
 	void refreshInventorySlots(Entity player);
+
+	// C++ random number generator
+	std::default_random_engine rng;
+	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 };

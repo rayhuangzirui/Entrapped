@@ -213,7 +213,7 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
 
             GLint radiusLoc = glGetUniformLocation(program, "circleRadius");
             if (radiusLoc >= 0) {
-                float circle_radius = 150.0f;
+                float circle_radius = 700.0f;
                 glUniform1f(radiusLoc, circle_radius);
             }
 
@@ -680,10 +680,10 @@ void RenderSystem::draw()
 
 
 for (Entity entity : registry.renderRequests.entities) {
-    if (!registry.fovs.has(entity) && !registry.texts.has(entity)) {
+    if (!registry.fovs.has(entity) && !registry.texts.has(entity) && !registry.UIs.has(entity)) {
         if (registry.maps.has(entity)) {
             drawMap(entity, camera_matrix);
-        } else if (registry.UIs.has(entity) || registry.backgrounds.has(entity)) {
+        } else if (registry.backgrounds.has(entity)) {
             drawTexturedMesh(entity, projection_2D);
         } else {
             drawTexturedMesh(entity, camera_matrix);
@@ -706,10 +706,11 @@ for (Entity entity : registry.renderRequests.entities) {
         } else {
             drawText(entity, projection_2D);
         }
-    }
+	}
+	else if (registry.UIs.has(entity)) {
+		drawTexturedMesh(entity, projection_2D);
+	}
 }
-
-
 
 	// Truely render to the screen
 	drawToScreen();

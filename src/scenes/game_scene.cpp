@@ -307,6 +307,43 @@ void GameScene::spawnEnemiesAndItems() {
 		}
 	}
 
+	// change the tape number and position in different maps or rooms
+	//Entity tape1 = createTape(vec2{ 300, 200 }, 1);
+	//Hint hint1;
+	//hint1.text = "Press E to pick up and play the tape";
+	//hint1.radius = 200.0f;  // Set the radius for the hint display
+	//registry.hints.emplace(tape1, hint1);
+
+	//Entity tape2 = createTape(vec2{ 1000, 200 }, 2);
+	//Hint hint2;
+	//hint2.text = "Press E to pick up and play the tape";
+	//hint2.radius = 200.0f;  // Set the radius for the hint display
+	//registry.hints.emplace(tape2, hint2);
+
+	//Entity tape3 = createTape(vec2{ 1800, 200 }, 3);
+	//Hint hint3;
+	//hint3.text = "Press E to pick up and play the tape";
+	//hint3.radius = 200.0f;  // Set the radius for the hint display
+	//registry.hints.emplace(tape3, hint3);
+
+	//Entity tape4 = createTape(vec2{ 300, 400 }, 4);
+	//Hint hint4;
+	//hint4.text = "Press E to pick up and play the tape";
+	//hint4.radius = 200.0f;  // Set the radius for the hint display
+	//registry.hints.emplace(tape4, hint4);
+
+	//Entity tape5 = createTape(vec2{ 1000, 400 }, 5);
+	//Hint hint5;
+	//hint5.text = "Press E to pick up and play the tape";
+	//hint5.radius = 200.0f;  // Set the radius for the hint display
+	//registry.hints.emplace(tape5, hint5);
+
+	//Entity tape6 = createTape(vec2{ 1800, 400 }, 6);
+	//Hint hint6;
+	//hint6.text = "Press E to pick up and play the tape";
+	//hint6.radius = 200.0f;  // Set the radius for the hint display
+	//registry.hints.emplace(tape6, hint6);
+
 	// tutorial specific elements
 	if (state.map_index == 0) {
 		Entity marker = createInvisible({ 10, 10 });
@@ -327,6 +364,44 @@ void GameScene::spawnEnemiesAndItems() {
 		hint3.text = "Look for the exit of the maze!";
 		hint3.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint3);
+	}
+
+	// tapes
+	if (state.map_index == 1) {
+		// tape 1
+		vec2 coords = { 45, 11 };
+		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape1 = createTape(pos, 1);
+		Hint hint1;
+		hint1.text = "Press E to pick up and play the tape";
+		hint1.radius = 200.0f;  // Set the radius for the hint display
+		registry.hints.emplace(tape1, hint1);
+		
+		// tape 2
+		coords = { 47, 38 };
+		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape2 = createTape(pos, 2);
+
+		// tape 3
+		coords = { 93, 54 };
+		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape3 = createTape(pos, 3);
+	}
+	else if (state.map_index == 2) {
+		// tape 4
+		vec2 coords = { 15, 23 };
+		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape4 = createTape(pos, 4);
+
+		// tape 5
+		coords = { 92, 5 };
+		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape5 = createTape(pos, 5);
+
+		coords = { 78, 45 };
+		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape6 = createTape(pos, 6);
+
 	}
 
 }
@@ -443,7 +518,7 @@ void GameScene::updateHints(Entity player) {
 void GameScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 	camera = renderer->getCameraSystem();
-
+	rng = std::default_random_engine(std::random_device()());
 	// *Render the maze before initializing player and enemy entities*
 	createBackground();
 	std::string map_name = state.map_lists[state.map_index];
@@ -469,43 +544,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 		// Ability to craft ammo, collect materials by killing enemy, increase 3 ammo per enemy killed
 		PowerUpSystem::applyPowerUp(player, PowerUpType::Hacker_init_powerup, 0);
 	}
-
-	// change the tape number and position in different maps or rooms
-	Entity tape1 = createTape(vec2{ 300, 200 }, 1);
-	Hint hint1;
-	hint1.text = "Press E to pick up and play the tape";
-	hint1.radius = 200.0f;  // Set the radius for the hint display
-	registry.hints.emplace(tape1, hint1);
-
-	Entity tape2 = createTape(vec2{ 1000, 200 }, 2);
-	Hint hint2;
-	hint2.text = "Press E to pick up and play the tape";
-	hint2.radius = 200.0f;  // Set the radius for the hint display
-	registry.hints.emplace(tape2, hint2);
-
-	Entity tape3 = createTape(vec2{ 1800, 200 }, 3);
-	Hint hint3;
-	hint3.text = "Press E to pick up and play the tape";
-	hint3.radius = 200.0f;  // Set the radius for the hint display
-	registry.hints.emplace(tape3, hint3);
-
-	Entity tape4 = createTape(vec2{ 300, 400 }, 4);
-	Hint hint4;
-	hint4.text = "Press E to pick up and play the tape";
-	hint4.radius = 200.0f;  // Set the radius for the hint display
-	registry.hints.emplace(tape4, hint4);
-
-	Entity tape5 = createTape(vec2{ 1000, 400 }, 5);
-	Hint hint5;
-	hint5.text = "Press E to pick up and play the tape";
-	hint5.radius = 200.0f;  // Set the radius for the hint display
-	registry.hints.emplace(tape5, hint5);
-
-	Entity tape6 = createTape(vec2{ 1800, 400 }, 6);
-	Hint hint6;
-	hint6.text = "Press E to pick up and play the tape";
-	hint6.radius = 200.0f;  // Set the radius for the hint display
-	registry.hints.emplace(tape6, hint6);
 	
 	// apply upgrade effect
 	if (state.map_index == 0) { // first level
@@ -1160,7 +1198,13 @@ void GameScene::on_key(int key, int action, int mod) {
 			if (distance(motion.position, player_motion.position) < 200.f && !random_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
 
-				
+				int choice = floor(uniform_dist(rng)*2);
+				if (choice == 0) {
+					InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 1);
+				}
+				else if(choice == 1) {
+					InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 1);
+				}
 
 				random_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
@@ -1493,13 +1537,13 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
     fov_motion = registry.motions.get(entity); // Copy player's motion
     
     // Add the FOV render request to the new entity
-    //registry.renderRequests.insert( 			
-    //    fov_entity, 			
-    //    { TEXTURE_ASSET_ID::PLAYER_1, 			  
-    //      EFFECT_ASSET_ID::FOV2, 			  
-    //      GEOMETRY_BUFFER_ID::SPRITE }
-    //); 	
-}
+    registry.renderRequests.insert( 			
+        fov_entity, 			
+        { TEXTURE_ASSET_ID::PLAYER_1, 			  
+          EFFECT_ASSET_ID::FOV2, 			  
+          GEOMETRY_BUFFER_ID::SPRITE }
+    ); 	
+	}
 
 	// Attach a gun to the player entity
 	createGun(entity);
@@ -1995,7 +2039,6 @@ void GameScene::changeMap(std::string map_name) {
 	}
 	state.save();
 	MapState map_state = state.changeMap(map_name);
-	state.map_index++;
 	// remove bullets and enemies
 	while (registry.hints.entities.size() > 0) {
 		Entity& entity = registry.hints.entities.back();
@@ -2023,6 +2066,8 @@ void GameScene::changeMap(std::string map_name) {
 		registry.remove_all_components_of(registry.healthChests.entities.back());
 	while (registry.ammoChests.entities.size() > 0)
 		registry.remove_all_components_of(registry.ammoChests.entities.back());
+	while (registry.randomChests.entities.size() > 0)
+		registry.remove_all_components_of(registry.randomChests.entities.back());
 
 	// also remove portals
 	while (registry.portals.entities.size() > 0)
@@ -2039,6 +2084,9 @@ void GameScene::changeMap(std::string map_name) {
 	player_component.health = player_component.max_health;
 	player_component.ammo = 50;
 	player_motion.position = { (map_state.player_spawn.x + 0.5) * 48,(map_state.player_spawn.y + 0.5) * 48 };
+	// spawn enemies
+	spawnEnemiesAndItems();
+	state.map_index++;
 	// spawn exit
 	if (state.map_index >= state.map_lists.size()) {
 		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
@@ -2046,9 +2094,6 @@ void GameScene::changeMap(std::string map_name) {
 	else {
 		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 	}
-
-	// spawn enemies
-	spawnEnemiesAndItems();
 }
 
 // Add bullet creation

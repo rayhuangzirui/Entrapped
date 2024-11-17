@@ -18,6 +18,7 @@ void InventorySystem::initializeInventory(Entity player) {
     for (int i = 0; i < inventory.max_slots; ++i) {
         inventory.items[i] = { InventoryItem::Type::None, 0 };
     }
+    
 
     // Debug message
     std::cout << "Initialized inventory for player with " << inventory.max_slots << " slots." << std::endl;

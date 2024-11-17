@@ -77,37 +77,63 @@ void main()
     float d = 100.0;
     float col_factor = 0.0f;
 
+
     if(getMap(int(twpos.x), int(twpos.y)) == 0)
     {
-        // Vertical
-        if(rayDir.y != 0.0)
-        {
-            // Step lengths
-            float stepX = sign(rayDir.y) / tan(directionAngle);
-            float stepY = sign(rayDir.y);
-
-            // Initial intersection
-            vec2 p = vec2(0.0, round(lightPos.y + sign(rayDir.y) * 0.5));
-            p.x = lightPos.x + -(lightPos.y - p.y) / tan(directionAngle);
-
-            // March
-            for(int i = 0; i < 16; i++)
-            {
-                // Test the tiles sharing an edge
-                int testX = int(p.x);
-                int testY1 = int(p.y + 0.5);
-                int testY2 = int(p.y - 0.5);
-                if(map[testX + testY1 * 16] + map[testX + testY2 * 16] <= 0)
-                {
-                    p += vec2(stepX, stepY);
+        float max_substep_distance = 1.0f; 
+        vec2 total_movement = tpos - center_pos;
+        float total_distance = length(total_movement);
+        int sub_steps = max(1, int(total_distance / max_substep_distance));
+        vec2 movement_per_substep = total_movement / float(sub_steps);
+        vec2 p = center_pos;
+        for (int step = 0; step < sub_steps; ++step) {
+            p = p + movement_per_substep;
+            vec2 ip = translateCoordsToWorld(p);
+            if(getMap(int(ip.x), int(ip.y)) == 1){
+                vec2 wall_pos = vec2((int(ip.x) + 0.5f) * 48.f, (int(ip.y) + 0.5f) * 48.f);
+                vec2 wall_size = vec2(48.f, 48.f);
+                float wall_left = wall_pos.x - wall_size.x / 2.0f;
+                float wall_right = wall_pos.x + wall_size.x / 2.0f;
+                float wall_top = wall_pos.y - wall_size.y / 2.0f;
+                float wall_bottom = wall_pos.y + wall_size.y / 2.0f;
+                float overlap_x = 0.0f;
+                float overlap_y = 0.0f;
+                // Calculate the minimum translation distance along x
+                if (p.x < wall_pos.x) {
+                    overlap_x = p.x - wall_left;
                 }
-                else
-                    break;
-            }
+                else {
+                    overlap_x = wall_right - p.x;
+                }
 
-            d = min(length(lightPos - p), d);
+                // Calculate the minimum translation distance along y
+                if (p.y < wall_pos.y) {
+                    overlap_y = p.y - wall_top;
+                }
+                else {
+                    overlap_y = wall_bottom - p.y;
+                }
+
+                // Determine the axis of minimum penetration
+                if (overlap_x < overlap_y) {
+                    // Move point out along x-axis
+                    float mtv_x = (p.x < wall_pos.x) ? -overlap_x : overlap_x;
+                    p.x += mtv_x;
+                }
+                else {
+                    // Move entity out along y-axis
+                    float mtv_y = (p.y < wall_pos.y) ? -overlap_y : overlap_y;
+                    p.y += mtv_y;
+                }
+            }
         }
-        col_factor = 0.0f;
+
+        float d = distance(p, center_pos);
+        // Is the pixel in view of the light?
+        if(d >= total_distance - EPSILON)
+            col_factor = 0.0f;
+        else
+            col_factor = 1.0f;
     }
     else // Wall
         col_factor = 1.0f;

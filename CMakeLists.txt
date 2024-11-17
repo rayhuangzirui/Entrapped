@@ -48,7 +48,7 @@ if (IS_OS_MAC)
   link_libraries(${FREETYPE2_LIBRARIES})
 endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/camera_system.cpp")
+add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/camera_system.cpp" "src/inventory_system.cpp")
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 # Added this so policy CMP0065 doesn't scream

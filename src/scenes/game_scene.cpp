@@ -6,6 +6,7 @@
 #include "render_system.hpp"
 #include <iostream>
 #include "components.hpp"
+#include "inventory_system.hpp"
 
 const int cell_size = 48;
 
@@ -240,7 +241,7 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(ammo_text);
 
 	// Draw inventory slots
-	createInventorySlots(player);
+	/*createInventorySlots(player);*/
 
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
@@ -340,6 +341,21 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+
+	//------- Inventory -------//
+
+	InventorySystem::initializeInventory(player);
+
+	// Load inventory sounds
+	InventorySystem::initializeSounds();
+
+	// Add some items to the player's inventory for testing
+	InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 5);
+	InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 2);
+
+	// Attempt to remove an item
+	InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
+	//------- Inventory -------//
 
 	// fps entity
 	FPS_entity = Entity();
@@ -708,6 +724,9 @@ void GameScene::destroy() {
 	Mix_FreeChunk(item_pickup_sound);
 	Mix_FreeChunk(reload_sound);
 	Mix_FreeChunk(stab_sound);
+
+	// Clean up inventory sounds
+	InventorySystem::cleanupSounds();
 }
 
 std::string GameScene::get_next_scene() {
@@ -929,24 +948,12 @@ void GameScene::on_key(int key, int action, int mod) {
 	
 	// Handle inventory slot usage with '1' '2' '3' '4'
 	if (action == GLFW_PRESS) {
-		if (key >= GLFW_KEY_1 && key <= GLFW_KEY_4) {
-			int slot_index = key - GLFW_KEY_1;
-			Entity player = registry.players.entities[0];
-			Inventory& inventory = registry.inventories.get(player);
-
-			if (slot_index < inventory.items.size() && inventory.items[slot_index].count > 0) {
-				// Check item type and consume it
-				if (inventory.items[slot_index].type == InventoryItem::Type::AmmoPack) {
-					Player& player_component = registry.players.get(player);
-					player_component.ammo += 10; // Increase ammo count
-					inventory.items[slot_index].count--;
-
-					// Play sound effect for item usage
-					Mix_PlayChannel(-1, item_pickup_sound, 0);
-				}
-			}
-		}
-	}
+        // Handle inventory slot usage with keys 1, 2, 3, 4
+        if (key >= GLFW_KEY_1 && key <= GLFW_KEY_4) {
+            int slot_index = key - GLFW_KEY_1;
+            InventorySystem::consumeItem(player, slot_index);
+        }
+    }
 
 
 	if (action == GLFW_PRESS) {
@@ -1064,15 +1071,6 @@ Entity GameScene::createPlayer(vec2 pos) {
 	// Initialize health and ammo
 	player.health = 20;
 	player.ammo = 50;
-
-	// Initialize player's inventory
-	Inventory& inventory = registry.inventories.emplace(entity);
-	inventory.items.resize(4); // 4 slots, all empty initially
-
-	// Add an initial ammo pack to slot 1 for testing
-	inventory.items[0] = { InventoryItem::Type::AmmoPack, 3 };
-
-
 
 	// Add the Health component to the player entity with initial health of 100
 	Health& health = registry.healths.emplace(entity);
@@ -1848,55 +1846,55 @@ void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& 
 
 
 // Inventory creation
-void GameScene::createInventorySlots(Entity player) {
-	Inventory& inventory = registry.inventories.get(player);
-
-	float slot_size = 48.f;
-	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - 2* slot_size;
-	float y_offset = 50.f;
-
-	for (int i = 0; i < inventory.max_slots; ++i) {
-		float x_position = x_offset + i * (slot_size + spacing);
-		vec2 position = { x_position, y_offset };
-
-		// Create a slot entity
-		Entity slot = Entity();
-		Motion& motion = registry.motions.emplace(slot);
-		motion.position = position;
-		motion.scale = { slot_size, slot_size };
-		registry.UIs.emplace(slot);
-
-		// Render slot background
-		registry.renderRequests.insert(slot, {
-			TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::BOX,
-			GEOMETRY_BUFFER_ID::DEBUG_LINE
-			});
-
-		// Render item icon if slot is not empty
-		if (inventory.items[i].count > 0) {
-			// Create a new icon entity for the item
-			Entity icon = Entity();
-
-			// Add a Motion component for position and scale
-			Motion& icon_motion = registry.motions.emplace(icon);
-			icon_motion.position = position; // Use screen position, not world position
-			icon_motion.scale = { slot_size - 10, slot_size - 10 };
-
-			// Mark this entity as a UI element so it renders on the UI layer
-			registry.UIs.emplace(icon);
-
-			// Render the icon with the appropriate texture
-			registry.renderRequests.insert(icon, {
-				TEXTURE_ASSET_ID::CHEST_CLOSED,
-				EFFECT_ASSET_ID::TEXTURED,
-				GEOMETRY_BUFFER_ID::SPRITE
-				});
-
-			// Display the item count as text
-			std::string count_text = std::to_string(inventory.items[i].count);
-			renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
-		}
-	}
-}
+//void GameScene::createInventorySlots(Entity player) {
+//	Inventory& inventory = registry.inventories.get(player);
+//
+//	float slot_size = 48.f;
+//	float spacing = 10.f;
+//	float x_offset = window_width_px / 2.0f - 2* slot_size;
+//	float y_offset = 50.f;
+//
+//	for (int i = 0; i < inventory.max_slots; ++i) {
+//		float x_position = x_offset + i * (slot_size + spacing);
+//		vec2 position = { x_position, y_offset };
+//
+//		// Create a slot entity
+//		Entity slot = Entity();
+//		Motion& motion = registry.motions.emplace(slot);
+//		motion.position = position;
+//		motion.scale = { slot_size, slot_size };
+//		registry.UIs.emplace(slot);
+//
+//		// Render slot background
+//		registry.renderRequests.insert(slot, {
+//			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+//			EFFECT_ASSET_ID::BOX,
+//			GEOMETRY_BUFFER_ID::DEBUG_LINE
+//			});
+//
+//		// Render item icon if slot is not empty
+//		if (inventory.items[i].count > 0) {
+//			// Create a new icon entity for the item
+//			Entity icon = Entity();
+//
+//			// Add a Motion component for position and scale
+//			Motion& icon_motion = registry.motions.emplace(icon);
+//			icon_motion.position = position; // Use screen position, not world position
+//			icon_motion.scale = { slot_size - 10, slot_size - 10 };
+//
+//			// Mark this entity as a UI element so it renders on the UI layer
+//			registry.UIs.emplace(icon);
+//
+//			// Render the icon with the appropriate texture
+//			registry.renderRequests.insert(icon, {
+//				TEXTURE_ASSET_ID::CHEST_CLOSED,
+//				EFFECT_ASSET_ID::TEXTURED,
+//				GEOMETRY_BUFFER_ID::SPRITE
+//				});
+//
+//			// Display the item count as text
+//			std::string count_text = std::to_string(inventory.items[i].count);
+//			renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
+//		}
+//	}
+//}

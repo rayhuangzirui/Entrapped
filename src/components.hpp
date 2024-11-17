@@ -383,6 +383,11 @@ struct Tape {
 	bool is_played = false;
 };
 
+// Subtitle component
+struct Subtitle {
+	
+};
+
 //-------------------- Inventory system --------------------
 struct InventoryItem {
 	enum class Type { AmmoPack } type;

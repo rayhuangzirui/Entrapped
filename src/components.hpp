@@ -27,6 +27,11 @@ struct Player
 	int ammo = 30;
 
 	std::string profession;
+	// if the player is a doctor, heal 1 health point every 5 seconds. Other professions have this timer set to 0.
+	float heal_timer = 0; // ms
+
+	// if the player is an hacker, increase 3 ammo per enemy killed. Other professions have this set to 0.
+	float ammo_per_kill = 0;
 };
 
 // Portal to the next map
@@ -392,6 +397,18 @@ struct Hint {
 struct FOV {
     
 };
+
+// Tape component
+struct Tape {
+	int tape_num;
+	bool is_played = false;
+};
+
+// Subtitle component
+struct Subtitle {
+	
+};
+
 //-------------------- Inventory system --------------------
 // Inventory item definition
 struct InventoryItem {
@@ -425,6 +442,9 @@ struct ItemCount {
 enum class PowerUpType {
 	Shield,
 	SpeedBoost, // For future power-ups
+	Soldier_init_powerup, 
+	Doctor_init_powerup,
+	Hacker_init_powerup,
 };
 
 // Component for PowerUp entities
@@ -436,6 +456,18 @@ struct PowerUp {
 // Component for Shield effect on the player
 struct Shield {
 	int charges; // Number of shield charges
+};
+
+struct Soldier_init_powerup {
+
+};
+
+struct Doctor_init_powerup {
+
+};
+
+struct Hacker_init_powerup {
+
 };
 //-------------------- Power up system --------------------
 
@@ -517,7 +549,12 @@ enum class TEXTURE_ASSET_ID {
 	CHOOSE_PROFESSION_TITLE = SPACE_BACKGROUND + 1,
 	SOLDIER_PAGE = CHOOSE_PROFESSION_TITLE + 1,
 	SOLDIER_PAGE_CLICKED = SOLDIER_PAGE + 1,
-	CONFIRM_BUTTON = SOLDIER_PAGE_CLICKED + 1,
+	DOCTOR_PAGE = SOLDIER_PAGE_CLICKED + 1,
+	DOCTOR_PAGE_CLICKED = DOCTOR_PAGE + 1,
+	HACKER_PAGE = DOCTOR_PAGE_CLICKED + 1,
+	HACKER_PAGE_CLICKED = HACKER_PAGE + 1,
+
+	CONFIRM_BUTTON = HACKER_PAGE_CLICKED + 1,
 	CONFIRM_BUTTON_CLICKED = CONFIRM_BUTTON + 1,
 	CONFIRM_BUTTON_DISABLED = CONFIRM_BUTTON_CLICKED + 1,
 	TAPE_1 = CONFIRM_BUTTON_DISABLED + 1,

@@ -40,7 +40,7 @@ void ProfessionMenu::step(float elapsed_ms) {
 	createChooseProfessionTitle(renderer);
 
 	for (auto& profession : professions) {
-		createProfessionLayer(renderer, profession.position, "Soldier", profession.is_selected);
+		createProfessionLayer(renderer, profession.position, profession.name, profession.is_selected);
 	}
 
 	// Create a confirm button

@@ -171,6 +171,7 @@ void InventorySystem::consumeHealthPotion(Entity player) {
     std::cout << "Restored 10 health. Current health: " << player_component.health << std::endl;
 }
 
+
 void InventorySystem::initializeSounds() {
     item_pickup_sound = Mix_LoadWAV(audio_path("item-pickup.wav").c_str());
     if (item_pickup_sound == nullptr) {

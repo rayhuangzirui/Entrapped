@@ -366,6 +366,9 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(exp_text);
 	registry.refreshables.emplace(exp_text);
 
+	// Power-up icons
+	refreshPowerUpUI(player);
+
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
 
@@ -2293,7 +2296,7 @@ void GameScene::refreshInventoryUI(Entity player) {
 	// Configuration for slot positions
 	float slot_size = 48.f;
 	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size + spacing)) / 2.0f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size)) / 2.0f + 8.0f;
 	float y_offset = 30.f; // Position at the top of the screen
 
 	// Loop through each inventory slot and recreate it
@@ -2311,9 +2314,9 @@ void GameScene::refreshInventoryUI(Entity player) {
 
 		// Render the slot background
 		registry.renderRequests.insert(slot, {
-			TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::BOX,
-			GEOMETRY_BUFFER_ID::DEBUG_LINE
+			TEXTURE_ASSET_ID::ITEM_SLOT,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE,
 			});
 
 		// Check if there's an item in this slot
@@ -2329,7 +2332,7 @@ void GameScene::refreshInventoryUI(Entity player) {
 
 			// Select the texture based on the item type
 			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
-				TEXTURE_ASSET_ID::CHEST_CLOSED : TEXTURE_ASSET_ID::CHEST_OPENED;
+				TEXTURE_ASSET_ID::ITEM_AMMOPACK : TEXTURE_ASSET_ID::ITEM_MEDKIT;
 
 			registry.renderRequests.insert(icon, {
 				item_texture,
@@ -2388,4 +2391,47 @@ void GameScene::refreshInventorySlots(Entity player) {
 	}
 }
 
+void GameScene::refreshPowerUpUI(Entity player) {
+	// Clear all existing UI elements related to power-ups
+	while (registry.powerUpSlots.entities.size() > 0) {
+		registry.remove_all_components_of(registry.powerUpSlots.entities.back());
+	}
 
+	// Check if the player has any power-ups
+	if (!registry.players.has(player)) return;
+
+	// Configuration for power-up icon positions
+	float icon_size = 30.f;
+	float spacing = 10.f;
+	float x_offset = window_width_px / 40.0f;
+	float y_offset = 110.f; // Position below the inventory
+
+	// Get the player's shield component
+	int shield_count = 0;
+	if (registry.shields.has(player)) {
+		Shield& shield = registry.shields.get(player);
+		shield_count = shield.charges;
+	}
+
+	// If the player has shields, render the shield icon
+	if (shield_count > 0) {
+		// Create a slot entity for the shield
+		Entity slot = Entity();
+		Motion& slot_motion = registry.motions.emplace(slot);
+		slot_motion.position = { x_offset, y_offset };
+		slot_motion.scale = { icon_size, icon_size };
+		registry.UIs.emplace(slot);
+
+		// Render the shield icon
+		registry.renderRequests.insert(slot, {
+			TEXTURE_ASSET_ID::POWER_UP_SHIELD,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+			});
+
+		// Display the shield count as text if stackable
+		std::string count_text = std::to_string(shield_count);
+		Entity text_entity = renderer->text_renderer.createText(count_text, { x_offset + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
+		registry.UIs.emplace(text_entity);
+	}
+}

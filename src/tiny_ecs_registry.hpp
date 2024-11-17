@@ -95,6 +95,7 @@ public:
 	// Power-Up related components
 	ComponentContainer<PowerUp> powerUps;
 	ComponentContainer<Shield> shields;
+	ComponentContainer<PowerUpSlot> powerUpSlots;
 	ComponentContainer<Refreshable> refreshables;
 
 	ComponentContainer<Soldier_init_powerup> soldier_init_powerups;
@@ -184,6 +185,8 @@ public:
 		// PowerUp
 		registry_list.push_back(&powerUps);
 		registry_list.push_back(&shields);
+  
+		registry_list.push_back(&powerUpSlots);
 		registry_list.push_back(&soldier_init_powerups);
 		registry_list.push_back(&doctor_init_powerups);
 		registry_list.push_back(&hacker_init_powerups);

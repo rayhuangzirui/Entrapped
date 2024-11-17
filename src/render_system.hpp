@@ -88,6 +88,13 @@ class RenderSystem {
 			textures_path("chest_opened.png"),
 
 			textures_path("Space Background.png"),
+
+			textures_path("item_slot.png"),
+			textures_path("item_ammopack.png"),
+			textures_path("item_medkit.png"),
+			
+			textures_path("power_up_shield.png")
+
 			textures_path("choose_profession_title.png"),
 			textures_path("soldier_page1.png"),
 			textures_path("Soldier_page2.png"),

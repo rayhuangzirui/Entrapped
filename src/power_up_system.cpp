@@ -2,6 +2,7 @@
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "render_system.hpp"
+#include "scenes/game_scene.hpp"
 #include <iostream>
 
 // Function to apply a power-up to a player
@@ -25,6 +26,21 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
             // Debug: Print the number of shields after adding the first one
             std::cout << "[DEBUG] Player collected the first shield power-up! Total shields: "
                 << shield.charges << std::endl;
+        }
+    }
+    else if (type == PowerUpType::SpeedBoost) {
+        // Handle speed boost power-up
+        if (registry.players.has(player)) {
+            Player& player_component = registry.players.get(player);
+
+            // Increase the player's speed by 10%
+            float original_speed = player_component.speed;
+            player_component.speed *= 1.1f; // Increase speed by 10%
+
+            // Debug output showing the new speed
+            std::cout << "[DEBUG] Speed Boost collected! Original speed: "
+                << original_speed << ", New speed: "
+                << player_component.speed << std::endl;
         }
     }
     else if (type == PowerUpType::Soldier_init_powerup) {

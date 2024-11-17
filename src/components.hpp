@@ -32,6 +32,9 @@ struct Player
 
 	// if the player is an hacker, increase 3 ammo per enemy killed. Other professions have this set to 0.
 	float ammo_per_kill = 0;
+
+	// Player's movement speed
+	float speed = 200.0f; // Default speed
 };
 
 // Portal to the next map

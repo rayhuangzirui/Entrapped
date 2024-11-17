@@ -60,7 +60,7 @@ private:
 	void restart_game();
 
 	// player movement
-	float PLAYER_SPEED = 200.0f;
+	/*float PLAYER_SPEED = 200.0f;*/
 	vec4 player_movement_state = { 0, 0, 0, 0 };
 
 	const int TILE_SIZE = 48;

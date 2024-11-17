@@ -986,6 +986,7 @@ void GameScene::on_key(int key, int action, int mod) {
 	};
 
 	Motion& motion = registry.motions.get(player);
+	Player& player_component = registry.players.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
 
@@ -1080,30 +1081,30 @@ void GameScene::on_key(int key, int action, int mod) {
 
 		}
 		vec2 dir = { player_movement_state.w - player_movement_state.z, player_movement_state.y - player_movement_state.x };
-		player_velocity = dir * PLAYER_SPEED;
+		player_velocity = dir * player_component.speed;
 		motion.velocity = player_velocity;
 
 		// Apply sprint effect if active
 		if (isSprinting) {
 			if (motion.velocity.x != 0) {
-				motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+				motion.velocity.x = (motion.velocity.x > 0) ? player_component.speed * 2 : -player_component.speed * 2;
 			}
 			if (motion.velocity.y != 0) {
-				motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+				motion.velocity.y = (motion.velocity.y > 0) ? player_component.speed * 2 : -player_component.speed * 2;
 			}
 		}
 		else {
-			if (motion.velocity.x > PLAYER_SPEED) {
-				motion.velocity.x = PLAYER_SPEED;
+			if (motion.velocity.x > player_component.speed) {
+				motion.velocity.x = player_component.speed;
 			}
-			else if (motion.velocity.x < -PLAYER_SPEED) {
-				motion.velocity.x = -PLAYER_SPEED;
+			else if (motion.velocity.x < -player_component.speed) {
+				motion.velocity.x = -player_component.speed;
 			}
-			if (motion.velocity.y > PLAYER_SPEED) {
-				motion.velocity.y = PLAYER_SPEED;
+			if (motion.velocity.y > player_component.speed) {
+				motion.velocity.y = player_component.speed;
 			}
-			else if (motion.velocity.y < -PLAYER_SPEED) {
-				motion.velocity.y = -PLAYER_SPEED;
+			else if (motion.velocity.y < -player_component.speed) {
+				motion.velocity.y = -player_component.speed;
 			}
 		}
 
@@ -1344,7 +1345,7 @@ void GameScene::on_key(int key, int action, int mod) {
         }
     }
 
-	// Remove later, this is shield powerup testing
+	// Remove later, this is power-up testing
 	if (action == GLFW_PRESS) {
 		switch (key) {
 		case GLFW_KEY_5:
@@ -1360,7 +1361,19 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 			break;
 
-			// Handle other keys here...
+		case GLFW_KEY_6:
+			// Give the player a speed boost when the '6' key is pressed
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
+
+				// Apply a speed boost power-up to the player
+				PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, 1);
+
+				// Debug: Print confirmation of speed boost granted
+				std::cout << "[DEBUG] Speed Boost power-up applied using key '6'!" << std::endl;
+			}
+			break;
+
 		default:
 			break;
 		}

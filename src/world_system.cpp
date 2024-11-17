@@ -148,3 +148,9 @@ void WorldSystem::on_mouse_click(int button, int action, int mod) {
 
 	ui_system.on_mouse_click(button, action, mod);
 }
+
+void WorldSystem::before_exit() {
+	scene_system.before_exit();
+	registry.clear_all_components();
+	std::cout << "test size: " << registry.texts.size() << std::endl;
+}

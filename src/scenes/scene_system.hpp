@@ -24,7 +24,7 @@ public:
 	void handle_collisions();
 	void on_mouse_move(vec2 mouse_position);
 	void on_mouse_click(int button, int action, int mod);
-
+	void before_exit();
 private:
 	RenderSystem* renderer;
 };

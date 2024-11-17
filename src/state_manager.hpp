@@ -25,6 +25,7 @@ public:
 	uint saved_map_index;
 	std::vector<std::string> map_lists;
 	MapState current_map_state;
+	
 
 	// experience and upgrade
 	int exp;
@@ -46,6 +47,10 @@ public:
 		map_lists = { "tutorial", "map_1" };
 		health_upgrade = { 0, 10, 1 };
 		ammo_upgrade = { 0, 10, 1 };
+	}
+
+	~StateManager() {
+		std::cout << "state destroyed" << std::endl;
 	}
 
 	MapState changeMap(std::string map_name);

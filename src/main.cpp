@@ -24,7 +24,6 @@ int main()
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
-	//BaseScene* game_scene = new GameScene();
 	AISystem ai_system;
 
 
@@ -60,6 +59,7 @@ int main()
 
 		renderer.draw();
 	}
+	world.before_exit();
 
 	return EXIT_SUCCESS;
 }

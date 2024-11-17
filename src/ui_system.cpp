@@ -12,6 +12,10 @@ void UISystem::step(float elapsed_ms_since_last_update)
 {	
 	registry.pressedButtons.clear();
 
+	if (registry.fps.size() <= 0) {
+		registry.fps.emplace(FPS_entity);
+	}
+
 	FPS& fps_counter = registry.fps.get(FPS_entity);
 
 	fps_counter.elapsed_time += elapsed_ms_since_last_update;

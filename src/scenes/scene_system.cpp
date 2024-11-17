@@ -15,6 +15,10 @@ SceneSystem::SceneSystem() {
 }
 
 SceneSystem::~SceneSystem() {
+	//delete this->current_scene;
+}
+
+void SceneSystem::before_exit() {
 	delete this->current_scene;
 }
 

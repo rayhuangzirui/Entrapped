@@ -141,6 +141,7 @@ bool triangle_intersect(const vec2& t1_v0, const vec2& t1_v1, const vec2& t1_v2,
 // Mesh-mesh collision
 void handle_mesh_mesh_collision() {
     auto& motion_registry = registry.motions;
+    auto& enemy_registry = registry.enemies;
 
     for (uint i = 0; i < motion_registry.size(); i++) {
         Motion& motion_i = motion_registry.components[i];
@@ -155,6 +156,10 @@ void handle_mesh_mesh_collision() {
             Mesh& mesh_j = *registry.meshPtrs.get(entity_j);
 
             bool collision_detected = false;
+            // don't check collisions between enemies
+            if (enemy_registry.has(entity_i) && enemy_registry.has(entity_j)) {
+                continue;
+            }
 
 			// AABB check before mesh-mesh collision
 			vec2 aabb_i = get_aabb(motion_i);
@@ -589,6 +594,7 @@ const float DASH_MULTIPLIER = 5.0f;
 
 void PhysicsSystem::step(float elapsed_ms) 
 {
+    //return;
     // Move fish based on how much time has passed, this is to (partially) avoid
     // having entities move at different speed based on the machine.
     auto& motion_registry = registry.motions;

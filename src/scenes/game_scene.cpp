@@ -1541,10 +1541,10 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
     Entity fov_entity = Entity();
     Motion& fov_motion = registry.motions.emplace(fov_entity);
 	registry.fovs.emplace(fov_entity);
-	fov_motion.position = { 0, 0 };
+	fov_motion.position = { window_width_px / 2.f, window_height_px / 2.f };
 	fov_motion.angle = 0;
 	fov_motion.velocity = { 0.f, 0.f };
-	fov_motion.scale = vec2({ 1296, window_height_px });
+	fov_motion.scale = vec2({ window_width_px, window_height_px });
 
     // Add the FOV render request to the new entity
     //registry.renderRequests.insert( 			

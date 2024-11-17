@@ -240,6 +240,8 @@ void GameScene::refreshUI(Entity player) {
 	Entity ammo_text = renderer->text_renderer.createText("Ammo: " + std::to_string(player_component.ammo), { 35.f, 72.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.UIs.emplace(ammo_text);
 
+	// Refresh inventory display
+	refreshInventoryUI(player);
 	// Draw inventory slots
 	/*createInventorySlots(player);*/
 
@@ -355,6 +357,8 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	// Attempt to remove an item
 	InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
+
+	//createInventorySlots(player);
 	//------- Inventory -------//
 
 	// fps entity
@@ -1844,57 +1848,66 @@ void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& 
 // TODO: Reloading logic
 
 
+void GameScene::refreshInventoryUI(Entity player) {
+	// Clear all existing UI elements related to the inventory
+	while (registry.inventorySlots.entities.size() > 0) {
+		registry.remove_all_components_of(registry.inventorySlots.entities.back());
+	}
 
-// Inventory creation
-//void GameScene::createInventorySlots(Entity player) {
-//	Inventory& inventory = registry.inventories.get(player);
-//
-//	float slot_size = 48.f;
-//	float spacing = 10.f;
-//	float x_offset = window_width_px / 2.0f - 2* slot_size;
-//	float y_offset = 50.f;
-//
-//	for (int i = 0; i < inventory.max_slots; ++i) {
-//		float x_position = x_offset + i * (slot_size + spacing);
-//		vec2 position = { x_position, y_offset };
-//
-//		// Create a slot entity
-//		Entity slot = Entity();
-//		Motion& motion = registry.motions.emplace(slot);
-//		motion.position = position;
-//		motion.scale = { slot_size, slot_size };
-//		registry.UIs.emplace(slot);
-//
-//		// Render slot background
-//		registry.renderRequests.insert(slot, {
-//			TEXTURE_ASSET_ID::TEXTURE_COUNT,
-//			EFFECT_ASSET_ID::BOX,
-//			GEOMETRY_BUFFER_ID::DEBUG_LINE
-//			});
-//
-//		// Render item icon if slot is not empty
-//		if (inventory.items[i].count > 0) {
-//			// Create a new icon entity for the item
-//			Entity icon = Entity();
-//
-//			// Add a Motion component for position and scale
-//			Motion& icon_motion = registry.motions.emplace(icon);
-//			icon_motion.position = position; // Use screen position, not world position
-//			icon_motion.scale = { slot_size - 10, slot_size - 10 };
-//
-//			// Mark this entity as a UI element so it renders on the UI layer
-//			registry.UIs.emplace(icon);
-//
-//			// Render the icon with the appropriate texture
-//			registry.renderRequests.insert(icon, {
-//				TEXTURE_ASSET_ID::CHEST_CLOSED,
-//				EFFECT_ASSET_ID::TEXTURED,
-//				GEOMETRY_BUFFER_ID::SPRITE
-//				});
-//
-//			// Display the item count as text
-//			std::string count_text = std::to_string(inventory.items[i].count);
-//			renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
-//		}
-//	}
-//}
+	Inventory& inventory = registry.inventories.get(player);
+
+	// Configuration for slot positions
+	float slot_size = 48.f;
+	float spacing = 10.f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size + spacing)) / 2.0f;
+	float y_offset = 30.f; // Position at the top of the screen
+
+	// Loop through each inventory slot and recreate it
+	for (int i = 0; i < inventory.max_slots; ++i) {
+		float x_position = x_offset + i * (slot_size + spacing);
+		vec2 position = { x_position, y_offset };
+
+		// Create a slot entity
+		Entity slot = Entity();
+		Motion& slot_motion = registry.motions.emplace(slot);
+		slot_motion.position = position;
+		slot_motion.scale = { slot_size, slot_size };
+		registry.UIs.emplace(slot);
+
+		// Render the slot background
+		registry.renderRequests.insert(slot, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+			});
+
+		// Check if there's an item in this slot
+		if (i < inventory.items.size() && inventory.items[i].type != InventoryItem::Type::None) {
+			InventoryItem& item = inventory.items[i];
+
+			// Create the icon for the item
+			Entity icon = Entity();
+			Motion& icon_motion = registry.motions.emplace(icon);
+			icon_motion.position = position;
+			icon_motion.scale = { slot_size - 10, slot_size - 10 };
+			registry.UIs.emplace(icon);
+
+			// Select the texture based on the item type
+			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
+				TEXTURE_ASSET_ID::CHEST_CLOSED : TEXTURE_ASSET_ID::CHEST_OPENED;
+
+			registry.renderRequests.insert(icon, {
+				item_texture,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE
+				});
+
+			// Display the item count as text
+			std::string count_text = std::to_string(item.count);
+			Entity text_entity = renderer->text_renderer.createText(count_text, position + vec2(10, -15), 20.f, { 1.f, 1.f, 1.f });
+			registry.UIs.emplace(text_entity);
+		}
+	}
+}
+
+

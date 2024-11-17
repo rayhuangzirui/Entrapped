@@ -194,3 +194,19 @@ void InventorySystem::cleanupSounds() {
         health_pickup_sound = nullptr;
     }
 }
+
+
+TEXTURE_ASSET_ID getItemTextureID(InventoryItem::Type itemType) {
+    static const std::unordered_map<InventoryItem::Type, TEXTURE_ASSET_ID> itemTextures = {
+        { InventoryItem::Type::AmmoPack, TEXTURE_ASSET_ID::CHEST_CLOSED },
+        { InventoryItem::Type::HealthPotion, TEXTURE_ASSET_ID::CHEST_OPENED }//,
+        //{ InventoryItem::Type::SpeedBoost, TEXTURE_ASSET_ID::SPEED_ICON },
+        //{ InventoryItem::Type::Shield, TEXTURE_ASSET_ID::SHIELD_ICON }
+    };
+
+    auto it = itemTextures.find(itemType);
+    if (it != itemTextures.end()) {
+        return it->second;
+    }
+    return TEXTURE_ASSET_ID::TEXTURE_COUNT; // Default texture for unknown items
+}

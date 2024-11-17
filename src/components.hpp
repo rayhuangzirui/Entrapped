@@ -318,7 +318,7 @@ struct Hint {
 //-------------------- Inventory system --------------------
 // Inventory item definition
 struct InventoryItem {
-	enum class Type { None, AmmoPack, HealthPotion, Weapon };
+	enum class Type { None, AmmoPack, HealthPotion };
 	Type type = Type::None;
 	int count = 0;     // Number of items (if stackable)
 	int max_count = 10; // Maximum stack size for stackable items
@@ -339,7 +339,9 @@ struct InventorySlot {
 struct IconSprite {};
 
 // New component to tag entities as item count text
-struct ItemCount {};
+struct ItemCount {
+	Entity text_entity;
+};
 //-------------------- Inventory system --------------------
 
 

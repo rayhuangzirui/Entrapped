@@ -86,6 +86,7 @@ public:
 	// Power-Up related components
 	ComponentContainer<PowerUp> powerUps;
 	ComponentContainer<Shield> shields;
+	ComponentContainer<PowerUpSlot> powerUpSlots;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -161,6 +162,7 @@ public:
 		// Power-Up related
 		registry_list.push_back(&powerUps);
 		registry_list.push_back(&shields);
+		registry_list.push_back(&powerUpSlots);
 	}
 
 	void clear_all_components() {

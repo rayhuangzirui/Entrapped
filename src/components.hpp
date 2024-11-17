@@ -360,6 +360,8 @@ struct PowerUp {
 struct Shield {
 	int charges; // Number of shield charges
 };
+
+struct PowerUpSlot {};
 //-------------------- Power up system --------------------
 
 /**

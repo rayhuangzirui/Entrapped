@@ -92,4 +92,5 @@ private:
 
 
 	void refreshInventoryUI(Entity player);
+	void refreshPowerUpUI(Entity player);
 };

@@ -246,6 +246,9 @@ void GameScene::refreshUI(Entity player) {
 	// Draw inventory slots
 	/*createInventorySlots(player);*/
 
+	// Power-up icons
+	refreshPowerUpUI(player);
+
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
 
@@ -1956,4 +1959,47 @@ void GameScene::refreshInventoryUI(Entity player) {
 	}
 }
 
+void GameScene::refreshPowerUpUI(Entity player) {
+	// Clear all existing UI elements related to power-ups
+	while (registry.powerUpSlots.entities.size() > 0) {
+		registry.remove_all_components_of(registry.powerUpSlots.entities.back());
+	}
 
+	// Check if the player has any power-ups
+	if (!registry.players.has(player)) return;
+
+	// Configuration for power-up icon positions
+	float icon_size = 30.f;
+	float spacing = 10.f;
+	float x_offset = window_width_px / 2.0f - 2 * (icon_size + spacing);
+	float y_offset = 100.f; // Position below the inventory
+
+	// Get the player's shield component
+	int shield_count = 0;
+	if (registry.shields.has(player)) {
+		Shield& shield = registry.shields.get(player);
+		shield_count = shield.charges;
+	}
+
+	// If the player has shields, render the shield icon
+	if (shield_count > 0) {
+		// Create a slot entity for the shield
+		Entity slot = Entity();
+		Motion& slot_motion = registry.motions.emplace(slot);
+		slot_motion.position = { x_offset, y_offset };
+		slot_motion.scale = { icon_size, icon_size };
+		registry.UIs.emplace(slot);
+
+		// Render the shield icon
+		registry.renderRequests.insert(slot, {
+			TEXTURE_ASSET_ID::CHEST_CLOSED,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+			});
+
+		// Display the shield count as text if stackable
+		std::string count_text = std::to_string(shield_count);
+		Entity text_entity = renderer->text_renderer.createText(count_text, { x_offset + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
+		registry.UIs.emplace(text_entity);
+	}
+}

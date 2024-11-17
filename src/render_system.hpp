@@ -86,6 +86,7 @@ class RenderSystem {
 			textures_path("chest_opened.png"),
 
 			textures_path("Space Background.png"),
+			textures_path("power_up_shield.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

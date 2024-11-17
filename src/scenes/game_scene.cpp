@@ -1992,7 +1992,7 @@ void GameScene::refreshPowerUpUI(Entity player) {
 
 		// Render the shield icon
 		registry.renderRequests.insert(slot, {
-			TEXTURE_ASSET_ID::CHEST_CLOSED,
+			TEXTURE_ASSET_ID::POWER_UP_SHIELD,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE
 			});

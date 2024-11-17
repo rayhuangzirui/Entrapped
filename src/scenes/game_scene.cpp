@@ -2460,65 +2460,52 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	float x_offset = window_width_px / 40.0f;
 	float y_offset = 110.f; // Position below the inventory
 
-	// Get the player's shield component
-	int shield_count = 0;
-	if (registry.shields.has(player)) {
-		Shield& shield = registry.shields.get(player);
-		shield_count = shield.charges;
+	// Create a vector to store power-ups dynamically
+	struct PowerUpInfo {
+		TEXTURE_ASSET_ID texture;
+		int count;
+	};
+	std::vector<PowerUpInfo> power_ups;
+
+	// Add the player's speed boost power-up (if any)
+	if (registry.speedBoosts.has(player)) {
+		SpeedBoost& speed_boost = registry.speedBoosts.get(player);
+		if (speed_boost.count > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_SPEED_UP, speed_boost.count });
+		}
 	}
 
-	// If the player has shields, render the shield icon
-	if (shield_count > 0) {
-		// Create a slot entity for the shield
+	// Add the player's shield power-up (if any)
+	if (registry.shields.has(player)) {
+		Shield& shield = registry.shields.get(player);
+		if (shield.charges > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_SHIELD, shield.charges });
+		}
+	}
+
+	// Loop through the collected power-ups and render them
+	for (size_t i = 0; i < power_ups.size(); ++i) {
+		float x_position = x_offset + i * (icon_size + spacing);
+
+		// Create a slot entity for the power-up
 		Entity slot = Entity();
 		Motion& slot_motion = registry.motions.emplace(slot);
-		slot_motion.position = { x_offset, y_offset };
+		slot_motion.position = { x_position, y_offset };
 		slot_motion.scale = { icon_size, icon_size };
 		registry.UIs.emplace(slot);
 		registry.refreshables.emplace(slot);
 
-		// Render the shield icon
+		// Render the power-up icon
 		registry.renderRequests.insert(slot, {
-			TEXTURE_ASSET_ID::POWER_UP_SHIELD,
+			power_ups[i].texture,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE
 			});
 
-		// Display the shield count as text if stackable
-		std::string count_text = std::to_string(shield_count);
-		Entity text_entity = renderer->text_renderer.createText(count_text, { x_offset + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
+		// Display the power-up count as text if stackable
+		std::string count_text = std::to_string(power_ups[i].count);
+		Entity text_entity = renderer->text_renderer.createText(count_text, { x_position + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
 		registry.UIs.emplace(text_entity);
 		registry.refreshables.emplace(text_entity);
-	}
-
-	// --- Render Speed Boost Power-Up ---
-	int speed_boost_count = 0;
-	if (registry.speedBoosts.has(player)) {
-		SpeedBoost& speed_boost = registry.speedBoosts.get(player);
-		speed_boost_count = speed_boost.count;
-	}
-
-	// If the player has speed boosts, render the speed boost icon
-	if (speed_boost_count > 0) {
-		// Create a slot entity for the speed boost icon
-		Entity speed_slot = Entity();
-		Motion& speed_motion = registry.motions.emplace(speed_slot);
-		speed_motion.position = { x_offset + icon_size + spacing, y_offset };
-		speed_motion.scale = { icon_size, icon_size };
-		registry.UIs.emplace(speed_slot);
-		registry.refreshables.emplace(speed_slot);
-
-		// Render the speed boost icon
-		registry.renderRequests.insert(speed_slot, {
-			TEXTURE_ASSET_ID::POWER_UP_SPEED_UP,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE
-			});
-
-		// Display the speed boost count as text
-		std::string speed_text = std::to_string(speed_boost_count);
-		Entity speed_text_entity = renderer->text_renderer.createText(speed_text, { x_offset + icon_size + spacing + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
-		registry.UIs.emplace(speed_text_entity);
-		registry.refreshables.emplace(speed_text_entity);
 	}
 }

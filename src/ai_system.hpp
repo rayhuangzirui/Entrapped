@@ -9,4 +9,6 @@ class AISystem
 {
 public:
 	void step(float elapsed_ms);
+private:
+	std::vector<vec2> findPath(vec2 start, vec2 end);
 };

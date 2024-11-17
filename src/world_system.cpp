@@ -112,12 +112,16 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 	this->scene_system.initialize(this->renderer);
 	this->scene_system.pushScene();
+
+	this->ui_system.initialize(this->renderer);
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->scene_system.step(elapsed_ms_since_last_update);
 	this->scene_system.handle_collisions();
+
+	this->ui_system.step(elapsed_ms_since_last_update);
 	return true;
 }
 
@@ -129,12 +133,24 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	scene_system.on_key(key, action, mod);
+
+	ui_system.on_key(key, action, mod);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	scene_system.on_mouse_move(mouse_position);
+
+	ui_system.on_mouse_move(mouse_position);
 }
 
 void WorldSystem::on_mouse_click(int button, int action, int mod) {
 	scene_system.on_mouse_click(button, action, mod);
+
+	ui_system.on_mouse_click(button, action, mod);
+}
+
+void WorldSystem::before_exit() {
+	scene_system.before_exit();
+	registry.clear_all_components();
+	std::cout << "test size: " << registry.texts.size() << std::endl;
 }

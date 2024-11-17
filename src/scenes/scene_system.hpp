@@ -14,6 +14,7 @@ public:
 	SceneSystem();
 	~SceneSystem();
 	BaseScene* current_scene;
+	std::string profession;
 	void initialize(RenderSystem* renderer);
 	void pushScene();
 	void step(float elapsed_ms);
@@ -23,8 +24,7 @@ public:
 	void handle_collisions();
 	void on_mouse_move(vec2 mouse_position);
 	void on_mouse_click(int button, int action, int mod);
-	void draw_fps();
-
+	void before_exit();
 private:
 	RenderSystem* renderer;
 };

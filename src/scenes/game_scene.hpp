@@ -18,7 +18,6 @@ public:
 	void on_mouse_move(vec2 mouse_position);
 	void drawHealthBars();
 	void on_mouse_click(int button, int action, int mod);
-	void draw_fps();
 
 private:
 	RenderSystem* renderer;
@@ -32,7 +31,7 @@ private:
 	//Entity createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size);
 	Entity createHealthBarNew(Entity entity);
 	Entity createChest(RenderSystem* renderer, vec2 pos);
-	Entity createPlayer(vec2 pos);
+	Entity createPlayer(vec2 pos, std::string profession);
 	Entity createGun(Entity player);
 	Entity createPortal(vec2 pos, std::string map_name);
 	Entity createEnemy(vec2 pos);
@@ -42,6 +41,11 @@ private:
 	Entity createAmmoChest(vec2 position);
 	Entity createDirectionMarker(vec2 position);
 	Entity createBackground();
+
+	Entity createTape(vec2 pos, int tape_num);
+	void startTextAnimation(std::vector<std::string> text, int tape_num);
+	void updateTextAnimation(float elapsed_ms);
+	void renderAnimatedText(RenderSystem* renderer);
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
@@ -54,7 +58,10 @@ private:
 
 	void restart_game();
 
+	// player movement
 	float PLAYER_SPEED = 200.0f;
+	vec4 player_movement_state = { 0, 0, 0, 0 };
+
 	const int TILE_SIZE = 48;
 	Mix_Music* background_music;
 	Mix_Chunk* player_dead_sound;
@@ -67,14 +74,19 @@ private:
 	Mix_Chunk* item_pickup_sound;
 	Mix_Chunk* reload_sound;
 	Mix_Chunk* stab_sound;
+	Mix_Chunk* tape1_recording;
+	Mix_Chunk* tape2_recording;
+	Mix_Chunk* tape3_recording;
+	Mix_Chunk* tape4_recording;
+	Mix_Chunk* tape5_recording;
+	Mix_Chunk* tape6_recording;
+	
 	vec2 player_velocity;
 
 	std::string next_scene = "";
 	CameraSystem camera;
 	void updateCamera(const vec2& player_position);
 	void updateCamera_smoothing(const vec2& player_position, const vec2& target_position);
-
-	Entity FPS_entity;
 
 	//void updateHints(Entity player);
 	void updateHints(Entity player);
@@ -83,4 +95,5 @@ private:
 
 	void refreshInventoryUI(Entity player);
 	void refreshPowerUpUI(Entity player);
+	void refreshInventorySlots(Entity player);
 };

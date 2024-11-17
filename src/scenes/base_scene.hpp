@@ -14,7 +14,7 @@ public:
 	virtual void handle_collisions() = 0;
 	virtual void on_mouse_move(vec2 mouse_position) = 0;
 	virtual void on_mouse_click(int button, int action, int mod) = 0;
-	virtual void draw_fps() = 0;
+	std::string selected_profession;
 private:
 	RenderSystem* renderer;
 	std::string next_scene = "";

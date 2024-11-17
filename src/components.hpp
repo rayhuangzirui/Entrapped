@@ -229,6 +229,10 @@ struct HealthBar {
 	
 };
 
+// Structure to store collidable entities
+struct Collidable {
+
+};
 
 // Stucture to store collision information
 struct Collision

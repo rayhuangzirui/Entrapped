@@ -1118,14 +1118,14 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	// 		  GEOMETRY_BUFFER_ID::SPRITE });
 	// }
 
-if (debugging.in_debug_mode) { 		
-    registry.renderRequests.insert( 			
-        entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::MESHED, 			  
-          GEOMETRY_BUFFER_ID::PLAYER }
-    ); 	
-} else { 		
+	if (debugging.in_debug_mode) { 		
+		registry.renderRequests.insert( 			
+			entity, 			
+			{ TEXTURE_ASSET_ID::PLAYER_1, 			  
+			  EFFECT_ASSET_ID::MESHED, 			  
+			  GEOMETRY_BUFFER_ID::PLAYER }
+		); 	
+	} else { 		
     // Player entity gets the textured effect
     registry.renderRequests.insert( 			
         entity, 			
@@ -1150,6 +1150,9 @@ if (debugging.in_debug_mode) {
 
 	// Attach a gun to the player entity
 	createGun(entity);
+
+	// Enable collision
+	registry.collidables.emplace(entity);
 
 	return entity;
 }
@@ -1427,6 +1430,9 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 	enemy.health_bar_entity = hp_bar;
 
+	// Enable collision
+	registry.collidables.emplace(entity);
+
 	return entity;
 }
 
@@ -1677,6 +1683,9 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	vec2 min = motion.position - (motion.scale / 2.0f);
 	vec2 max = motion.position + (motion.scale / 2.0f);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	// Enable collision
+	registry.collidables.emplace(entity);
 
 	if (debugging.in_debug_mode) {
 		registry.renderRequests.insert(

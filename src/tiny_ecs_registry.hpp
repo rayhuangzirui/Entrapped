@@ -48,6 +48,9 @@ public:
 	// Bounding box
 	ComponentContainer<BoundingBox> boundingBoxes;
 
+	// Physics
+	ComponentContainer<Collidable> collidables;
+
 	//For Damage text render purpose
 	ComponentContainer<DamageText> damageTexts;
 
@@ -153,12 +156,15 @@ public:
 		// background
 		registry_list.push_back(&backgrounds);
 
-		//FOV
+		// FOV
 		registry_list.push_back(&fovs);
 
 		// Inventory
 		registry_list.push_back(&inventoryItems);
 		registry_list.push_back(&inventories);
+
+		// Physics
+		registry_list.push_back(&collidables);
 	}
 
 	void clear_all_components() {

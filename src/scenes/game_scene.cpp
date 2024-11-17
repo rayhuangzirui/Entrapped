@@ -867,6 +867,7 @@ void GameScene::step(float elapsed_ms) {
 			EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
 			auto& motion = registry.motions.get(entity);
 			motion.scale = abs(motion.scale);
+			motion.velocity = { 0, 0 };
 
 			// Remove the enemy entity from the ai
 			registry.enemyAIs.remove(entity);
@@ -897,7 +898,7 @@ void GameScene::step(float elapsed_ms) {
 				//printf("before scale: %f, %f\n", motion.scale.x, motion.scale.y);
 				if (frame == 0) {
 					motion.scale = { 1.547f * 64.f * 1.3, 1.547f * 10.f * 1.3 };
-					motion.position.y += 3;
+					//motion.position.y += 3;
 					//printf("after scale: %f, %f\n", motion.scale.x, motion.scale.y);
 				}
 				texture.used_texture = monster_dead[frame];

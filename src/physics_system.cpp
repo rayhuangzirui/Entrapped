@@ -525,14 +525,9 @@ void PhysicsSystem::step(float elapsed_ms)
             
             // Update dash timer
             dash.counter_ms -= elapsed_ms;
-            dash.cooldown_ms -= elapsed_ms;
             if (dash.counter_ms <= 0) {
 				// Reset velocity multiplier
                 velocity_multiplier = 1.0f;
-            }
-
-            if (dash.cooldown_ms <= 0) {
-                registry.dashTimers.remove(entity);
             }
         }
         vec2 total_movement = motion.velocity * velocity_multiplier * step_seconds;

@@ -17,12 +17,12 @@ void MainMenu::initialize(RenderSystem* renderer) {
 	//renderer->text_renderer.createText("Press any key to start the game", { 40.f, window_height_px - 140.f }, 20.f, { 1.f, 1.f, 1.f });
 	//renderer->text_renderer.createText("Press ; key to enter debug mode", { 40.f, window_height_px - 110.f }, 20.f, { 1.f, 1.f, 1.f });
 
-	state.map_index = 0;
 	new_game_button = createButton(renderer, { 50.f, window_height_px - 240.f }, { 200.f, 30.f }, "New Game");
 	upgrade_button = createButton(renderer, { 50.f, window_height_px - 160.f }, { 200.f, 30.f }, "Upgrades");
 	debug_button = createButton(renderer, { 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Debug: Off");
 	debugging.in_debug_mode = false;
 	state.load();
+	state.map_index = state.saved_map_index;
 	//exit_game_button = createButton({ 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Exit Game");
 	//(vec2)mouse_position; // dummy to avoid compiler warning
 	if (state.saved_map_index > 0) {
@@ -33,6 +33,7 @@ void MainMenu::initialize(RenderSystem* renderer) {
 void MainMenu::step(float elapsed_ms) {
 	for (Entity button_entity : registry.pressedButtons.entities) {
 		if (button_entity == new_game_button) {
+			state.map_index = 0;
 			next_scene = "profession_menu";
 			break;
 		}

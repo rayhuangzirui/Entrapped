@@ -544,22 +544,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 		// Ability to craft ammo, collect materials by killing enemy, increase 3 ammo per enemy killed
 		PowerUpSystem::applyPowerUp(player, PowerUpType::Hacker_init_powerup, 0);
 	}
-	
-	// apply upgrade effect
-	if (state.map_index == 0) { // first level
-		Player& player_component = registry.players.get(player);
-		player_component.max_health += state.health_upgrade.curVal;
-		player_component.health = player_component.max_health;
-		player_component.ammo += state.ammo_upgrade.curVal;
-	}
-
-	state.map_index++;
-	if (state.map_index >= state.map_lists.size()) {
-		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
-	}
-	else {
-		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
-	}
 
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
@@ -572,14 +556,37 @@ void GameScene::initialize(RenderSystem* renderer) {
 	InventorySystem::initializeSounds();
 
 	// Add some items to the player's inventory for testing
-	InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 5);
-	InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 2);
+	//InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 5);
+	//InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 2);
 
 	// Attempt to remove an item
-	InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
+	//InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
 
 	//createInventorySlots(player);
 	//------- Inventory -------//
+
+	Player& player_component = registry.players.get(player);
+	// apply upgrade effect
+	if (state.map_index == 0) { // first level
+		player_component.max_health += state.health_upgrade.curVal;
+		player_component.health = player_component.max_health;
+		player_component.ammo += state.ammo_upgrade.curVal;
+	}
+	else { // continue game
+		player_component.max_health = state.saved_max_health;
+		player_component.health = state.saved_health;
+		player_component.ammo = state.saved_ammo;
+		InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, state.saved_ammo_pack);
+		InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, state.saved_health_potion);
+	}
+
+	state.map_index++;
+	if (state.map_index >= state.map_lists.size()) {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
+	}
+	else {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+	}
   
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
@@ -736,6 +743,20 @@ void GameScene::step(float elapsed_ms) {
 
 		if (counter.counter_ms < 0) {
 			registry.damageCoolDowns.remove(entity);
+		}
+
+	}
+
+	// Dash cool down timer drop 
+	for (Entity entity : registry.dashCoolDowns.entities) {
+		// progress timer
+		DashCoolDown& counter = registry.dashCoolDowns.get(entity);
+		counter.counter_ms -= elapsed_ms;
+
+		/*std::cout << "Damage timer: " << counter.counter_ms << " ms" << std::endl;*/
+
+		if (counter.counter_ms < 0) {
+			registry.dashCoolDowns.remove(entity);
 		}
 
 	}
@@ -1048,8 +1069,9 @@ void GameScene::on_key(int key, int action, int mod) {
 				isSprinting = true;
 				break;
 			case GLFW_KEY_SPACE:
-				if (!registry.dashTimers.has(player) && !isSprinting) {
-					registry.dashTimers.emplace(player, DashTimer{ 200.f, 1200.f });
+				if (!registry.dashTimers.has(player) && !isSprinting && !registry.dashCoolDowns.has(player)) {
+					registry.dashTimers.emplace(player, DashTimer{ 200.f });
+					registry.dashCoolDowns.emplace(player, DashCoolDown{ 200.f + player_component.dash_cooldown });
 					motion.velocity *= 2.5f;
 				}
 				break;
@@ -1199,12 +1221,18 @@ void GameScene::on_key(int key, int action, int mod) {
 			if (distance(motion.position, player_motion.position) < 200.f && !random_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
 
-				int choice = floor(uniform_dist(rng)*2);
+				int choice = floor(uniform_dist(rng)*4);
 				if (choice == 0) {
 					InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 1);
 				}
 				else if(choice == 1) {
 					InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 1);
+				}
+				else if (choice == 2) {
+					PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, 1);
+				}
+				else if (choice == 3) {
+					PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, 1);
 				}
 
 				random_chest.isOpen = true;
@@ -2050,7 +2078,6 @@ void GameScene::changeMap(std::string map_name) {
 		next_scene = "over_scene";
 		return;
 	}
-	state.save();
 	MapState map_state = state.changeMap(map_name);
 	// remove bullets and enemies
 	while (registry.hints.entities.size() > 0) {
@@ -2094,11 +2121,14 @@ void GameScene::changeMap(std::string map_name) {
 	Entity& player_entity = registry.players.entities[0];
 	Motion& player_motion = registry.motions.get(player_entity);
 	Player& player_component = registry.players.get(player_entity);
-	player_component.health = player_component.max_health;
-	player_component.ammo = 50;
+	if (state.map_index == 1) { // first time leaving tutorial
+		player_component.health = player_component.max_health;
+		player_component.ammo = 50+state.ammo_upgrade.curVal;
+	}
 	player_motion.position = { (map_state.player_spawn.x + 0.5) * 48,(map_state.player_spawn.y + 0.5) * 48 };
 	// spawn enemies
 	spawnEnemiesAndItems();
+	state.save();
 	state.map_index++;
 	// spawn exit
 	if (state.map_index >= state.map_lists.size()) {

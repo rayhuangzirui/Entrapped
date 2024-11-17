@@ -1,4 +1,9 @@
-map_index=0
-exp=25
-heath_upgrades=10
-ammo_upgrades=0
+map_index=1
+exp=28
+heath_upgrades=20
+ammo_upgrades=20
+health=39
+max_health=40
+ammo=9
+ammo_pack=1
+health_potion=1

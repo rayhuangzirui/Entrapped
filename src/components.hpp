@@ -23,6 +23,9 @@ struct Player
 	// Hit cooldown
 	float hit_cooldown = 0.f;
 
+	// Dash cooldown
+	float dash_cooldown = 500.f;
+
 	// Player's initial ammo, associated with a weapon but currently associated with the player
 	int ammo = 30;
 
@@ -185,7 +188,6 @@ struct Health {
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
-	float cooldown_ms; // Cooldown of dahs in milliseconds
 };
 
 // placeholder entities that are invisible
@@ -309,6 +311,10 @@ struct AITimer
 struct DamageCoolDown
 {
 	float counter_ms = 500; // damage cooldown for 0.5 second
+};
+
+struct DashCoolDown {
+	float counter_ms = 1000;
 };
 
 // Background sprite that does not change with camera matrix

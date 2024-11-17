@@ -104,6 +104,8 @@ public:
 	ComponentContainer<Doctor_init_powerup> doctor_init_powerups;
 	ComponentContainer<Hacker_init_powerup> hacker_init_powerups;
 
+	ComponentContainer<DashCoolDown> dashCoolDowns;
+
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
@@ -198,6 +200,8 @@ public:
 		registry_list.push_back(&tapes);
 		// Physics
 		registry_list.push_back(&collidables);
+
+		registry_list.push_back(&dashCoolDowns);
 	}
 
 	void clear_all_components() {

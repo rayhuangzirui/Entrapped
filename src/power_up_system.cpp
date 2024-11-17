@@ -62,6 +62,8 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
 		
 		//DashCoolDown& dashCoolDown = registry.dashCoolDowns.get(player);
 		//dashCoolDown.cooldown = 5000; //ms
+        Player& player_component = registry.players.get(player);
+        player_component.dash_cooldown = 1000.f;
     }
     else if (type == PowerUpType::Doctor_init_powerup) {
 		// heal 1 health point every 5 seconds

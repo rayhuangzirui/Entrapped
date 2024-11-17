@@ -22,10 +22,17 @@ public:
 	int map_width;
 	std::vector<std::vector<int>> map;
 	uint map_index;
-	uint saved_map_index;
 	std::vector<std::string> map_lists;
 	MapState current_map_state;
 	
+	// save
+	uint saved_map_index;
+	int saved_max_health;
+	int saved_health;
+	int saved_ammo;
+
+	int saved_ammo_pack;
+	int saved_health_potion;
 
 	// experience and upgrade
 	int exp;
@@ -47,6 +54,13 @@ public:
 		map_lists = { "tutorial", "map_1", "map_2" };
 		health_upgrade = { 0, 10, 1 };
 		ammo_upgrade = { 0, 10, 1 };
+
+		saved_max_health = 0;
+		saved_health = 0;
+		saved_ammo = 0;
+
+		saved_ammo_pack = 0;
+		saved_health_potion = 0;
 	}
 
 	~StateManager() {

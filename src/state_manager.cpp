@@ -1,6 +1,7 @@
 #include "state_manager.hpp"
 #include "common.hpp"
 #include <maze.hpp>
+#include <tiny_ecs_registry.hpp>
 
 StateManager state;
 
@@ -50,6 +51,26 @@ void StateManager::save() {
 		std::cerr << "Failed to open the file: " << filepath << std::endl;
 		return;
 	}
+	// player stats
+	if (registry.players.size() > 0) {
+		Player& p = registry.players.components[0];
+		Entity& player = registry.players.entities[0];
+		Inventory& inventory = registry.inventories.get(player);
+
+		for (int i = 0; i < inventory.items.size(); i++) {
+			InventoryItem& item = inventory.items[i];
+			if (item.type == InventoryItem::Type::AmmoPack) {
+				saved_ammo_pack = item.count;
+			}
+			else if (item.type == InventoryItem::Type::HealthPotion) {
+				saved_health_potion = item.count;
+			}
+		}
+		saved_health = p.health;
+		saved_max_health = p.max_health;
+		saved_ammo = p.ammo;
+	}
+
 	std::cout << "Game saved" << std::endl;
 	fprintf(file, "map_index=%d\n", map_index);
 	fprintf(file, "exp=%d\n", exp);
@@ -57,6 +78,11 @@ void StateManager::save() {
 	fprintf(file, "heath_upgrades=%d\n", health_upgrade.curVal);
 	// ammo upgrades
 	fprintf(file, "ammo_upgrades=%d\n", ammo_upgrade.curVal);
+	fprintf(file, "health=%d\n", saved_health);
+	fprintf(file, "max_health=%d\n", saved_max_health);
+	fprintf(file, "ammo=%d\n", saved_ammo);
+	fprintf(file, "ammo_pack=%d\n", saved_ammo_pack);
+	fprintf(file, "health_potion=%d\n", saved_health_potion);
 	fclose(file);
 	return;
 
@@ -90,6 +116,35 @@ void StateManager::load() {
 	}
 
 	res = fscanf(file, "ammo_upgrades=%d\n", &ammo_upgrade.curVal);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	res = fscanf(file, "health=%d\n", &saved_health);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	res = fscanf(file, "max_health=%d\n", &saved_max_health);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	res = fscanf(file, "ammo=%d\n", &saved_ammo);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	res = fscanf(file, "ammo_pack=%d\n", &saved_ammo_pack);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+	res = fscanf(file, "health_potion=%d\n", &saved_health_potion);
 	if (res == EOF) {
 		std::cerr << "Unable to read the save data" << std::endl;
 		return;

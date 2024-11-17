@@ -93,7 +93,7 @@ private:
 
 	//void renderCenteredText(const std::string& text, float screen_width, float screen_height, float scale, vec3 color);
 
-	void refreshInventoryUI(Entity player);
+	void createInventorySlots(Entity player);
 	void refreshPowerUpUI(Entity player);
 	void refreshInventorySlots(Entity player);
 };

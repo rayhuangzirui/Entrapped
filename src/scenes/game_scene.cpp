@@ -238,9 +238,6 @@ Entity GameScene::createBackground() {
 
 	return entity;
 }
-//Entity createShadowOverlay(vec2 position) {
-//
-//}
 
 // Create player hp bar
 Entity GameScene::createPlayerHPBar(vec2 position, float ratio) {
@@ -357,9 +354,8 @@ void GameScene::refreshUI(Entity player) {
 	registry.refreshables.emplace(ammo_text);
 
 	// Refresh inventory display
-	refreshInventoryUI(player);
+	refreshInventorySlots(player);
 	// Draw inventory slots
-	/*createInventorySlots(player);*/
   
 	// create exp text
 	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), {window_width_px - 175.f, 20.f}, 20.f, {1.f, 1.f, 1.f});
@@ -591,7 +587,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	player_velocity = { 0.0, 0.0 };
 
 	// Draw inventory slots
-	//createInventorySlots(player);
+	createInventorySlots(player);
 	refreshUI(player);
 }
 
@@ -1852,6 +1848,29 @@ void GameScene::handle_collisions() {
 					}
 					registry.damageCoolDowns.emplace(entity);
 
+					// Check if the player has shields
+					if (registry.shields.has(entity)) {
+						Shield& shield = registry.shields.get(entity);
+
+						// If the player has shield charges, block the damage and reduce the shield count
+						if (shield.charges > 0) {
+							shield.charges -= 1; // Use one shield charge
+							std::cout << "Shield absorbed the damage! Remaining shields: " << shield.charges << std::endl;
+
+							// Remove the shield component if all charges are used up
+							if (shield.charges == 0) {
+								registry.shields.remove(entity);
+								std::cout << "All shield charges used up!" << std::endl;
+							}
+
+							// Play shield block sound effect (optional)
+							Mix_PlayChannel(-1, health_pickup_sound, 0);
+
+							// Skip reducing health if shield absorbed the damage
+							continue;
+						}
+					}
+
 					player.health -= enemy.damage;
 
 					if (player.health > 0) {
@@ -2285,7 +2304,7 @@ void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& 
 }
 
 // TODO: Reloading logic
-void GameScene::refreshInventoryUI(Entity player) {
+void GameScene::createInventorySlots(Entity player) {
 	// Clear all existing UI elements related to the inventory
 	while (registry.inventorySlots.entities.size() > 0) {
 		registry.remove_all_components_of(registry.inventorySlots.entities.back());
@@ -2318,6 +2337,23 @@ void GameScene::refreshInventoryUI(Entity player) {
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
 			});
+	}
+}
+
+void GameScene::refreshInventorySlots(Entity player) {
+
+	Inventory& inventory = registry.inventories.get(player);
+
+	// Configuration for slot positions
+	float slot_size = 48.f;
+	float spacing = 10.f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size)) / 2.0f + 8.0f;
+	float y_offset = 30.f; // Position at the top of the screen
+
+	// Loop through each inventory slot and recreate it
+	for (int i = 0; i < inventory.max_slots; ++i) {
+		float x_position = x_offset + i * (slot_size + spacing);
+		vec2 position = { x_position, y_offset };
 
 		// Check if there's an item in this slot
 		if (i < inventory.items.size() && inventory.items[i].type != InventoryItem::Type::None) {
@@ -2329,6 +2365,7 @@ void GameScene::refreshInventoryUI(Entity player) {
 			icon_motion.position = position;
 			icon_motion.scale = { slot_size - 10, slot_size - 10 };
 			registry.UIs.emplace(icon);
+			registry.refreshables.emplace(icon);
 
 			// Select the texture based on the item type
 			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
@@ -2344,49 +2381,9 @@ void GameScene::refreshInventoryUI(Entity player) {
 			std::string count_text = std::to_string(item.count);
 			Entity text_entity = renderer->text_renderer.createText(count_text, position + vec2(10, -15), 20.f, { 1.f, 1.f, 1.f });
 			registry.UIs.emplace(text_entity);
+			registry.refreshables.emplace(text_entity);
 			//std::string count_text = std::to_string(inventory.items[i].count);
 			//renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
-		}
-	}
-}
-
-void GameScene::refreshInventorySlots(Entity player) {
-	Inventory& inventory = registry.inventories.get(player);
-
-	float slot_size = 48.f;
-	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - 2 * slot_size;
-	float y_offset = 50.f;
-
-	for (int i = 0; i < inventory.max_slots; ++i) {
-		float x_position = x_offset + i * (slot_size + spacing);
-		vec2 position = { x_position, y_offset };
-
-		// Render item icon if slot is not empty
-		if (inventory.items[i].count > 0) {
-			// Create a new icon entity for the item
-			Entity icon = Entity();
-
-			// Add a Motion component for position and scale
-			Motion& icon_motion = registry.motions.emplace(icon);
-			icon_motion.position = position; // Use screen position, not world position
-			icon_motion.scale = { slot_size - 10, slot_size - 10 };
-
-			// Mark this entity as a UI element so it renders on the UI layer
-			registry.UIs.emplace(icon);
-			registry.refreshables.emplace(icon);
-
-			// Render the icon with the appropriate texture
-			registry.renderRequests.insert(icon, {
-				TEXTURE_ASSET_ID::CHEST_CLOSED,
-				EFFECT_ASSET_ID::TEXTURED,
-				GEOMETRY_BUFFER_ID::SPRITE
-				});
-
-			// Display the item count as text
-			std::string count_text = std::to_string(inventory.items[i].count);
-			Entity count_text_entity = renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
-			registry.refreshables.emplace(count_text_entity);
 		}
 	}
 }
@@ -2421,6 +2418,7 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		slot_motion.position = { x_offset, y_offset };
 		slot_motion.scale = { icon_size, icon_size };
 		registry.UIs.emplace(slot);
+		registry.refreshables.emplace(slot);
 
 		// Render the shield icon
 		registry.renderRequests.insert(slot, {
@@ -2433,5 +2431,6 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		std::string count_text = std::to_string(shield_count);
 		Entity text_entity = renderer->text_renderer.createText(count_text, { x_offset + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
 		registry.UIs.emplace(text_entity);
+		registry.refreshables.emplace(text_entity);
 	}
 }

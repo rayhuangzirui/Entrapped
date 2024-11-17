@@ -2490,4 +2490,35 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		registry.UIs.emplace(text_entity);
 		registry.refreshables.emplace(text_entity);
 	}
+
+	// --- Render Speed Boost Power-Up ---
+	int speed_boost_count = 0;
+	if (registry.speedBoosts.has(player)) {
+		SpeedBoost& speed_boost = registry.speedBoosts.get(player);
+		speed_boost_count = speed_boost.count;
+	}
+
+	// If the player has speed boosts, render the speed boost icon
+	if (speed_boost_count > 0) {
+		// Create a slot entity for the speed boost icon
+		Entity speed_slot = Entity();
+		Motion& speed_motion = registry.motions.emplace(speed_slot);
+		speed_motion.position = { x_offset + icon_size + spacing, y_offset };
+		speed_motion.scale = { icon_size, icon_size };
+		registry.UIs.emplace(speed_slot);
+		registry.refreshables.emplace(speed_slot);
+
+		// Render the speed boost icon
+		registry.renderRequests.insert(speed_slot, {
+			TEXTURE_ASSET_ID::POWER_UP_SPEED_UP,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+			});
+
+		// Display the speed boost count as text
+		std::string speed_text = std::to_string(speed_boost_count);
+		Entity speed_text_entity = renderer->text_renderer.createText(speed_text, { x_offset + icon_size + spacing + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
+		registry.UIs.emplace(speed_text_entity);
+		registry.refreshables.emplace(speed_text_entity);
+	}
 }

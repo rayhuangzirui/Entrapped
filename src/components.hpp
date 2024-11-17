@@ -459,6 +459,11 @@ struct Shield {
 	int charges; // Number of shield charges
 };
 
+// Component for SpeedBoost effect on the player
+struct SpeedBoost {
+	int count; // Number of times speed has been increased
+};
+
 struct PowerUpSlot {
 
 };

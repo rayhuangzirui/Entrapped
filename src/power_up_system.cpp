@@ -37,10 +37,22 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
             float original_speed = player_component.speed;
             player_component.speed *= 1.1f; // Increase speed by 10%
 
-            // Debug output showing the new speed
+            // Check if the player already has a SpeedBoost component
+            if (registry.speedBoosts.has(player)) {
+                SpeedBoost& speed_boost = registry.speedBoosts.get(player);
+                speed_boost.count += 1; // Increment the speed boost count
+            }
+            else {
+                // If not, add a new SpeedBoost component with a count of 1
+                SpeedBoost& speed_boost = registry.speedBoosts.emplace(player);
+                speed_boost.count = 1;
+            }
+
+            // Debug output showing the new speed and count
             std::cout << "[DEBUG] Speed Boost collected! Original speed: "
                 << original_speed << ", New speed: "
-                << player_component.speed << std::endl;
+                << player_component.speed << ", Total speed boosts: "
+                << registry.speedBoosts.get(player).count << std::endl;
         }
     }
     else if (type == PowerUpType::Soldier_init_powerup) {

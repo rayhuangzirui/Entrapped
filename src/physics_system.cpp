@@ -315,143 +315,141 @@ bool check_box_in_the_wall(Motion motion) {
 }
 
 // Precise mesh-wall collision handling
-void handle_mesh_wall_collision() {
+void handle_mesh_wall_collision(Entity entity) {
     auto& motion_registry = registry.motions;
     auto& collidable_registry = registry.collidables;
     const int TILE_SIZE = state.TILE_SIZE;
 
-    for (uint i = 0; i < collidable_registry.size(); ++i) {
-        Entity entity = collidable_registry.entities[i];
-        Motion& motion = motion_registry.get(entity);
+    //Entity entity = collidable_registry.entities[i];
+    Motion& motion = motion_registry.get(entity);
 
-        if (!registry.meshPtrs.has(entity)) {
-            continue;
-        }
+    if (!registry.meshPtrs.has(entity)) {
+        return;
+    }
 
-        Mesh& mesh = *registry.meshPtrs.get(entity);
+    Mesh& mesh = *registry.meshPtrs.get(entity);
 
-        vec2 aabb_size = get_aabb(motion);
-        vec2 aabb_min = motion.position - aabb_size / 2.0f;
-        vec2 aabb_max = motion.position + aabb_size / 2.0f;
+    vec2 aabb_size = get_aabb(motion);
+    vec2 aabb_min = motion.position - aabb_size / 2.0f;
+    vec2 aabb_max = motion.position + aabb_size / 2.0f;
 
-        int x_min = int(floor(aabb_min.x / TILE_SIZE));
-        int x_max = int(floor(aabb_max.x / TILE_SIZE));
-        int y_min = int(floor(aabb_min.y / TILE_SIZE));
-        int y_max = int(floor(aabb_max.y / TILE_SIZE));
+    int x_min = int(floor(aabb_min.x / TILE_SIZE));
+    int x_max = int(floor(aabb_max.x / TILE_SIZE));
+    int y_min = int(floor(aabb_min.y / TILE_SIZE));
+    int y_max = int(floor(aabb_max.y / TILE_SIZE));
 
-        // Clamp to map boundaries
-        x_min = clamp_m(x_min, 0, state.map_width - 1);
-        x_max = clamp_m(x_max, 0, state.map_width - 1);
-        y_min = clamp_m(y_min, 0, state.map_height - 1);
-        y_max = clamp_m(y_max, 0, state.map_height - 1);
+    // Clamp to map boundaries
+    x_min = clamp_m(x_min, 0, state.map_width - 1);
+    x_max = clamp_m(x_max, 0, state.map_width - 1);
+    y_min = clamp_m(y_min, 0, state.map_height - 1);
+    y_max = clamp_m(y_max, 0, state.map_height - 1);
 
-        bool is_box_in_wall = check_box_in_the_wall(motion);
-        if (!is_box_in_wall) {
-            continue;
-        }
-        // For each tile that the entity overlaps with
-        for (int y = y_min; y <= y_max; ++y) {
-            for (int x = x_min; x <= x_max; ++x) {
-                if (state.is_blocked(state.map[y][x])) {
-                    vec2 wall_pos = vec2((x + 0.5f) * TILE_SIZE, (y + 0.5f) * TILE_SIZE);
+    bool is_box_in_wall = check_box_in_the_wall(motion);
+    if (!is_box_in_wall) {
+        return;
+    }
+    // For each tile that the entity overlaps with
+    for (int y = y_min; y <= y_max; ++y) {
+        for (int x = x_min; x <= x_max; ++x) {
+            if (state.is_blocked(state.map[y][x])) {
+                vec2 wall_pos = vec2((x + 0.5f) * TILE_SIZE, (y + 0.5f) * TILE_SIZE);
 
-                    vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
+                vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
 
-                    bool collision_detected = false;
+                bool collision_detected = false;
 
-                    // For each vertex in the mesh
-                    for (size_t vi = 0; vi < mesh.vertex_indices.size(); ++vi) {
-                        vec3 vertex = mesh.vertices[mesh.vertex_indices[vi]].position;
-                        vec2 transformed_vertex = transform_vertex(vertex, motion);
+                // For each vertex in the mesh
+                for (size_t vi = 0; vi < mesh.vertex_indices.size(); ++vi) {
+                    vec3 vertex = mesh.vertices[mesh.vertex_indices[vi]].position;
+                    vec2 transformed_vertex = transform_vertex(vertex, motion);
 
-                        // Check if the vertex is inside the wall's bounding box
-                        if (point_in_aabb(transformed_vertex, wall_pos, wall_size)) {
-                            collision_detected = true;
-                            break;
+                    // Check if the vertex is inside the wall's bounding box
+                    if (point_in_aabb(transformed_vertex, wall_pos, wall_size)) {
+                        collision_detected = true;
+                        break;
+                    }
+                }
+        //          if (registry.players.has(entity)) {
+
+        //              if (collision_detected) {
+						//printf("collision detected\n");
+        //                  // print number of tiles
+						//printf("number of tiles: %d, %d\n", x, y);
+        //              }
+        //              else {
+						//printf("no collision detected\n");
+						//printf("number of tiles: %d, %d\n", x, y);
+        //              }
+        //          }
+
+                if (collision_detected) {
+					// if the entity is a bullet, remove it
+                    if (registry.bullets.has(entity)) {
+                        registry.remove_all_components_of(entity);
+                    }
+                    float overlap_x = 0.0f;
+                    float overlap_y = 0.0f;
+
+                    float aabb_left = motion.position.x - aabb_size.x / 2.0f;
+                    float aabb_right = motion.position.x + aabb_size.x / 2.0f;
+                    float aabb_top = motion.position.y - aabb_size.y / 2.0f;
+                    float aabb_bottom = motion.position.y + aabb_size.y / 2.0f;
+
+                    float wall_left = wall_pos.x - wall_size.x / 2.0f;
+                    float wall_right = wall_pos.x + wall_size.x / 2.0f;
+                    float wall_top = wall_pos.y - wall_size.y / 2.0f;
+                    float wall_bottom = wall_pos.y + wall_size.y / 2.0f;
+
+                    // Calculate the minimum translation distance along x
+                    if (motion.position.x < wall_pos.x) {
+                        overlap_x = aabb_right - wall_left;
+                    }
+                    else {
+                        overlap_x = wall_right - aabb_left;
+                    }
+
+                    // Calculate the minimum translation distance along y
+                    if (motion.position.y < wall_pos.y) {
+                        overlap_y = aabb_bottom - wall_top;
+                    }
+                    else {
+                        overlap_y = wall_bottom - aabb_top;
+                    }
+
+                    // Determine the axis of minimum penetration
+                    if (overlap_x < overlap_y) {
+                        // Move entity out along x-axis
+                        float mtv_x = (motion.position.x < wall_pos.x) ? -overlap_x : overlap_x;
+                        motion.position.x += mtv_x;
+
+                        // Adjust velocity along x-axis if moving towards the wall
+                        if ((mtv_x > 0 && motion.velocity.x < 0) || (mtv_x < 0 && motion.velocity.x > 0)) {
+                            motion.velocity.x = 0.0f;
                         }
                     }
-          //          if (registry.players.has(entity)) {
+                    else {
+                        // Move entity out along y-axis
+                        float mtv_y = (motion.position.y < wall_pos.y) ? -overlap_y : overlap_y;
+                        motion.position.y += mtv_y;
 
-          //              if (collision_detected) {
-						    //printf("collision detected\n");
-          //                  // print number of tiles
-						    //printf("number of tiles: %d, %d\n", x, y);
-          //              }
-          //              else {
-						    //printf("no collision detected\n");
-						    //printf("number of tiles: %d, %d\n", x, y);
-          //              }
-          //          }
-
-                    if (collision_detected) {
-						// if the entity is a bullet, remove it
-                        if (registry.bullets.has(entity)) {
-                            registry.remove_all_components_of(entity);
+                        // Adjust velocity along y-axis if moving towards the wall
+                        if ((mtv_y > 0 && motion.velocity.y < 0) || (mtv_y < 0 && motion.velocity.y > 0)) {
+                            motion.velocity.y = 0.0f;
                         }
-                        float overlap_x = 0.0f;
-                        float overlap_y = 0.0f;
-
-                        float aabb_left = motion.position.x - aabb_size.x / 2.0f;
-                        float aabb_right = motion.position.x + aabb_size.x / 2.0f;
-                        float aabb_top = motion.position.y - aabb_size.y / 2.0f;
-                        float aabb_bottom = motion.position.y + aabb_size.y / 2.0f;
-
-                        float wall_left = wall_pos.x - wall_size.x / 2.0f;
-                        float wall_right = wall_pos.x + wall_size.x / 2.0f;
-                        float wall_top = wall_pos.y - wall_size.y / 2.0f;
-                        float wall_bottom = wall_pos.y + wall_size.y / 2.0f;
-
-                        // Calculate the minimum translation distance along x
-                        if (motion.position.x < wall_pos.x) {
-                            overlap_x = aabb_right - wall_left;
-                        }
-                        else {
-                            overlap_x = wall_right - aabb_left;
-                        }
-
-                        // Calculate the minimum translation distance along y
-                        if (motion.position.y < wall_pos.y) {
-                            overlap_y = aabb_bottom - wall_top;
-                        }
-                        else {
-                            overlap_y = wall_bottom - aabb_top;
-                        }
-
-                        // Determine the axis of minimum penetration
-                        if (overlap_x < overlap_y) {
-                            // Move entity out along x-axis
-                            float mtv_x = (motion.position.x < wall_pos.x) ? -overlap_x : overlap_x;
-                            motion.position.x += mtv_x;
-
-                            // Adjust velocity along x-axis if moving towards the wall
-                            if ((mtv_x > 0 && motion.velocity.x < 0) || (mtv_x < 0 && motion.velocity.x > 0)) {
-                                motion.velocity.x = 0.0f;
-                            }
-                        }
-                        else {
-                            // Move entity out along y-axis
-                            float mtv_y = (motion.position.y < wall_pos.y) ? -overlap_y : overlap_y;
-                            motion.position.y += mtv_y;
-
-                            // Adjust velocity along y-axis if moving towards the wall
-                            if ((mtv_y > 0 && motion.velocity.y < 0) || (mtv_y < 0 && motion.velocity.y > 0)) {
-                                motion.velocity.y = 0.0f;
-                            }
-                        }
+                    }
 
   
-                    }
+                }
                     
-                    is_box_in_wall = check_box_in_the_wall(motion);
-                }
-                if (!is_box_in_wall) {
-                    break;
-                }
+                is_box_in_wall = check_box_in_the_wall(motion);
             }
-
             if (!is_box_in_wall) {
                 break;
             }
+        }
+
+        if (!is_box_in_wall) {
+            break;
         }
     }
 }
@@ -541,10 +539,9 @@ void PhysicsSystem::step(float elapsed_ms)
 		// Continuous collision detection for wall collisions over multiple sub-steps
         for (int step = 0; step < sub_steps; ++step) {
             motion.position += movement_per_substep;
+            handle_mesh_wall_collision(entity);
         }
     }
-
-    handle_mesh_wall_collision();
     // Mesh-wall collision
     //if (registry.meshPtrs.has(entity)) {
     //    Mesh& mesh = *registry.meshPtrs.get(entity);

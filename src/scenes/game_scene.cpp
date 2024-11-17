@@ -1925,9 +1925,9 @@ void GameScene::refreshInventoryUI(Entity player) {
 
 		// Render the slot background
 		registry.renderRequests.insert(slot, {
-			TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::BOX,
-			GEOMETRY_BUFFER_ID::DEBUG_LINE,
+			TEXTURE_ASSET_ID::ITEM_SLOT,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE,
 			});
 
 		// Check if there's an item in this slot

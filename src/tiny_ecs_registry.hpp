@@ -83,6 +83,10 @@ public:
 	ComponentContainer<ItemCount> itemCounts;
 	ComponentContainer<Inventory> inventories;
 
+	// Power-Up related components
+	ComponentContainer<PowerUp> powerUps;
+	ComponentContainer<Shield> shields;
+
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
@@ -153,6 +157,10 @@ public:
 		registry_list.push_back(&iconSprites);
 		registry_list.push_back(&itemCounts);
 		registry_list.push_back(&inventories);
+
+		// Power-Up related
+		registry_list.push_back(&powerUps);
+		registry_list.push_back(&shields);
 	}
 
 	void clear_all_components() {

@@ -7,6 +7,7 @@
 #include <iostream>
 #include "components.hpp"
 #include "inventory_system.hpp"
+#include "power_up_system.hpp"
 
 const int cell_size = 48;
 
@@ -959,6 +960,27 @@ void GameScene::on_key(int key, int action, int mod) {
         }
     }
 
+	// Remove later, this is shield powerup testing
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_5:
+			// Give the player a shield when the '5' key is pressed
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
+
+				// Apply a shield power-up to the player with 1 charge
+				PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, 1);
+
+				// Debug: Print confirmation of shield granted
+				std::cout << "[DEBUG] Shield power-up applied using key '5'!" << std::endl;
+			}
+			break;
+
+			// Handle other keys here...
+		default:
+			break;
+		}
+	}
 
 	if (action == GLFW_PRESS) {
 		switch (key) {
@@ -1408,6 +1430,30 @@ void GameScene::handle_collisions() {
 
 				if (!registry.damageCoolDowns.has(entity) && !registry.deathTimers.has(entity)) {
 					registry.damageCoolDowns.emplace(entity);
+
+					// Check if the player has shields
+					if (registry.shields.has(entity)) {
+						Shield& shield = registry.shields.get(entity);
+
+						// If the player has shield charges, block the damage and reduce the shield count
+						if (shield.charges > 0) {
+							shield.charges -= 1; // Use one shield charge
+							std::cout << "Shield absorbed the damage! Remaining shields: " << shield.charges << std::endl;
+
+							// Remove the shield component if all charges are used up
+							if (shield.charges == 0) {
+								registry.shields.remove(entity);
+								std::cout << "All shield charges used up!" << std::endl;
+							}
+
+							// Play shield block sound effect (optional)
+							Mix_PlayChannel(-1, health_pickup_sound, 0);
+
+							// Skip reducing health if shield absorbed the damage
+							continue;
+						}
+					}
+
 					player.health -= enemy.damage;
 
 					if (player.health > 0) {

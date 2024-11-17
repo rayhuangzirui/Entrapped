@@ -344,6 +344,23 @@ struct ItemCount {
 };
 //-------------------- Inventory system --------------------
 
+//-------------------- Power up system --------------------
+enum class PowerUpType {
+	Shield,
+	SpeedBoost, // For future power-ups
+};
+
+// Component for PowerUp entities
+struct PowerUp {
+	PowerUpType type;  // Type of power-up
+	int strength;      // Effect strength (e.g., shield points)
+};
+
+// Component for Shield effect on the player
+struct Shield {
+	int charges; // Number of shield charges
+};
+//-------------------- Power up system --------------------
 
 /**
  * The following enumerators represent global identifiers refering to graphic

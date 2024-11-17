@@ -213,7 +213,7 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
 
             GLint radiusLoc = glGetUniformLocation(program, "circleRadius");
             if (radiusLoc >= 0) {
-                float circle_radius = 400.0f;
+                float circle_radius = 500.0f;
                 glUniform1f(radiusLoc, circle_radius);
             }
 

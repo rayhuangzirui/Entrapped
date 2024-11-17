@@ -307,43 +307,6 @@ void GameScene::spawnEnemiesAndItems() {
 		}
 	}
 
-	// change the tape number and position in different maps or rooms
-	//Entity tape1 = createTape(vec2{ 300, 200 }, 1);
-	//Hint hint1;
-	//hint1.text = "Press E to pick up and play the tape";
-	//hint1.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape1, hint1);
-
-	//Entity tape2 = createTape(vec2{ 1000, 200 }, 2);
-	//Hint hint2;
-	//hint2.text = "Press E to pick up and play the tape";
-	//hint2.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape2, hint2);
-
-	//Entity tape3 = createTape(vec2{ 1800, 200 }, 3);
-	//Hint hint3;
-	//hint3.text = "Press E to pick up and play the tape";
-	//hint3.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape3, hint3);
-
-	//Entity tape4 = createTape(vec2{ 300, 400 }, 4);
-	//Hint hint4;
-	//hint4.text = "Press E to pick up and play the tape";
-	//hint4.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape4, hint4);
-
-	//Entity tape5 = createTape(vec2{ 1000, 400 }, 5);
-	//Hint hint5;
-	//hint5.text = "Press E to pick up and play the tape";
-	//hint5.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape5, hint5);
-
-	//Entity tape6 = createTape(vec2{ 1800, 400 }, 6);
-	//Hint hint6;
-	//hint6.text = "Press E to pick up and play the tape";
-	//hint6.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape6, hint6);
-
 	// tutorial specific elements
 	if (state.map_index == 0) {
 		Entity marker = createInvisible({ 10, 10 });
@@ -975,11 +938,14 @@ void GameScene::restart_game() {
 	next_scene = "death_scene";
 }
 
+int tape_channel = 1;
+
 void GameScene::destroy() {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 	while (registry.fps.entities.size() > 0)
 		registry.remove_all_components_of(registry.fps.entities.back());
+	Mix_HaltChannel(tape_channel);
 	Mix_FreeMusic(background_music);
 	Mix_FreeChunk(player_dead_sound);
 	Mix_FreeChunk(player_hurt_sound);
@@ -999,8 +965,6 @@ void GameScene::destroy() {
 std::string GameScene::get_next_scene() {
 	return this->next_scene;
 }
-
-int tape_channel = 1;
 
 void GameScene::on_key(int key, int action, int mod) {
 	static int frame = 0;

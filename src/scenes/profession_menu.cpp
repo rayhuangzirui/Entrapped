@@ -113,9 +113,11 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 		// Confirm button
 		if (mouse_position.x > window_width_px / 2 - 75.f && mouse_position.x < window_width_px / 2 + 58.f &&
 			mouse_position.y > window_height_px - 100 - 25.f && mouse_position.y < window_height_px - 100 + 33.f) {
-			confirm_button_clicked = true;
-			printf("Confirm button clicked\n");
-			time_since_last_click = 0.f;
+			if (selection_delay_complete) {
+				confirm_button_clicked = true;
+				printf("Confirm button clicked\n");
+				time_since_last_click = 0.f;
+			}
 		}
 	}
 }

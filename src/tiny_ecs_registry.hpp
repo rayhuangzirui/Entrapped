@@ -62,6 +62,7 @@ public:
 	ComponentContainer<FPSText> fpsTexts;
 	ComponentContainer<Button> buttons;
 	ComponentContainer<PressedButton> pressedButtons;
+	ComponentContainer<Message> messages;
 
 	// Map transition
 	ComponentContainer<Portal> portals;
@@ -134,6 +135,7 @@ public:
 		registry_list.push_back(&fpsTexts);
 		registry_list.push_back(&buttons);
 		registry_list.push_back(&pressedButtons);
+		registry_list.push_back(&messages);
 
 		// portal
 		registry_list.push_back(&portals);

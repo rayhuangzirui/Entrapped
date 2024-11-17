@@ -208,3 +208,13 @@ Entity createButton(RenderSystem* renderer, vec2 pos, vec2 scale, std::string te
 
 	return entity;
 }
+
+Entity createMessage(RenderSystem* renderer, vec2 pos, std::string text) {
+	Entity msg = renderer->text_renderer.createText("Map Name", pos, 20.f, { 1.f, 1.f, 1.f });
+	Opacity& o = registry.opacities.emplace(msg);
+	o.opacity = 0.5;
+
+	registry.messages.emplace(msg);
+
+	return msg;
+}

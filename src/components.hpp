@@ -321,6 +321,11 @@ struct UI {
 
 };
 
+// Component that shows as a floating message
+struct Message {
+
+};
+
 // UI component that requires refreshing
 struct Refreshable {
 

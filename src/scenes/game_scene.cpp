@@ -530,6 +530,10 @@ void GameScene::initialize(RenderSystem* renderer) {
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
 
+	if (state.map_index > 0) { // first level
+		selected_profession = state.saved_profession;
+	}
+
 	// initialize player's powerup by the profession
 	if (selected_profession == "Soldier") {
 		// dealt in handle_collision
@@ -578,6 +582,8 @@ void GameScene::initialize(RenderSystem* renderer) {
 		player_component.ammo = state.saved_ammo;
 		InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, state.saved_ammo_pack);
 		InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, state.saved_health_potion);
+		PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, state.saved_shield);
+		PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, state.saved_speed_boost);
 	}
 
 	state.map_index++;

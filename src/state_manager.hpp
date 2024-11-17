@@ -34,6 +34,11 @@ public:
 	int saved_ammo_pack;
 	int saved_health_potion;
 
+	int saved_speed_boost;
+	int saved_shield;
+
+	std::string saved_profession;
+
 	// experience and upgrade
 	int exp;
 	UpgradeState health_upgrade;
@@ -61,6 +66,10 @@ public:
 
 		saved_ammo_pack = 0;
 		saved_health_potion = 0;
+
+		saved_speed_boost = 0;
+		saved_shield = 0;
+		saved_profession = "Soldier";
 	}
 
 	~StateManager() {

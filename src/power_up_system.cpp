@@ -40,12 +40,12 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
             // Check if the player already has a SpeedBoost component
             if (registry.speedBoosts.has(player)) {
                 SpeedBoost& speed_boost = registry.speedBoosts.get(player);
-                speed_boost.count += 1; // Increment the speed boost count
+                speed_boost.count += strength; // Increment the speed boost count
             }
             else {
                 // If not, add a new SpeedBoost component with a count of 1
                 SpeedBoost& speed_boost = registry.speedBoosts.emplace(player);
-                speed_boost.count = 1;
+                speed_boost.count = strength;
             }
 
             // Debug output showing the new speed and count

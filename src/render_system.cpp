@@ -217,6 +217,11 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
                 glUniform1f(radiusLoc, circle_radius);
             }
 
+			GLuint time_uloc = glGetUniformLocation(program, "time");
+			if (radiusLoc >= 0) {
+				glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+			}
+
             GLint windowSizeLoc = glGetUniformLocation(program, "windowSize");
             if (windowSizeLoc >= 0) {
                 glUniform2f(windowSizeLoc, (float)window_width, (float)window_height);

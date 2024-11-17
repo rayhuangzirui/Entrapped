@@ -69,6 +69,17 @@ void StateManager::save() {
 		saved_health = p.health;
 		saved_max_health = p.max_health;
 		saved_ammo = p.ammo;
+		saved_profession = p.profession;
+
+		if (registry.speedBoosts.has(player)) {
+			SpeedBoost& speed_boost = registry.speedBoosts.get(player);
+			saved_speed_boost = speed_boost.count;
+		}
+
+		if (registry.shields.has(player)) {
+			Shield& shield = registry.shields.get(player);
+			saved_shield = shield.charges;
+		}
 	}
 
 	std::cout << "Game saved" << std::endl;
@@ -83,6 +94,21 @@ void StateManager::save() {
 	fprintf(file, "ammo=%d\n", saved_ammo);
 	fprintf(file, "ammo_pack=%d\n", saved_ammo_pack);
 	fprintf(file, "health_potion=%d\n", saved_health_potion);
+	fprintf(file, "speed_boost=%d\n", saved_speed_boost);
+	fprintf(file, "shield=%d\n", saved_shield);
+
+	// initialize player's powerup by the profession
+	if (saved_profession == "Soldier") {
+		fprintf(file, "profession=%d\n", 0);
+
+	}
+	else if (saved_profession == "Doctor") {
+		fprintf(file, "profession=%d\n", 1);
+
+	}
+	else if (saved_profession == "Hacker") {
+		fprintf(file, "profession=%d\n", 2);
+	}
 	fclose(file);
 	return;
 
@@ -138,7 +164,7 @@ void StateManager::load() {
 		std::cerr << "Unable to read the save data" << std::endl;
 		return;
 	}
-
+	// inventory
 	res = fscanf(file, "ammo_pack=%d\n", &saved_ammo_pack);
 	if (res == EOF) {
 		std::cerr << "Unable to read the save data" << std::endl;
@@ -148,6 +174,35 @@ void StateManager::load() {
 	if (res == EOF) {
 		std::cerr << "Unable to read the save data" << std::endl;
 		return;
+	}
+	// powerup
+	res = fscanf(file, "speed_boost=%d\n", &saved_speed_boost);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+	res = fscanf(file, "shield=%d\n", &saved_shield);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+
+	int idx;
+	res = fscanf(file, "profession=%d\n", &idx);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+	// initialize player's powerup by the profession
+	if (idx == 0) {
+		saved_profession = "Soldier";
+	}
+	else if (idx == 1) {
+		saved_profession = "Doctor";
+
+	}
+	else if (idx == 2) {
+		saved_profession = "Hacker";
 	}
 
 	std::cout << "Game loaded: " << std::endl;

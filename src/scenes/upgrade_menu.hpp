@@ -3,7 +3,7 @@
 #include "base_scene.hpp"
 #include "render_system.hpp"
 
-class DeathScene : public BaseScene {
+class UpgradeMenu : public BaseScene {
 public:
 	void initialize(RenderSystem* renderer);
 	void step(float elapsed_ms);
@@ -16,4 +16,11 @@ public:
 private:
 	RenderSystem* renderer;
 	std::string next_scene = "";
+
+	void refreshUI();
+
+	// Buttons
+	Entity health_button;
+	Entity ammo_button;
+	Entity exit_button;
 };

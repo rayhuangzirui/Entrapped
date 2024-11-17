@@ -8,8 +8,6 @@
 void ProfessionMenu::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 	create_profession();
-
-	state.map_index = 0;
 }
 
 void ProfessionMenu::step(float elapsed_ms) {
@@ -120,10 +118,6 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 			time_since_last_click = 0.f;
 		}
 	}
-}
-
-void ProfessionMenu::draw_fps() {
-	(RenderSystem*)renderer;
 }
 
 void ProfessionMenu::create_profession() {

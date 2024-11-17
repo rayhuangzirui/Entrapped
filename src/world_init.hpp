@@ -27,3 +27,7 @@ Entity createChooseProfessionTitle(RenderSystem* renderer);
 Entity createProfessionLayer(RenderSystem* renderer, vec2 pos, std::string profession, bool is_clicked);
 
 Entity createConfirmButton(RenderSystem* renderer, vec2 pos, bool is_enabled, bool is_clicked);
+
+Entity createButton(RenderSystem* renderer, vec2 pos, vec2 scale, std::string text);
+
+Entity createMessage(RenderSystem* renderer, vec2 pos, std::string text);

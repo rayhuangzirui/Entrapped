@@ -18,7 +18,6 @@ public:
 	void on_mouse_move(vec2 mouse_position);
 	void drawHealthBars();
 	void on_mouse_click(int button, int action, int mod);
-	void draw_fps();
 
 private:
 	RenderSystem* renderer;
@@ -57,7 +56,10 @@ private:
 
 	void restart_game();
 
+	// player movement
 	float PLAYER_SPEED = 200.0f;
+	vec4 player_movement_state = { 0, 0, 0, 0 };
+
 	const int TILE_SIZE = 48;
 	Mix_Music* background_music;
 	Mix_Chunk* player_dead_sound;
@@ -76,8 +78,6 @@ private:
 	CameraSystem camera;
 	void updateCamera(const vec2& player_position);
 	void updateCamera_smoothing(const vec2& player_position, const vec2& target_position);
-
-	Entity FPS_entity;
 
 	//void updateHints(Entity player);
 	void updateHints(Entity player);

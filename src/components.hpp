@@ -40,6 +40,15 @@ struct CameraText {
 };
 
 
+struct Button {
+	Entity text;
+};
+
+// button that is pressed
+struct PressedButton{
+
+};
+
 
 // Gun component
 struct Gun
@@ -168,6 +177,7 @@ struct Health {
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
+	float cooldown_ms; // Cooldown of dahs in milliseconds
 };
 
 // placeholder entities that are invisible
@@ -219,6 +229,10 @@ struct HealthBar {
 	
 };
 
+// Structure to store collidable entities
+struct Collidable {
+
+};
 
 // Stucture to store collision information
 struct Collision
@@ -307,6 +321,11 @@ struct UI {
 
 };
 
+// Component that shows as a floating message
+struct Message {
+
+};
+
 // UI component that requires refreshing
 struct Refreshable {
 
@@ -369,6 +388,10 @@ struct Hint {
 	Entity text_entity;        // Stores the entity of the rendered text
 };
 
+//For draw order of FOV shader
+struct FOV {
+    
+};
 //-------------------- Inventory system --------------------
 struct InventoryItem {
 	enum class Type { AmmoPack } type;
@@ -483,7 +506,8 @@ enum class EFFECT_ASSET_ID {
 	BOX = RECTANGLE + 1,
 	GLOBAL = BOX+1,
 	MAP = GLOBAL + 1,
-	EFFECT_COUNT = MAP + 1,
+	FOV2 = MAP + 1,
+	EFFECT_COUNT = FOV2 + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -498,7 +522,8 @@ enum class GEOMETRY_BUFFER_ID {
 	ENEMY_WOMAN = BULLET + 1,
 	MAZE = ENEMY_WOMAN  + 1,
 	SQUARE = MAZE + 1,
-	GEOMETRY_COUNT = SQUARE + 1
+	FOV_QUAD = SQUARE + 1,
+	GEOMETRY_COUNT = FOV_QUAD + 1
 
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;

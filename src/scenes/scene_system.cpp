@@ -5,6 +5,7 @@
 #include "death_scene.hpp"
 #include "over_scene.hpp"
 #include "profession_menu.hpp"
+#include "upgrade_menu.hpp"
 #include "tiny_ecs_registry.hpp"
 
 SceneSystem::SceneSystem() {
@@ -14,6 +15,10 @@ SceneSystem::SceneSystem() {
 }
 
 SceneSystem::~SceneSystem() {
+	//delete this->current_scene;
+}
+
+void SceneSystem::before_exit() {
 	delete this->current_scene;
 }
 
@@ -62,10 +67,6 @@ void SceneSystem::on_mouse_click(int button, int action, int mod) {
 	current_scene->on_mouse_click(button, action, mod);
 }
 
-void SceneSystem::draw_fps() {
-	current_scene->draw_fps();
-}
-
 void SceneSystem::changeScene(std::string name) {
 	if (name.compare("main_menu") == 0) {
 		this->popScene();
@@ -93,6 +94,11 @@ void SceneSystem::changeScene(std::string name) {
 		this->popScene();
 		delete this->current_scene;
 		this->current_scene = new ProfessionMenu();
+	}
+	else if (name.compare("upgrade_menu") == 0) {
+		this->popScene();
+		delete this->current_scene;
+		this->current_scene = new UpgradeMenu();
 	}
 	else {
 		std::cout << "Error: Unknow Scene Name" << std::endl;

@@ -49,6 +49,9 @@ public:
 	// Bounding box
 	ComponentContainer<BoundingBox> boundingBoxes;
 
+	// Physics
+	ComponentContainer<Collidable> collidables;
+
 	//For Damage text render purpose
 	ComponentContainer<DamageText> damageTexts;
 
@@ -58,6 +61,9 @@ public:
 	ComponentContainer<UI> UIs;
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
+	ComponentContainer<Button> buttons;
+	ComponentContainer<PressedButton> pressedButtons;
+	ComponentContainer<Message> messages;
 
 	// Map transition
 	ComponentContainer<Portal> portals;
@@ -76,6 +82,8 @@ public:
 
 	ComponentContainer<Background> backgrounds;
 
+	//FOV shader 
+	ComponentContainer<FOV> fovs;
 	//Inventory Related
 	ComponentContainer<InventoryItem> inventoryItems;
 	ComponentContainer<Inventory> inventories;
@@ -126,6 +134,9 @@ public:
 		registry_list.push_back(&playerHPBars);
 		registry_list.push_back(&fps);
 		registry_list.push_back(&fpsTexts);
+		registry_list.push_back(&buttons);
+		registry_list.push_back(&pressedButtons);
+		registry_list.push_back(&messages);
 
 		// portal
 		registry_list.push_back(&portals);
@@ -148,11 +159,16 @@ public:
 		// background
 		registry_list.push_back(&backgrounds);
 
+		// FOV
+		registry_list.push_back(&fovs);
+
 		// Inventory
 		registry_list.push_back(&inventoryItems);
 		registry_list.push_back(&inventories);
 
 		registry_list.push_back(&tapes);
+		// Physics
+		registry_list.push_back(&collidables);
 	}
 
 	void clear_all_components() {

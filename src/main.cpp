@@ -1,6 +1,7 @@
-
+#define _CRTDBG_MAP_ALLOC
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
+#include <crtdbg.h>
 
 // stlib
 #include <chrono>
@@ -19,6 +20,7 @@ using Clock = std::chrono::high_resolution_clock;
 // Entry point
 int main()
 {
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	std::cout << "Main method entered" << std::endl;
 	// Global systems
 	WorldSystem world;

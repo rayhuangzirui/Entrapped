@@ -202,12 +202,16 @@ struct Chest
 
 struct HealthChest {
 	bool isOpen = false;
-	float amount = 5;
+	float amount = 1;
 };
 
 struct AmmoChest {
 	bool isOpen = false;
-	float amount = 10;
+	float amount = 1;
+};
+
+struct RandomChest {
+	bool isOpen = false;
 };
 
 // component used to render text

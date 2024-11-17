@@ -56,6 +56,9 @@ public:
 	MapState changeMap(std::string map_name);
 	void save();
 	void load();
+	bool is_blocked(int id);
+	bool is_floor(int id);
+	bool is_wall(int id);
 };
 
 extern StateManager state;

@@ -511,11 +511,11 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 			GLfloat xpos = x;
 			GLfloat ypos = y;
 			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			if (state.map[row][col] == 1) {
+			if (state.is_wall(state.map[row][col])) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
 			}
-			else if (state.map[row][col] == 0 || state.map[row][col] == 3 || state.map[row][col] == 2 || state.map[row][col] == 4) {
+			else if (state.is_floor(state.map[row][col])) {
 				texture_id =
 					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
 			}

@@ -37,10 +37,10 @@ private:
 	Entity createEnemy(vec2 pos);
 	Entity createWall(vec2 position, vec2 size);
 	Entity createPlayerHPBar(vec2 position, float ratio);
-	Entity createHealthChest(vec2 position);
-	Entity createAmmoChest(vec2 position);
 	Entity createDirectionMarker(vec2 position);
 	Entity createBackground();
+
+	Entity createChest(vec2 position);
 
 	Entity createTape(vec2 pos, int tape_num);
 	void startTextAnimation(std::vector<std::string> text, int tape_num);

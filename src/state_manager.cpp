@@ -27,6 +27,12 @@ MapState StateManager::changeMap(std::string map_name) {
 		map_state.player_spawn = { 3,3 };
 		map_state.exit = { 58, 35 };
 	}
+	else if (map_name.compare("map_2") == 0) {
+		map = map_2_vector;
+
+		map_state.player_spawn = { 5,4 };
+		map_state.exit = { 107, 44 };
+	}
 	map_height = map.size();
 	map_width = map[0].size();
 
@@ -93,4 +99,23 @@ void StateManager::load() {
 	fclose(file);
 	return;
 
+}
+
+bool StateManager::is_blocked(int id) {
+	return id == 1  // wall
+		|| id == 3  // random chest
+		|| id == 4  // health chest
+		|| id == 5; // ammo chest
+}
+
+bool StateManager::is_floor(int id) {
+	return id == 0  // floor
+		|| id == 2  // enemy
+		|| id == 3  // random chest
+		|| id == 4  // health chest
+		|| id == 5; // ammo chest
+}
+
+bool StateManager::is_wall(int id) {
+	return id == 1; // wall
 }

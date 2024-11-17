@@ -58,7 +58,6 @@ void GameScene::startTextAnimation(std::vector<std::string> text, int tape_num) 
 	else {
 		animatedText.sentence_delay = 1.2f;
 		animatedText.interval = 0.05f;
-
 	}
 }
 
@@ -282,7 +281,12 @@ void GameScene::spawnEnemiesAndItems() {
 				}
 			}
 			else if (state.map[row][col] == 3) {
-				Entity chest = createHealthChest(pos);
+				Entity chest = createChest(pos);
+				registry.randomChests.emplace(chest);
+			}
+			else if (state.map[row][col] == 4) {
+				Entity chest = createChest(pos);
+				registry.healthChests.emplace(chest);
 				if (state.map_index == 0) {
 					Hint hint;
 					hint.text = "Chest with healing item. Press E to open";
@@ -290,23 +294,14 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
-			else if (state.map[row][col] == 4) {
-				Entity chest = createAmmoChest(pos);
+			else if (state.map[row][col] == 5) {
+				Entity chest = createChest(pos);
+				registry.ammoChests.emplace(chest);
 				if (state.map_index == 0) {
 					Hint hint;
 					hint.text = "Chest with ammo. Press E to open";
 					hint.radius = 200.0f;  // Set the radius for the hint display
 					registry.hints.emplace(chest, hint);
-				}
-			}
-			else if (state.map[row][col] == 5) { // Tape 1
-				// change the tape number in different maps or rooms
-				Entity tape1 = createTape(pos, 2);
-				if (state.map_index == 1) {
-					Hint hint;
-					hint.text = "Press E to pick up and play the tape";
-					hint.radius = 200.0f;  // Set the radius for the hint display
-					registry.hints.emplace(tape1, hint);
 				}
 			}
 		}
@@ -1116,8 +1111,9 @@ void GameScene::on_key(int key, int action, int mod) {
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !health_chest.isOpen) {
 				Mix_PlayChannel(-1, health_pickup_sound, 0);
-				player_component.health += (int)health_chest.amount;
-				player_component.health = min(player_component.health, player_component.max_health);
+
+				InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, health_chest.amount);
+
 				health_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
 				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
@@ -1139,8 +1135,34 @@ void GameScene::on_key(int key, int action, int mod) {
 			Player& player_component = registry.players.get(player);
 			if (distance(motion.position, player_motion.position) < 200.f && !ammo_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
-				player_component.ammo += (int)ammo_chest.amount;
+
+				InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, ammo_chest.amount);
+
 				ammo_chest.isOpen = true;
+				auto& chest_texture = registry.renderRequests.get(entity);
+				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
+				if (registry.hints.has(entity)) {
+					Hint& hint = registry.hints.get(entity);
+					if (hint.is_visible) {
+						// Remove the hint text entity if visible
+						renderer->text_renderer.removeText(hint.text_entity);
+					}
+					registry.hints.remove(entity);
+				}
+			}
+		}
+		auto& random_chests = registry.randomChests;
+		for (Entity entity : random_chests.entities) {
+			RandomChest& random_chest = random_chests.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			Motion& player_motion = registry.motions.get(player);
+			Player& player_component = registry.players.get(player);
+			if (distance(motion.position, player_motion.position) < 200.f && !random_chest.isOpen) {
+				Mix_PlayChannel(-1, item_pickup_sound, 0);
+
+				
+
+				random_chest.isOpen = true;
 				auto& chest_texture = registry.renderRequests.get(entity);
 				chest_texture.used_texture = TEXTURE_ASSET_ID::CHEST_OPENED;
 				if (registry.hints.has(entity)) {
@@ -1514,7 +1536,7 @@ Entity GameScene::createChest(RenderSystem* renderer, vec2 position) {
     return chest_entity;
 }
 
-Entity GameScene::createHealthChest(vec2 pos) {
+Entity GameScene::createChest(vec2 pos) {
 	auto entity = Entity();
 
 
@@ -1524,30 +1546,6 @@ Entity GameScene::createHealthChest(vec2 pos) {
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ 48.f ,48.f });
-
-	registry.healthChests.emplace(entity);
-
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::CHEST_CLOSED,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
-
-	return entity;
-}
-
-Entity GameScene::createAmmoChest(vec2 pos) {
-	auto entity = Entity();
-
-
-	// Setting initial motion values
-	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
-	motion.angle = 0;
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 48.f ,48.f });
-
-	registry.ammoChests.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,
@@ -1738,6 +1736,7 @@ Entity GameScene::createPortal(vec2 pos, std::string map_name) {
 	vec2 min = motion.position - (motion.scale / 2.0f);
 	vec2 max = motion.position + (motion.scale / 2.0f);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+	registry.collidables.emplace(entity);
 
 	registry.renderRequests.insert(
 		entity,

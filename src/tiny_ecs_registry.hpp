@@ -72,6 +72,7 @@ public:
 	// Chest related
 	ComponentContainer<HealthChest> healthChests;
 	ComponentContainer<AmmoChest> ammoChests;
+	ComponentContainer<RandomChest> randomChests;
 
 	// Hint related
 	ComponentContainer<Hint> hints;
@@ -160,6 +161,7 @@ public:
 		// chest
 		registry_list.push_back(&healthChests);
 		registry_list.push_back(&ammoChests);
+		registry_list.push_back(&randomChests);
 
 		// hint
 		registry_list.push_back(&hints);

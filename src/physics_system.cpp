@@ -286,69 +286,6 @@ void handle_mesh_box_collision() {
     }
 }
 
-vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
-    bb.min = motion.position - (abs(motion.scale) / 2.0f);
-    bb.max = motion.position + (abs(motion.scale) / 2.0f);
-    const int TILE_SIZE = 48;
-    vec2 offset = vec2(0, 0);
-
-    int y_top = clamp_m(floor(round_to_digits(bb.min.y / TILE_SIZE, 6)), 0, state.map_height - 1);
-    int y_bot = clamp_m(floor(round_to_digits(bb.max.y / TILE_SIZE, 6)), 0, state.map_height - 1);
-    int x_left = clamp_m(floor(round_to_digits(bb.min.x / TILE_SIZE, 6)), 0, state.map_width - 1);
-    int x_right = clamp_m(floor(round_to_digits(bb.max.x / TILE_SIZE, 6)), 0, state.map_width - 1);
-
-    float offset_top = 0.0;
-    float offset_bottom = 0.0;
-    float offset_left = 0.0;
-    float offset_right = 0.0;
-
-    bool heading_up = motion.velocity.y < 0;
-    bool heading_down = motion.velocity.y > 0;
-    bool heading_left = motion.velocity.x < 0;
-    bool heading_right = motion.velocity.x > 0;
-
-    if (direction == 0) {
-        for (uint i = x_left; i < x_right; i++) {
-            if (heading_up &&  state.map[y_top][i] == 1) {
-                offset_top = max((y_top + 1) * TILE_SIZE - bb.min.y, offset_top);
-            }
-            if (heading_down && state.map[y_bot][i] == 1) {
-                offset_bottom = max(bb.max.y - y_bot * TILE_SIZE, offset_bottom);
-            }
-        }
-    }
-    else {
-        for (uint i = y_top; i < y_bot; i++) {
-            if (heading_left && state.map[i][x_left] == 1) {
-                offset_left = max((x_left + 1) * TILE_SIZE - bb.min.x, offset_left);
-            }
-            if (heading_right && state.map[i][x_right] == 1) {
-                offset_right = max(bb.max.x - x_right * TILE_SIZE, offset_right);
-            }
-        }
-    }
-
-    vec2 result = vec2(0, 0);
-    //if (offset_top <= 0.001 || offset_bottom <= 0.0010) {
-    //    result.y = offset_top - offset_bottom;
-    //}
-    //if (offset_left <= 0.001 || offset_right <= 0.001) {
-    //    result.x = offset_left - offset_right;
-    //}
-    result.y = offset_top - offset_bottom;
-    result.x = offset_left - offset_right;
-
-
-    //if (offset_top > 0 || offset_bottom > 0 || offset_left > 0 || offset_right > 0) {
-    //    printf("bbox: %f, %f, %f, %f\n", bb.min.y, bb.max.y, bb.min.x, bb.max.x);
-    //    printf("collision index: %d, %d, %d, %d\n", y_top, y_bot, x_left, x_right);
-    //    printf("collision offset: %f, %f, %f, %f\n", offset_top, offset_bottom, offset_left, offset_right);
-    //    printf("collision vector: %f, %f\n", result.x, result.y);
-    //}
-
-    return result;
-}
-
 bool check_box_in_the_wall(Motion motion) {
     const int TILE_SIZE = state.TILE_SIZE;
     vec2 aabb_size = get_aabb(motion);
@@ -368,7 +305,7 @@ bool check_box_in_the_wall(Motion motion) {
 
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.map[y][x] == 1 || state.map[y][x] == 3 || state.map[y][x] == 4) {
+            if (state.is_blocked(state.map[y][x])) {
                 return true;
             }
         }
@@ -415,7 +352,7 @@ void handle_mesh_wall_collision() {
         // For each tile that the entity overlaps with
         for (int y = y_min; y <= y_max; ++y) {
             for (int x = x_min; x <= x_max; ++x) {
-                if (state.map[y][x] == 1 || state.map[y][x] == 3 || state.map[y][x] == 4) {
+                if (state.is_blocked(state.map[y][x])) {
                     vec2 wall_pos = vec2((x + 0.5f) * TILE_SIZE, (y + 0.5f) * TILE_SIZE);
 
                     vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
@@ -626,7 +563,7 @@ void PhysicsSystem::step(float elapsed_ms)
     handle_mesh_mesh_collision();
 
     // Mesh-box collision
-    //handle_mesh_box_collision();
+    handle_mesh_box_collision();
 
 
     // Update gun position

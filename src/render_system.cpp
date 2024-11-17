@@ -326,6 +326,18 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
+		if (registry.opacities.has(entity)) {
+			// Set the opacity
+			GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+			assert(opacity_uloc >= 0);
+			glUniform1f(opacity_uloc, registry.opacities.get(entity).opacity);
+		}
+		else {
+			// Set the opacity
+			GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+			assert(opacity_uloc >= 0);
+			glUniform1f(opacity_uloc, 1.0f);
+		}
 		gl_has_errors();
 
 	}

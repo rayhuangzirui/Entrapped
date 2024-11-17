@@ -365,9 +365,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
-	// fps entity
-	FPS_entity = Entity();
-
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	player_hurt_sound = Mix_LoadWAV(audio_path("male-hurt.wav").c_str());
@@ -516,24 +513,6 @@ void GameScene::step(float elapsed_ms) {
 
 	}
 
-	// FPS counter
-	if (registry.fps.entities.size() == 0) {
-		registry.fps.emplace(FPS_entity);
-	}
-
-	FPS& fps_counter = registry.fps.get(FPS_entity);
-
-	fps_counter.elapsed_time += elapsed_ms;
-	fps_counter.frame_count++;
-
-	if (fps_counter.elapsed_time >= 1000) {
-		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
-		fps_counter.frame_count = 0;
-		fps_counter.elapsed_time = 0.0;
-	}
-
-	draw_fps();
-
 	// Update HP and ammo
 	refreshUI(player);
 
@@ -553,7 +532,6 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 
-	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 
 	//if (registry.enemies.size() > 0) {
@@ -772,15 +750,18 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y += -PLAYER_SPEED;
+				//player_velocity.y += -PLAYER_SPEED;
+				player_movement_state.x = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y += PLAYER_SPEED;
+				//player_velocity.y += PLAYER_SPEED;
+				player_movement_state.y = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x += -PLAYER_SPEED;
+				//player_velocity.x += -PLAYER_SPEED;
+				player_movement_state.z = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x > 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -797,7 +778,8 @@ void GameScene::on_key(int key, int action, int mod) {
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x += PLAYER_SPEED;
+				//player_velocity.x += PLAYER_SPEED;
+				player_movement_state.w = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x < 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -815,19 +797,10 @@ void GameScene::on_key(int key, int action, int mod) {
 				isSprinting = true;
 				break;
 			case GLFW_KEY_SPACE:
-				if (!registry.dashTimers.has(player)) {
-					registry.dashTimers.emplace(player, DashTimer{ 200.f });
+				if (!registry.dashTimers.has(player) && !isSprinting) {
+					registry.dashTimers.emplace(player, DashTimer{ 200.f, 1200.f });
 					motion.velocity *= 2.5f;
 				}
-				break;
-			case GLFW_KEY_F:
-				// get the fps entity
-				Entity fps_entity = registry.fps.entities[0];
-				FPS& fps_counter = registry.fps.get(fps_entity);
-				// visialize fps
-				fps_counter.visible = !fps_counter.visible;
-				printf("FPS counter visibility: %d\n", fps_counter.visible);
-				printf("FPS: %f\n", fps_counter.fps);
 				break;
 			}
 
@@ -835,16 +808,20 @@ void GameScene::on_key(int key, int action, int mod) {
 		else if (action == GLFW_RELEASE) {
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y -= -PLAYER_SPEED;
+				player_movement_state.x = 0;
+				//player_velocity.y -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y -= PLAYER_SPEED;
+				player_movement_state.y = 0;
+				//player_velocity.y -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x -= -PLAYER_SPEED;
+				player_movement_state.z = 0;
+				//player_velocity.x -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x -= PLAYER_SPEED;
+				player_movement_state.w = 0;
+				//player_velocity.x -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_LEFT_SHIFT:
 				isSprinting = false;
@@ -852,6 +829,8 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 
 		}
+		vec2 dir = { player_movement_state.w - player_movement_state.z, player_movement_state.y - player_movement_state.x };
+		player_velocity = dir * PLAYER_SPEED;
 		motion.velocity = player_velocity;
 
 		// Apply sprint effect if active
@@ -1139,14 +1118,14 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	// 		  GEOMETRY_BUFFER_ID::SPRITE });
 	// }
 
-if (debugging.in_debug_mode) { 		
-    registry.renderRequests.insert( 			
-        entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::MESHED, 			  
-          GEOMETRY_BUFFER_ID::PLAYER }
-    ); 	
-} else { 		
+	if (debugging.in_debug_mode) { 		
+		registry.renderRequests.insert( 			
+			entity, 			
+			{ TEXTURE_ASSET_ID::PLAYER_1, 			  
+			  EFFECT_ASSET_ID::MESHED, 			  
+			  GEOMETRY_BUFFER_ID::PLAYER }
+		); 	
+	} else { 		
     // Player entity gets the textured effect
     registry.renderRequests.insert( 			
         entity, 			
@@ -1161,16 +1140,19 @@ if (debugging.in_debug_mode) {
     fov_motion = registry.motions.get(entity); // Copy player's motion
     
     // Add the FOV render request to the new entity
-    registry.renderRequests.insert( 			
-        fov_entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::FOV2, 			  
-          GEOMETRY_BUFFER_ID::SPRITE }
-    ); 	
+    //registry.renderRequests.insert( 			
+    //    fov_entity, 			
+    //    { TEXTURE_ASSET_ID::PLAYER_1, 			  
+    //      EFFECT_ASSET_ID::FOV2, 			  
+    //      GEOMETRY_BUFFER_ID::SPRITE }
+    //); 	
 }
 
 	// Attach a gun to the player entity
 	createGun(entity);
+
+	// Enable collision
+	registry.collidables.emplace(entity);
 
 	return entity;
 }
@@ -1448,6 +1430,9 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 	enemy.health_bar_entity = hp_bar;
 
+	// Enable collision
+	registry.collidables.emplace(entity);
+
 	return entity;
 }
 
@@ -1699,6 +1684,9 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	vec2 max = motion.position + (motion.scale / 2.0f);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
+	// Enable collision
+	registry.collidables.emplace(entity);
+
 	if (debugging.in_debug_mode) {
 		registry.renderRequests.insert(
 			entity,
@@ -1841,25 +1829,6 @@ void GameScene::on_mouse_click(int button, int action, int mod) {
 	(int)action;
 	(int)mod;
 	(RenderSystem*)renderer;
-}
-
-void GameScene::draw_fps() {
-	RenderSystem* renderer = this->renderer;
-	if (registry.fpsTexts.entities.size() > 0) {
-		registry.remove_all_components_of(registry.fpsTexts.entities.back());
-	}
-	Entity fps_entity = registry.fps.entities[0];
-	FPS& fps_counter = registry.fps.get(fps_entity);
-	if (fps_counter.visible) {
-		std::string fps_string = "FPS: " + std::to_string(static_cast<int> (fps_counter.fps));
-
-		// Update the text content
-		//fps_text.content = fps_string;
-		vec2 fps_position = vec2(10.f, 10.f);
-		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
-		registry.fpsTexts.emplace(text);
-		//registry.cameraTexts.emplace(text);
-	}
 }
 
 

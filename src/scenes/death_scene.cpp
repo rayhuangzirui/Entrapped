@@ -48,8 +48,4 @@ void DeathScene::on_mouse_click(int button, int action, int mod) {
 	(int)mod;
 }
 
-void DeathScene::draw_fps() {
-	// pass
-}
-
 

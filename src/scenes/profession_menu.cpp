@@ -120,10 +120,6 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 	}
 }
 
-void ProfessionMenu::draw_fps() {
-	(RenderSystem*)renderer;
-}
-
 void ProfessionMenu::create_profession() {
 	Profession soldier;
 	soldier.name = "Soldier";

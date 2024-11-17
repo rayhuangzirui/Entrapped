@@ -41,7 +41,7 @@ struct CameraText {
 
 
 struct Button {
-
+	Entity text;
 };
 
 // button that is pressed
@@ -177,6 +177,7 @@ struct Health {
 
 struct DashTimer {
 	float counter_ms;  // Duration of dash in milliseconds
+	float cooldown_ms; // Cooldown of dahs in milliseconds
 };
 
 // placeholder entities that are invisible
@@ -228,6 +229,10 @@ struct HealthBar {
 	
 };
 
+// Structure to store collidable entities
+struct Collidable {
+
+};
 
 // Stucture to store collision information
 struct Collision
@@ -313,6 +318,11 @@ struct KnockbackTimer
 
 // Component to distinguish between UI and game elements
 struct UI {
+
+};
+
+// Component that shows as a floating message
+struct Message {
 
 };
 

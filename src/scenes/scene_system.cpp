@@ -15,6 +15,10 @@ SceneSystem::SceneSystem() {
 }
 
 SceneSystem::~SceneSystem() {
+	//delete this->current_scene;
+}
+
+void SceneSystem::before_exit() {
 	delete this->current_scene;
 }
 
@@ -61,10 +65,6 @@ void SceneSystem::on_mouse_move(vec2 mouse_position) {
 
 void SceneSystem::on_mouse_click(int button, int action, int mod) {
 	current_scene->on_mouse_click(button, action, mod);
-}
-
-void SceneSystem::draw_fps() {
-	current_scene->draw_fps();
 }
 
 void SceneSystem::changeScene(std::string name) {

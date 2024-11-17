@@ -1908,7 +1908,7 @@ void GameScene::refreshInventoryUI(Entity player) {
 	// Configuration for slot positions
 	float slot_size = 48.f;
 	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size + spacing)) / 2.0f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size)) / 2.0f + 8.0f;
 	float y_offset = 30.f; // Position at the top of the screen
 
 	// Loop through each inventory slot and recreate it
@@ -1927,7 +1927,7 @@ void GameScene::refreshInventoryUI(Entity player) {
 		registry.renderRequests.insert(slot, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::BOX,
-			GEOMETRY_BUFFER_ID::DEBUG_LINE
+			GEOMETRY_BUFFER_ID::DEBUG_LINE,
 			});
 
 		// Check if there's an item in this slot
@@ -1943,7 +1943,7 @@ void GameScene::refreshInventoryUI(Entity player) {
 
 			// Select the texture based on the item type
 			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
-				TEXTURE_ASSET_ID::CHEST_CLOSED : TEXTURE_ASSET_ID::CHEST_OPENED;
+				TEXTURE_ASSET_ID::ITEM_AMMOPACK : TEXTURE_ASSET_ID::ITEM_MEDKIT;
 
 			registry.renderRequests.insert(icon, {
 				item_texture,
@@ -1971,8 +1971,8 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	// Configuration for power-up icon positions
 	float icon_size = 30.f;
 	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - 2 * (icon_size + spacing);
-	float y_offset = 100.f; // Position below the inventory
+	float x_offset = window_width_px / 40.0f;
+	float y_offset = 110.f; // Position below the inventory
 
 	// Get the player's shield component
 	int shield_count = 0;

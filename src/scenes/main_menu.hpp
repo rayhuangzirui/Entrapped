@@ -13,7 +13,6 @@ public:
 	void handle_collisions();
 	void on_mouse_move(vec2 mouse_position);
 	void on_mouse_click(int button, int action, int mod);
-	void draw_fps();
 private:
 	RenderSystem* renderer;
 	std::string next_scene = "";
@@ -23,4 +22,5 @@ private:
 	Entity continue_game_button;
 	Entity upgrade_button;
 	Entity exit_game_button;
+	Entity debug_button;
 };

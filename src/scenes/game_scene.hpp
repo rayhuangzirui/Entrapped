@@ -18,7 +18,6 @@ public:
 	void on_mouse_move(vec2 mouse_position);
 	void drawHealthBars();
 	void on_mouse_click(int button, int action, int mod);
-	void draw_fps();
 
 private:
 	RenderSystem* renderer;
@@ -42,6 +41,7 @@ private:
 	Entity createAmmoChest(vec2 position);
 	Entity createDirectionMarker(vec2 position);
 	Entity createBackground();
+
 	Entity createTape(vec2 pos, int tape_num);
 	void startTextAnimation(std::vector<std::string> text, int tape_num);
 	void updateTextAnimation(float elapsed_ms);
@@ -58,7 +58,10 @@ private:
 
 	void restart_game();
 
+	// player movement
 	float PLAYER_SPEED = 200.0f;
+	vec4 player_movement_state = { 0, 0, 0, 0 };
+
 	const int TILE_SIZE = 48;
 	Mix_Music* background_music;
 	Mix_Chunk* player_dead_sound;
@@ -85,8 +88,6 @@ private:
 	void updateCamera(const vec2& player_position);
 	void updateCamera_smoothing(const vec2& player_position, const vec2& target_position);
 
-	Entity FPS_entity;
-
 	//void updateHints(Entity player);
 	void updateHints(Entity player);
 
@@ -94,5 +95,14 @@ private:
 
 	// Create inventory
 	void createInventorySlots(Entity player);
+	void updateInventorySlots(Entity player);
+
+	// Function to initialize the inventory slots (called once during game initialization)
+	void initializeInventorySlots(Entity player);
+	// Function to update the inventory display (called when inventory changes)
+	void updateInventoryDisplay(Entity player);
+
+
+	void refreshInventoryUI(Entity player);
 	void refreshInventorySlots(Entity player);
 };

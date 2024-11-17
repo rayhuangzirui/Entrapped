@@ -141,20 +141,26 @@ bool triangle_intersect(const vec2& t1_v0, const vec2& t1_v1, const vec2& t1_v2,
 // Mesh-mesh collision
 void handle_mesh_mesh_collision() {
     auto& motion_registry = registry.motions;
+    auto& collidable_registry = registry.collidables;
+    auto& enemy_registry = registry.enemies;
 
-    for (uint i = 0; i < motion_registry.size(); i++) {
-        Motion& motion_i = motion_registry.components[i];
-        Entity entity_i = motion_registry.entities[i];
+    for (uint i = 0; i < collidable_registry.size(); i++) {
+        Entity entity_i = collidable_registry.entities[i];
+        Motion& motion_i = motion_registry.get(entity_i);
         if (!registry.meshPtrs.has(entity_i)) continue;
         Mesh& mesh_i = *registry.meshPtrs.get(entity_i);
 
-        for (uint j = i + 1; j < motion_registry.size(); j++) {
-            Motion& motion_j = motion_registry.components[j];
-            Entity entity_j = motion_registry.entities[j];
+        for (uint j = i + 1; j < collidable_registry.size(); j++) {
+            Entity entity_j = collidable_registry.entities[j];
+            Motion& motion_j = motion_registry.get(entity_j);
             if (!registry.meshPtrs.has(entity_j)) continue;
             Mesh& mesh_j = *registry.meshPtrs.get(entity_j);
 
             bool collision_detected = false;
+            // don't check collisions between enemies
+            if (enemy_registry.has(entity_i) && enemy_registry.has(entity_j)) {
+                continue;
+            }
 
 			// AABB check before mesh-mesh collision
 			vec2 aabb_i = get_aabb(motion_i);
@@ -204,90 +210,19 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
-// Mesh-mesh collision
-void handle_mesh_box_collision() {
-    auto& motion_registry = registry.motions;
-    // Handle mesh-based collision detection
-    for (uint i = 0; i < motion_registry.size(); i++)
-    {
-        Motion& motion_i = motion_registry.components[i];
-        Entity entity_i = motion_registry.entities[i];
-
-        // Skip entities without a mesh
-        if (!registry.meshPtrs.has(entity_i)) {
-            continue;
-        }
-
-        Mesh& mesh_i = *registry.meshPtrs.get(entity_i);
-
-        for (uint j = i + 1; j < motion_registry.size(); j++) {
-            Motion& motion_j = motion_registry.components[j];
-            Entity entity_j = motion_registry.entities[j];
-
-
-            if (!registry.meshPtrs.has(entity_j)) {
-                continue;
-            }
-
-            Mesh& mesh_j = *registry.meshPtrs.get(entity_j);
-
-            vec2 aabb_i = get_aabb(motion_i);
-            vec2 aabb_j = get_aabb(motion_j);
-
-            // Fast AABB check
-            if (!aabb_intersect(motion_i.position, aabb_i, motion_j.position, aabb_j)) {
-                continue;
-            }
-
-            bool collision = false;
-
-            for (auto& vertex_index : mesh_i.vertex_indices) {
-                vec3 vertex = mesh_i.vertices[vertex_index].position;
-                vec2 transformed_vertex = transform_vertex(vertex, motion_i);
-
-                for (auto& vertex_index_j : mesh_j.vertex_indices) {
-                    vec3 vertex_j = mesh_j.vertices[vertex_index_j].position;
-                    vec2 transformed_player_vertex = transform_vertex(vertex_j, motion_j);
-
-                    // Check if the transformed vertex is inside the player's bounding box
-                    if (point_in_aabb(transformed_vertex, motion_j.position, aabb_j)) {
-                        collision = true;
-                        break;
-                    }
-
-                    // Check if the transformed player vertex is inside the entity's bounding box
-                    if (point_in_aabb(transformed_player_vertex, motion_i.position, aabb_i)) {
-                        collision = true;
-                        break;
-                    }
-                }
-
-                if (collision) {
-                    // Create a collisions event
-                    // We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
-                    printf("collision detected\n");
-                    registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-                    registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-                    break;
-                }
-            }
-
-        }
-    }
-}
-
 // check wall collision based on the bounding box
-void handle_mesh_box_collision_new() {
+void handle_mesh_box_collision() {
+    auto& collidable_registry = registry.collidables;
     auto& motion_registry = registry.motions;
     // Handle mesh-based collision detection
-    for (uint i = 0; i < motion_registry.size(); i++)
+    for (uint i = 0; i < collidable_registry.size(); i++)
     {
-        Motion& motion_i = motion_registry.components[i];
-        Entity entity_i = motion_registry.entities[i];
+        Entity entity_i = collidable_registry.entities[i];
+        Motion& motion_i = motion_registry.get(entity_i);
 
-        for (uint j = i + 1; j < motion_registry.size(); j++) {
-            Motion& motion_j = motion_registry.components[j];
-            Entity entity_j = motion_registry.entities[j];
+        for (uint j = i + 1; j < collidable_registry.size(); j++) {
+            Entity entity_j = collidable_registry.entities[j];
+            Motion& motion_j = motion_registry.get(entity_j);
 
             if (registry.meshPtrs.has(entity_i) && registry.meshPtrs.has(entity_j)) {
                 continue;
@@ -414,14 +349,43 @@ vec2 check_wall_collision(BoundingBox& bb, Motion& motion, int direction) {
     return result;
 }
 
-// Precise mesh-wall collision handling
-void handle_mesh_wall_collision(float step_seconds) {
-    auto& motion_registry = registry.motions;
-    const int TILE_SIZE = 48;
+bool check_box_in_the_wall(Motion motion) {
+    const int TILE_SIZE = state.TILE_SIZE;
+    vec2 aabb_size = get_aabb(motion);
+    vec2 aabb_min = motion.position - aabb_size / 2.0f;
+    vec2 aabb_max = motion.position + aabb_size / 2.0f;
 
-    for (uint i = 0; i < motion_registry.components.size(); ++i) {
-        Motion& motion = motion_registry.components[i];
-        Entity entity = motion_registry.entities[i];
+    int x_min = int(floor(aabb_min.x / TILE_SIZE));
+    int x_max = int(floor(aabb_max.x / TILE_SIZE));
+    int y_min = int(floor(aabb_min.y / TILE_SIZE));
+    int y_max = int(floor(aabb_max.y / TILE_SIZE));
+
+    // Clamp to map boundaries
+    x_min = clamp_m(x_min, 0, state.map_width - 1);
+    x_max = clamp_m(x_max, 0, state.map_width - 1);
+    y_min = clamp_m(y_min, 0, state.map_height - 1);
+    y_max = clamp_m(y_max, 0, state.map_height - 1);
+
+    for (int y = y_min; y <= y_max; ++y) {
+        for (int x = x_min; x <= x_max; ++x) {
+            if (state.map[y][x] == 1 || state.map[y][x] == 3 || state.map[y][x] == 4) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// Precise mesh-wall collision handling
+void handle_mesh_wall_collision() {
+    auto& motion_registry = registry.motions;
+    auto& collidable_registry = registry.collidables;
+    const int TILE_SIZE = state.TILE_SIZE;
+
+    for (uint i = 0; i < collidable_registry.size(); ++i) {
+        Entity entity = collidable_registry.entities[i];
+        Motion& motion = motion_registry.get(entity);
 
         if (!registry.meshPtrs.has(entity)) {
             continue;
@@ -444,13 +408,15 @@ void handle_mesh_wall_collision(float step_seconds) {
         y_min = clamp_m(y_min, 0, state.map_height - 1);
         y_max = clamp_m(y_max, 0, state.map_height - 1);
 
+        bool is_box_in_wall = check_box_in_the_wall(motion);
+        if (!is_box_in_wall) {
+            continue;
+        }
         // For each tile that the entity overlaps with
         for (int y = y_min; y <= y_max; ++y) {
             for (int x = x_min; x <= x_max; ++x) {
                 if (state.map[y][x] == 1 || state.map[y][x] == 3 || state.map[y][x] == 4) {
                     vec2 wall_pos = vec2((x + 0.5f) * TILE_SIZE, (y + 0.5f) * TILE_SIZE);
-
-
 
                     vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
 
@@ -538,7 +504,16 @@ void handle_mesh_wall_collision(float step_seconds) {
 
   
                     }
+                    
+                    is_box_in_wall = check_box_in_the_wall(motion);
                 }
+                if (!is_box_in_wall) {
+                    break;
+                }
+            }
+
+            if (!is_box_in_wall) {
+                break;
             }
         }
     }
@@ -589,9 +564,11 @@ const float DASH_MULTIPLIER = 5.0f;
 
 void PhysicsSystem::step(float elapsed_ms) 
 {
+    //return;
     // Move fish based on how much time has passed, this is to (partially) avoid
     // having entities move at different speed based on the machine.
     auto& motion_registry = registry.motions;
+    auto& collidable_registry = registry.collidables;
     auto& bbox_container = registry.boundingBoxes;
     float step_seconds = elapsed_ms / 1000.f;
 
@@ -611,10 +588,14 @@ void PhysicsSystem::step(float elapsed_ms)
             
             // Update dash timer
             dash.counter_ms -= elapsed_ms;
+            dash.cooldown_ms -= elapsed_ms;
             if (dash.counter_ms <= 0) {
-                registry.dashTimers.remove(entity);
 				// Reset velocity multiplier
                 velocity_multiplier = 1.0f;
+            }
+
+            if (dash.cooldown_ms <= 0) {
+                registry.dashTimers.remove(entity);
             }
         }
         vec2 total_movement = motion.velocity * velocity_multiplier * step_seconds;
@@ -628,11 +609,10 @@ void PhysicsSystem::step(float elapsed_ms)
 		// Continuous collision detection for wall collisions over multiple sub-steps
         for (int step = 0; step < sub_steps; ++step) {
             motion.position += movement_per_substep;
-
-            handle_mesh_wall_collision(substep_seconds);
         }
     }
 
+    handle_mesh_wall_collision();
     // Mesh-wall collision
     //if (registry.meshPtrs.has(entity)) {
     //    Mesh& mesh = *registry.meshPtrs.get(entity);
@@ -647,7 +627,6 @@ void PhysicsSystem::step(float elapsed_ms)
 
     // Mesh-box collision
     //handle_mesh_box_collision();
-    handle_mesh_box_collision_new();
 
 
     // Update gun position

@@ -50,6 +50,9 @@ public:
 	// Bounding box
 	ComponentContainer<BoundingBox> boundingBoxes;
 
+	// Physics
+	ComponentContainer<Collidable> collidables;
+
 	//For Damage text render purpose
 	ComponentContainer<DamageText> damageTexts;
 
@@ -61,6 +64,7 @@ public:
 	ComponentContainer<FPSText> fpsTexts;
 	ComponentContainer<Button> buttons;
 	ComponentContainer<PressedButton> pressedButtons;
+	ComponentContainer<Message> messages;
 
 	// Map transition
 	ComponentContainer<Portal> portals;
@@ -82,9 +86,15 @@ public:
 	//FOV shader 
 	ComponentContainer<FOV> fovs;
 	//Inventory Related
+	ComponentContainer<InventorySlot> inventorySlots;
 	ComponentContainer<InventoryItem> inventoryItems;
+	ComponentContainer<IconSprite> iconSprites;
+	ComponentContainer<ItemCount> itemCounts;
 	ComponentContainer<Inventory> inventories;
 
+	// Power-Up related components
+	ComponentContainer<PowerUp> powerUps;
+	ComponentContainer<Shield> shields;
 	ComponentContainer<Refreshable> refreshables;
 
 	ComponentContainer<PowerUp> powerUps;
@@ -140,6 +150,7 @@ public:
 		registry_list.push_back(&fpsTexts);
 		registry_list.push_back(&buttons);
 		registry_list.push_back(&pressedButtons);
+		registry_list.push_back(&messages);
 
 		// portal
 		registry_list.push_back(&portals);
@@ -162,11 +173,14 @@ public:
 		// background
 		registry_list.push_back(&backgrounds);
 
-		//FOV
+		// FOV
 		registry_list.push_back(&fovs);
 
 		// Inventory
+		registry_list.push_back(&inventorySlots);
 		registry_list.push_back(&inventoryItems);
+		registry_list.push_back(&iconSprites);
+		registry_list.push_back(&itemCounts);
 		registry_list.push_back(&inventories);
 
 		// PowerUp
@@ -175,6 +189,10 @@ public:
 		registry_list.push_back(&soldier_init_powerups);
 		registry_list.push_back(&doctor_init_powerups);
 		registry_list.push_back(&hacker_init_powerups);
+
+		registry_list.push_back(&tapes);
+		// Physics
+		registry_list.push_back(&collidables);
 	}
 
 	void clear_all_components() {

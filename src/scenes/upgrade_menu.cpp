@@ -12,6 +12,8 @@ void UpgradeMenu::initialize(RenderSystem* renderer) {
 	ammo_button = createButton(renderer, { 350.f, 150.f }, { 105.f, 30.f }, "Upgrade");
 
 	exit_button = createButton(renderer, { 50.f, window_height_px-50.f }, { 105.f, 30.f }, "Finish");
+
+	renderer->text_renderer.createText("*Upgrade will be applied on new games", { window_width_px - 450.f, window_height_px - 50.f }, 20.f, { 1.f, 1.f, 1.f });
 	refreshUI();
 }
 
@@ -82,9 +84,5 @@ void UpgradeMenu::on_mouse_click(int button, int action, int mod) {
 	(int)button;
 	(int)action;
 	(int)mod;
-}
-
-void UpgradeMenu::draw_fps() {
-	// pass
 }
 

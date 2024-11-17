@@ -7,6 +7,7 @@
 #include <iostream>
 #include "components.hpp"
 #include <chrono> // For timing
+#include "inventory_system.hpp"
 #include "power_up_system.hpp"
 
 const int cell_size = 48;
@@ -301,6 +302,16 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
+			else if (state.map[row][col] == 5) { // Tape 1
+				// change the tape number in different maps or rooms
+				Entity tape1 = createTape(pos, 2);
+				if (state.map_index == 1) {
+					Hint hint;
+					hint.text = "Press E to pick up and play the tape";
+					hint.radius = 200.0f;  // Set the radius for the hint display
+					registry.hints.emplace(tape1, hint);
+				}
+			}
 		}
 	}
 
@@ -345,13 +356,15 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(ammo_text);
 	registry.refreshables.emplace(ammo_text);
 
+	// Refresh inventory display
+	refreshInventoryUI(player);
+	// Draw inventory slots
+	/*createInventorySlots(player);*/
+  
 	// create exp text
 	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), {window_width_px - 175.f, 20.f}, 20.f, {1.f, 1.f, 1.f});
 	registry.UIs.emplace(exp_text);
 	registry.refreshables.emplace(exp_text);
-
-	// refresh inventory
-	refreshInventorySlots(player);
 
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
@@ -519,10 +532,23 @@ void GameScene::initialize(RenderSystem* renderer) {
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
+	//------- Inventory -------//
 
-	// fps entity
-	FPS_entity = Entity();
+	InventorySystem::initializeInventory(player);
 
+	// Load inventory sounds
+	InventorySystem::initializeSounds();
+
+	// Add some items to the player's inventory for testing
+	InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 5);
+	InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 2);
+
+	// Attempt to remove an item
+	InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
+
+	//createInventorySlots(player);
+	//------- Inventory -------//
+  
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	player_hurt_sound = Mix_LoadWAV(audio_path("male-hurt.wav").c_str());
@@ -693,24 +719,6 @@ void GameScene::step(float elapsed_ms) {
 		}
 	}
 
-	// FPS counter
-	if (registry.fps.entities.size() == 0) {
-		registry.fps.emplace(FPS_entity);
-	}
-
-	FPS& fps_counter = registry.fps.get(FPS_entity);
-
-	fps_counter.elapsed_time += elapsed_ms;
-	fps_counter.frame_count++;
-
-	if (fps_counter.elapsed_time >= 1000) {
-		fps_counter.fps = fps_counter.frame_count / (fps_counter.elapsed_time / 1000.f);
-		fps_counter.frame_count = 0;
-		fps_counter.elapsed_time = 0.0;
-	}
-
-	draw_fps();
-
 	// Update HP and ammo
 	refreshUI(player);
 
@@ -730,7 +738,6 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 
-	//std::cout << "FPS: " << fps_counter.fps << std::endl;
 	(RenderSystem*)renderer;
 
 	//if (registry.enemies.size() > 0) {
@@ -924,6 +931,9 @@ void GameScene::destroy() {
 	Mix_FreeChunk(item_pickup_sound);
 	Mix_FreeChunk(reload_sound);
 	Mix_FreeChunk(stab_sound);
+
+	// Clean up inventory sounds
+	InventorySystem::cleanupSounds();
 }
 
 std::string GameScene::get_next_scene() {
@@ -958,15 +968,18 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y += -PLAYER_SPEED;
+				//player_velocity.y += -PLAYER_SPEED;
+				player_movement_state.x = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y += PLAYER_SPEED;
+				//player_velocity.y += PLAYER_SPEED;
+				player_movement_state.y = 1;
 				texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x += -PLAYER_SPEED;
+				//player_velocity.x += -PLAYER_SPEED;
+				player_movement_state.z = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x > 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -983,7 +996,8 @@ void GameScene::on_key(int key, int action, int mod) {
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x += PLAYER_SPEED;
+				//player_velocity.x += PLAYER_SPEED;
+				player_movement_state.w = 1;
 				texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x < 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
@@ -1001,19 +1015,10 @@ void GameScene::on_key(int key, int action, int mod) {
 				isSprinting = true;
 				break;
 			case GLFW_KEY_SPACE:
-				if (!registry.dashTimers.has(player)) {
-					registry.dashTimers.emplace(player, DashTimer{ 200.f });
+				if (!registry.dashTimers.has(player) && !isSprinting) {
+					registry.dashTimers.emplace(player, DashTimer{ 200.f, 1200.f });
 					motion.velocity *= 2.5f;
 				}
-				break;
-			case GLFW_KEY_F:
-				// get the fps entity
-				Entity fps_entity = registry.fps.entities[0];
-				FPS& fps_counter = registry.fps.get(fps_entity);
-				// visialize fps
-				fps_counter.visible = !fps_counter.visible;
-				printf("FPS counter visibility: %d\n", fps_counter.visible);
-				printf("FPS: %f\n", fps_counter.fps);
 				break;
 			}
 
@@ -1021,16 +1026,20 @@ void GameScene::on_key(int key, int action, int mod) {
 		else if (action == GLFW_RELEASE) {
 			switch (key) {
 			case GLFW_KEY_W:
-				player_velocity.y -= -PLAYER_SPEED;
+				player_movement_state.x = 0;
+				//player_velocity.y -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_S:
-				player_velocity.y -= PLAYER_SPEED;
+				player_movement_state.y = 0;
+				//player_velocity.y -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_A:
-				player_velocity.x -= -PLAYER_SPEED;
+				player_movement_state.z = 0;
+				//player_velocity.x -= -PLAYER_SPEED;
 				break;
 			case GLFW_KEY_D:
-				player_velocity.x -= PLAYER_SPEED;
+				player_movement_state.w = 0;
+				//player_velocity.x -= PLAYER_SPEED;
 				break;
 			case GLFW_KEY_LEFT_SHIFT:
 				isSprinting = false;
@@ -1038,6 +1047,8 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 
 		}
+		vec2 dir = { player_movement_state.w - player_movement_state.z, player_movement_state.y - player_movement_state.x };
+		player_velocity = dir * PLAYER_SPEED;
 		motion.velocity = player_velocity;
 
 		// Apply sprint effect if active
@@ -1156,7 +1167,6 @@ void GameScene::on_key(int key, int action, int mod) {
 				// stop the audio on the tape channel
 				Mix_HaltChannel(tape_channel);
 				std::vector<std::string> subtitles;
-
 				// Play the recording based on the tape number
 				switch (tape.tape_num)
 				{
@@ -1237,7 +1247,6 @@ void GameScene::on_key(int key, int action, int mod) {
 					};
 					// add recording here
 					Mix_PlayChannel(tape_channel, tape6_recording, 0);
-
 				default:
 					break;
 				}
@@ -1263,25 +1272,34 @@ void GameScene::on_key(int key, int action, int mod) {
 	
 	// Handle inventory slot usage with '1' '2' '3' '4'
 	if (action == GLFW_PRESS) {
-		if (key >= GLFW_KEY_1 && key <= GLFW_KEY_4) {
-			int slot_index = key - GLFW_KEY_1;
-			Entity player = registry.players.entities[0];
-			Inventory& inventory = registry.inventories.get(player);
+        // Handle inventory slot usage with keys 1, 2, 3, 4
+        if (key >= GLFW_KEY_1 && key <= GLFW_KEY_4) {
+            int slot_index = key - GLFW_KEY_1;
+            InventorySystem::consumeItem(player, slot_index);
+        }
+    }
 
-			if (slot_index < inventory.items.size() && inventory.items[slot_index].count > 0) {
-				// Check item type and consume it
-				if (inventory.items[slot_index].type == InventoryItem::Type::AmmoPack) {
-					Player& player_component = registry.players.get(player);
-					player_component.ammo += 10; // Increase ammo count
-					inventory.items[slot_index].count--;
+	// Remove later, this is shield powerup testing
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_5:
+			// Give the player a shield when the '5' key is pressed
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
 
-					// Play sound effect for item usage
-					Mix_PlayChannel(-1, item_pickup_sound, 0);
-				}
+				// Apply a shield power-up to the player with 1 charge
+				PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, 1);
+
+				// Debug: Print confirmation of shield granted
+				std::cout << "[DEBUG] Shield power-up applied using key '5'!" << std::endl;
 			}
+			break;
+
+			// Handle other keys here...
+		default:
+			break;
 		}
 	}
-
 
 	if (action == GLFW_PRESS) {
 		switch (key) {
@@ -1403,15 +1421,6 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	player.profession = profession;
 
 
-	// Initialize player's inventory
-	Inventory& inventory = registry.inventories.emplace(entity);
-	inventory.items.resize(4); // 4 slots, all empty initially
-
-	// Add an initial ammo pack to slot 1 for testing
-	inventory.items[0] = { InventoryItem::Type::AmmoPack, 3 };
-
-
-
 	// Add the Health component to the player entity with initial health of 100
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 100;
@@ -1441,14 +1450,14 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	// 		  GEOMETRY_BUFFER_ID::SPRITE });
 	// }
 
-if (debugging.in_debug_mode) { 		
-    registry.renderRequests.insert( 			
-        entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::MESHED, 			  
-          GEOMETRY_BUFFER_ID::PLAYER }
-    ); 	
-} else { 		
+	if (debugging.in_debug_mode) { 		
+		registry.renderRequests.insert( 			
+			entity, 			
+			{ TEXTURE_ASSET_ID::PLAYER_1, 			  
+			  EFFECT_ASSET_ID::MESHED, 			  
+			  GEOMETRY_BUFFER_ID::PLAYER }
+		); 	
+	} else { 		
     // Player entity gets the textured effect
     registry.renderRequests.insert( 			
         entity, 			
@@ -1463,16 +1472,19 @@ if (debugging.in_debug_mode) {
     fov_motion = registry.motions.get(entity); // Copy player's motion
     
     // Add the FOV render request to the new entity
-    /*registry.renderRequests.insert( 			
-        fov_entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::FOV2, 			  
-          GEOMETRY_BUFFER_ID::SPRITE }
-    ); 	*/
+    //registry.renderRequests.insert( 			
+    //    fov_entity, 			
+    //    { TEXTURE_ASSET_ID::PLAYER_1, 			  
+    //      EFFECT_ASSET_ID::FOV2, 			  
+    //      GEOMETRY_BUFFER_ID::SPRITE }
+    //); 	
 }
 
 	// Attach a gun to the player entity
 	createGun(entity);
+
+	// Enable collision
+	registry.collidables.emplace(entity);
 
 	return entity;
 }
@@ -1803,6 +1815,9 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 	enemy.health_bar_entity = hp_bar;
 
+	// Enable collision
+	registry.collidables.emplace(entity);
+
 	return entity;
 }
 
@@ -1833,7 +1848,7 @@ void GameScene::handle_collisions() {
 						continue;
 					}
 					registry.damageCoolDowns.emplace(entity);
-					
+
 					player.health -= enemy.damage;
 
 					if (player.health > 0) {
@@ -2064,6 +2079,9 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	vec2 max = motion.position + (motion.scale / 2.0f);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
+	// Enable collision
+	registry.collidables.emplace(entity);
+
 	if (debugging.in_debug_mode) {
 		registry.renderRequests.insert(
 			entity,
@@ -2217,25 +2235,6 @@ void GameScene::on_mouse_click(int button, int action, int mod) {
 	(RenderSystem*)renderer;
 }
 
-void GameScene::draw_fps() {
-	RenderSystem* renderer = this->renderer;
-	if (registry.fpsTexts.entities.size() > 0) {
-		registry.remove_all_components_of(registry.fpsTexts.entities.back());
-	}
-	Entity fps_entity = registry.fps.entities[0];
-	FPS& fps_counter = registry.fps.get(fps_entity);
-	if (fps_counter.visible) {
-		std::string fps_string = "FPS: " + std::to_string(static_cast<int> (fps_counter.fps));
-
-		// Update the text content
-		//fps_text.content = fps_string;
-		vec2 fps_position = vec2(10.f, 10.f);
-		Entity text = renderer->text_renderer.createText(fps_string, fps_position, 20.f, { 0.f, 1.f, 0.f });
-		registry.fpsTexts.emplace(text);
-		//registry.cameraTexts.emplace(text);
-	}
-}
-
 
 // void GameScene::drawHealthBars(RenderSystem* renderer) {
 
@@ -2283,58 +2282,65 @@ void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& 
 }
 
 // TODO: Reloading logic
+void GameScene::refreshInventoryUI(Entity player) {
+	// Clear all existing UI elements related to the inventory
+	while (registry.inventorySlots.entities.size() > 0) {
+		registry.remove_all_components_of(registry.inventorySlots.entities.back());
+	}
 
-
-
-// Inventory creation
-void GameScene::createInventorySlots(Entity player) {
 	Inventory& inventory = registry.inventories.get(player);
 
+	// Configuration for slot positions
 	float slot_size = 48.f;
 	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - 2* slot_size;
-	float y_offset = 50.f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size + spacing)) / 2.0f;
+	float y_offset = 30.f; // Position at the top of the screen
 
+	// Loop through each inventory slot and recreate it
 	for (int i = 0; i < inventory.max_slots; ++i) {
 		float x_position = x_offset + i * (slot_size + spacing);
 		vec2 position = { x_position, y_offset };
 
 		// Create a slot entity
 		Entity slot = Entity();
-		Motion& motion = registry.motions.emplace(slot);
-		motion.position = position;
-		motion.scale = { slot_size, slot_size };
+		Motion& slot_motion = registry.motions.emplace(slot);
+		slot_motion.position = position;
+		slot_motion.scale = { slot_size, slot_size };
 		registry.UIs.emplace(slot);
 		registry.colors.insert(slot, { 1, 0, 0 });
 
-		// Render slot background
+		// Render the slot background
 		registry.renderRequests.insert(slot, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::BOX,
 			GEOMETRY_BUFFER_ID::DEBUG_LINE
 			});
 
-		// Render item icon if slot is not empty
-		if (inventory.items[i].count > 0) {
-			// Create a new icon entity for the item
+		// Check if there's an item in this slot
+		if (i < inventory.items.size() && inventory.items[i].type != InventoryItem::Type::None) {
+			InventoryItem& item = inventory.items[i];
+
+			// Create the icon for the item
 			Entity icon = Entity();
-
-			// Add a Motion component for position and scale
 			Motion& icon_motion = registry.motions.emplace(icon);
-			icon_motion.position = position; // Use screen position, not world position
+			icon_motion.position = position;
 			icon_motion.scale = { slot_size - 10, slot_size - 10 };
-
-			// Mark this entity as a UI element so it renders on the UI layer
 			registry.UIs.emplace(icon);
 
-			// Render the icon with the appropriate texture
+			// Select the texture based on the item type
+			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
+				TEXTURE_ASSET_ID::CHEST_CLOSED : TEXTURE_ASSET_ID::CHEST_OPENED;
+
 			registry.renderRequests.insert(icon, {
-				TEXTURE_ASSET_ID::CHEST_CLOSED,
+				item_texture,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE
 				});
 
 			// Display the item count as text
+			std::string count_text = std::to_string(item.count);
+			Entity text_entity = renderer->text_renderer.createText(count_text, position + vec2(10, -15), 20.f, { 1.f, 1.f, 1.f });
+			registry.UIs.emplace(text_entity);
 			//std::string count_text = std::to_string(inventory.items[i].count);
 			//renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
 		}
@@ -2381,3 +2387,5 @@ void GameScene::refreshInventorySlots(Entity player) {
 		}
 	}
 }
+
+

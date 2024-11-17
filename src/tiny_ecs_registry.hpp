@@ -87,6 +87,11 @@ public:
 
 	ComponentContainer<Refreshable> refreshables;
 
+	ComponentContainer<PowerUp> powerUps;
+	ComponentContainer<Shield> shields;
+	ComponentContainer<Soldier_init_powerup> soldier_init_powerups;
+	ComponentContainer<Doctor_init_powerup> doctor_init_powerups;
+	ComponentContainer<Hacker_init_powerup> hacker_init_powerups;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -163,6 +168,13 @@ public:
 		// Inventory
 		registry_list.push_back(&inventoryItems);
 		registry_list.push_back(&inventories);
+
+		// PowerUp
+		registry_list.push_back(&powerUps);
+		registry_list.push_back(&shields);
+		registry_list.push_back(&soldier_init_powerups);
+		registry_list.push_back(&doctor_init_powerups);
+		registry_list.push_back(&hacker_init_powerups);
 	}
 
 	void clear_all_components() {

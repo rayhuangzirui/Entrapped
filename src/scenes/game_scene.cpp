@@ -7,6 +7,7 @@
 #include <iostream>
 #include "components.hpp"
 #include <chrono> // For timing
+#include "power_up_system.hpp"
 
 const int cell_size = 48;
 
@@ -447,6 +448,21 @@ void GameScene::initialize(RenderSystem* renderer) {
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
 
+	// initialize player's powerup by the profession
+	if (selected_profession == "Soldier") {
+		// dealt in handle_collision
+		// increase dash cool down
+		PowerUpSystem::applyPowerUp(player, PowerUpType::Soldier_init_powerup, 0);
+	}
+	else if (selected_profession == "Doctor") {
+		// slowly heal over time
+		PowerUpSystem::applyPowerUp(player, PowerUpType::Doctor_init_powerup, 0);
+	}
+	else if (selected_profession == "Hacker") {
+		// Ability to craft ammo, collect materials by killing enemy, increase 3 ammo per enemy killed
+		PowerUpSystem::applyPowerUp(player, PowerUpType::Hacker_init_powerup, 0);
+	}
+
 	// change the tape number and position in different maps or rooms
 	Entity tape1 = createTape(vec2{ 300, 200 }, 1);
 	Hint hint1;
@@ -502,6 +518,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+
 
 	// fps entity
 	FPS_entity = Entity();
@@ -663,6 +680,17 @@ void GameScene::step(float elapsed_ms) {
 			registry.damageCoolDowns.remove(entity);
 		}
 
+	}
+
+	if (selected_profession == "Doctor") {
+		Player& player_component = registry.players.get(player);
+		if (player_component.health < player_component.max_health) {
+			player_component.heal_timer -= elapsed_ms;
+			if (player_component.heal_timer <= 0) {
+				player_component.health += 1;
+				player_component.heal_timer = 5000;
+			}
+		}
 	}
 
 	// FPS counter
@@ -1799,7 +1827,13 @@ void GameScene::handle_collisions() {
 				//printf("Player health: %d\n", player.health);
 
 				if (!registry.damageCoolDowns.has(entity) && !registry.deathTimers.has(entity)) {
+					// soldier power up: invincible when dashing
+					if (selected_profession == "Soldier" && registry.dashTimers.has(entity)) {
+						// skip the damage
+						continue;
+					}
 					registry.damageCoolDowns.emplace(entity);
+					
 					player.health -= enemy.damage;
 
 					if (player.health > 0) {
@@ -2085,6 +2119,15 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			Mix_PlayChannel(-1, monster_hurt_sound, 0);
 
 			std::cout << "Enemy is dead!" << std::endl;
+
+			// increase the player's ammo when enemy is killed
+			if (selected_profession == "Hacker") {
+				Player& player = registry.players.get(registry.players.entities[0]);
+				std::cout << "Player ammo: " << player.ammo << std::endl;
+				player.ammo += player.ammo_per_kill;
+				std::cout << "Player ammo increased to: " << player.ammo << std::endl;
+			}
+			
 		}
 	}
 }

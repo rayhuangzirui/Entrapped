@@ -1,4 +1,4 @@
-#include "game_scene.hpp"
+﻿#include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "maze.hpp" // Access box_testing_environment
 #include "state_manager.hpp"
@@ -6,10 +6,110 @@
 #include "render_system.hpp"
 #include <iostream>
 #include "components.hpp"
+#include <chrono> // For timing
 #include "inventory_system.hpp"
 #include "power_up_system.hpp"
 
 const int cell_size = 48;
+
+
+struct AnimatedText {
+	std::vector<std::string> sentences; 
+	size_t current_sentence = 0;       
+	size_t current_char = 0;           
+	float timer = 0.f;
+	float interval = 0.05f;
+	float sentence_delay = 1.2f;
+	float delay_timer = 0.f;
+	bool is_done = false;
+};
+
+AnimatedText animatedText;
+
+// Initialize animated text when tape is picked up
+void GameScene::startTextAnimation(std::vector<std::string> text, int tape_num) {
+	animatedText.sentences = text;
+	animatedText.current_sentence = 0;
+	animatedText.current_char = 0;
+	animatedText.timer = 0.f;
+	animatedText.delay_timer = 0.f;
+	animatedText.is_done = false;
+
+	if (tape_num == 2) {
+		animatedText.sentence_delay = 1.2f;
+		animatedText.interval = 0.045f;
+	}
+	else if (tape_num == 3) {
+		animatedText.sentence_delay = 1.4f;
+		animatedText.interval = 0.05f;
+	}
+	else if (tape_num == 6) {
+		animatedText.sentence_delay = 1.4f;
+		animatedText.interval = 0.05f;
+	}
+	else if (tape_num == 4) {
+		animatedText.sentence_delay = 1.5f;
+		animatedText.interval = 0.055f;
+	}
+	else if (tape_num == 5) {
+		animatedText.sentence_delay = 1.0f;
+		animatedText.interval = 0.043f;
+	}
+	else {
+		animatedText.sentence_delay = 1.2f;
+		animatedText.interval = 0.05f;
+
+	}
+}
+
+void GameScene::updateTextAnimation(float elapsed_ms) {
+	if (animatedText.is_done || animatedText.sentences.empty()) return;
+
+	animatedText.timer += elapsed_ms / 1000.f;
+
+	// Handle delay between sentences
+	if (animatedText.current_char == animatedText.sentences[animatedText.current_sentence].size()) {
+		animatedText.delay_timer += elapsed_ms / 1000.f;
+
+		if (animatedText.delay_timer >= animatedText.sentence_delay) {
+			animatedText.delay_timer = 0.f;
+			animatedText.current_char = 0; 
+			animatedText.current_sentence++;
+
+			// If all sentences are displayed, mark as done
+			if (animatedText.current_sentence >= animatedText.sentences.size()) {
+				animatedText.is_done = true;
+			}
+		}
+		return;
+	}
+
+	if (animatedText.timer >= animatedText.interval) {
+		animatedText.timer = 0.f; // Reset timer
+		animatedText.current_char++;
+	}
+}
+
+void GameScene::renderAnimatedText(RenderSystem* renderer) {
+	if (animatedText.is_done || animatedText.sentences.empty()) return;
+
+	std::string text_to_display = animatedText.sentences[animatedText.current_sentence].substr(0, animatedText.current_char);
+
+	// Adjust left margin depending on the text length, if text is too short, keep it centered
+	float left_offset = 0.f;
+	if (animatedText.sentences[animatedText.current_sentence].size() < 55) {
+		left_offset = window_width_px / 2.f - 220.f;
+	}
+	else {
+		left_offset = 300.f; 
+	}
+	vec2 position = { left_offset, 720 - 50.f }; 
+
+	Entity subtitle = renderer->text_renderer.createText(text_to_display, position, 20.f, { 1.f, 1.f, 1.f });
+	registry.subtitles.emplace(subtitle);
+}
+
+
 
 // Debug Component
 Entity createRing(vec2 position, vec2 scale)
@@ -360,6 +460,59 @@ void GameScene::initialize(RenderSystem* renderer) {
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
+
+	// initialize player's powerup by the profession
+	if (selected_profession == "Soldier") {
+		// dealt in handle_collision
+		// increase dash cool down
+		PowerUpSystem::applyPowerUp(player, PowerUpType::Soldier_init_powerup, 0);
+	}
+	else if (selected_profession == "Doctor") {
+		// slowly heal over time
+		PowerUpSystem::applyPowerUp(player, PowerUpType::Doctor_init_powerup, 0);
+	}
+	else if (selected_profession == "Hacker") {
+		// Ability to craft ammo, collect materials by killing enemy, increase 3 ammo per enemy killed
+		PowerUpSystem::applyPowerUp(player, PowerUpType::Hacker_init_powerup, 0);
+	}
+
+	// change the tape number and position in different maps or rooms
+	Entity tape1 = createTape(vec2{ 300, 200 }, 1);
+	Hint hint1;
+	hint1.text = "Press E to pick up and play the tape";
+	hint1.radius = 200.0f;  // Set the radius for the hint display
+	registry.hints.emplace(tape1, hint1);
+
+	Entity tape2 = createTape(vec2{ 1000, 200 }, 2);
+	Hint hint2;
+	hint2.text = "Press E to pick up and play the tape";
+	hint2.radius = 200.0f;  // Set the radius for the hint display
+	registry.hints.emplace(tape2, hint2);
+
+	Entity tape3 = createTape(vec2{ 1800, 200 }, 3);
+	Hint hint3;
+	hint3.text = "Press E to pick up and play the tape";
+	hint3.radius = 200.0f;  // Set the radius for the hint display
+	registry.hints.emplace(tape3, hint3);
+
+	Entity tape4 = createTape(vec2{ 300, 400 }, 4);
+	Hint hint4;
+	hint4.text = "Press E to pick up and play the tape";
+	hint4.radius = 200.0f;  // Set the radius for the hint display
+	registry.hints.emplace(tape4, hint4);
+
+	Entity tape5 = createTape(vec2{ 1000, 400 }, 5);
+	Hint hint5;
+	hint5.text = "Press E to pick up and play the tape";
+	hint5.radius = 200.0f;  // Set the radius for the hint display
+	registry.hints.emplace(tape5, hint5);
+
+	Entity tape6 = createTape(vec2{ 1800, 400 }, 6);
+	Hint hint6;
+	hint6.text = "Press E to pick up and play the tape";
+	hint6.radius = 200.0f;  // Set the radius for the hint display
+	registry.hints.emplace(tape6, hint6);
+	
 	// apply upgrade effect
 	if (state.map_index == 0) { // first level
 		Player& player_component = registry.players.get(player);
@@ -408,6 +561,13 @@ void GameScene::initialize(RenderSystem* renderer) {
 	item_pickup_sound = Mix_LoadWAV(audio_path("item-pickup.wav").c_str());
 	reload_sound = Mix_LoadWAV(audio_path("reload.wav").c_str());
 	stab_sound = Mix_LoadWAV(audio_path("stab.wav").c_str());
+	tape1_recording = Mix_LoadWAV(audio_path("Dr_Wang_tape1.wav").c_str());
+	tape2_recording = Mix_LoadWAV(audio_path("Security_Officer_Ali_tape2.wav").c_str());
+	tape3_recording = Mix_LoadWAV(audio_path("Gene_expert_tape3.wav").c_str());
+	tape4_recording = Mix_LoadWAV(audio_path("Engineer_Xu_tape4.wav").c_str());
+	tape5_recording = Mix_LoadWAV(audio_path("Commander_Blake_tape5.wav").c_str());
+	tape6_recording = Mix_LoadWAV(audio_path("We_failed_tape6.wav").c_str());
+
 
 	if (background_music == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
@@ -438,6 +598,10 @@ void GameScene::step(float elapsed_ms) {
 	// remove all debug component
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
+
+	// remove all text component
+	while (registry.subtitles.entities.size() > 0)
+		registry.remove_all_components_of(registry.subtitles.entities.back());
 
 	updateHints(player);
 
@@ -542,6 +706,17 @@ void GameScene::step(float elapsed_ms) {
 			registry.damageCoolDowns.remove(entity);
 		}
 
+	}
+
+	if (selected_profession == "Doctor") {
+		Player& player_component = registry.players.get(player);
+		if (player_component.health < player_component.max_health) {
+			player_component.heal_timer -= elapsed_ms;
+			if (player_component.heal_timer <= 0) {
+				player_component.health += 1;
+				player_component.heal_timer = 5000;
+			}
+		}
 	}
 
 	// Update HP and ammo
@@ -722,6 +897,13 @@ void GameScene::step(float elapsed_ms) {
 		auto& texture = registry.renderRequests.get(player);
 		texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
 	}
+
+
+	// update text animation
+	updateTextAnimation(elapsed_ms);
+	
+	renderAnimatedText(renderer);
+
 }
 
 void GameScene::restart_game() {
@@ -757,6 +939,8 @@ void GameScene::destroy() {
 std::string GameScene::get_next_scene() {
 	return this->next_scene;
 }
+
+int tape_channel = 1;
 
 void GameScene::on_key(int key, int action, int mod) {
 	static int frame = 0;
@@ -979,118 +1163,98 @@ void GameScene::on_key(int key, int action, int mod) {
 			Motion& player_motion = registry.motions.get(player);
 			Player& player_component = registry.players.get(player);
 
-			if (distance(motion.position, player_motion.position) < 200.f && !tape.is_played) {
-				std::string subtitle1;
-				std::string subtitle2;
-				std::string subtitle3;
-				std::string subtitle4;
-				std::string subtitle5;
-				std::string subtitle6;
+			if (distance(motion.position, player_motion.position) < 100.f && !tape.is_played) {
+				// stop the audio on the tape channel
+				Mix_HaltChannel(tape_channel);
+				std::vector<std::string> subtitles;
 				// Play the recording based on the tape number
 				switch (tape.tape_num)
 				{
 				case 1:
-					subtitle1 = "This is Dr.Wang, lead biologist from the second Mars settlement crew... ";
-					subtitle2 = "or at least that is what I thought. If you are hearing this, ";
-					subtitle3 = "something is gone horribly wrong. I do not know how long I have been unconscious, ";
-					subtitle4 = "but... I woke up alone. The others... they are missing.";
-					subtitle5 = "If you are awake too, you need to get out of here. Something is... off.";
-					subtitle6 = "This place... it is not what we were told.";
-					// add recording here
-					//Mix_PlayChannel(-1, tape1_recording, 0);
-					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
-
-					break;
-				case 2:
-					subtitle1 = "Security Officer Ali, reporting. I do not have much time...";
-					subtitle2 = "This is not Mars. I do not know where the hell we are, but it is not Mars.";
-					subtitle3 = "The... creatures. They look like... us. I shot one down, and... it... ";
-					subtitle4 = "it screamed like a human. God, what have they done to us? Dr.Smack... ";
-					subtitle5 = "he lied to us. This whole mission... was a setup. If you are still alive...";
-					subtitle6 = "don¡¯t trust anything you see.";
-					// add recording here
-					//Mix_PlayChannel(-1, tape2_recording, 0);
-					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
-					break;
-				case 3:
-					subtitle1 = "This is Dr. , geneticist. I found... logs, data... things I wasn¡¯t meant to see.";
-					subtitle2 = "Dr. Smack... he¡¯s not human. None of them are. They¡¯ve been using us... experimenting on us... ";
-					subtitle3 = "I don¡¯t know what they want, but they¡¯re... breeding something. ";
-					subtitle4 = "I tried to warn the others, but... they took them. If you find this...";
-					subtitle5 = "please, get out while you can. Don¡¯t end up like the rest of us.";
-					// add recording here
-					//Mix_PlayChannel(-1, tape3_recording, 0);
-					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					subtitles = {
+						"This is Dr. Wang, lead biologist from the second Mars settlement crew...",
+						"or at least that's what I thought.",
+						"If you are hearing this, something's gone horribly wrong. ",
+						"I don't know how long I have been unconscious, but... I woke up alone.",
+						"The others... they're missing.",
+						"If you are awake too, you need to get out of here.",
+						"Something's... off. This place... it's not what we were told.",
+					};
+					Mix_PlayChannel(tape_channel, tape1_recording, 0);
 					
 					break;
+				case 2:
+					subtitles = {
+						"Security Officer Ali, reporting. I don't have much time...",
+						"This isn't Mars. I don't know where the hell we are, but it's not Mars.",
+						"The... creatures. They look like... us. ",
+						"I shot one down, and... it... it screamed like a human. God, what have they done to us? ",
+						"Dr.Smack... he lied to us. This whole mission... was a setup. ",
+						"If you're still alive... don't trust anything you see."
+					};
+					Mix_PlayChannel(tape_channel, tape2_recording, 0);
+					break;
+				case 3:
+					subtitles = {
+						"This is Dr. Bell, geneticist. I found... logs, data... things I wasn't meant to see.",
+						"Dr. Smack... he's not human. None of them are. ",
+						"They've been using us... experimenting on us... ",
+						"I don't know what they want, but they're... breeding something. ",
+						"I tried to warn the others, but... they took them. If you find this...",
+						"please, get out while you can. Don't end up like the rest of us."
+					};
+					Mix_PlayChannel(tape_channel, tape3_recording, 0);
+					break;
 				case 4:
-					subtitle1 = "Engineer Xu here. I managed to hack into the mainframe.";
-					subtitle2 = "It¡¯s all here. Mars... the whole program... it¡¯s a lie. ";
-					subtitle3 = "We were never on Mars. This place... it¡¯s a lab designed to study us, ";
-					subtitle4 = "to... harvest us. Dr. Smack and his team... they¡¯re Martians. ";
-					subtitle5 = "They need our DNA to save their dying race. It¡¯s... it¡¯s all about survival for them.";
-					subtitle6 = "They lured the best of us here to breed a new hybrid species.If you¡¯re still alive... find a way to destroy this place.";
+					Mix_PlayChannel(tape_channel, tape4_recording, 0);
+					subtitles = {
+						"Engineer Xu here. I managed to hack into the mainframe. ",
+						
+						"It's all here. Mars... the whole program... it's a lie. ",
+						"We were never on Mars. ",
+						"This place... it's a lab designed to study us,",
+						"to... harvest us. Dr. Smack and his team... they're Martians. ",
+						"They need our DNA to save their dying race. ",
+						"It's... it's all about survival for them.",
+						"They lured the best of us here breed a new hybrid species. ",
+						"If you're still alive... find a way to destroy this place."
+					};
+					break;
+				case 5:
+					subtitles = {
+						"This is Commander Blake. This message is my last stand.",
+						"They're using our bodies, our DNA...to create some...abomination.",
+						"We were never meant to return to Earth.",
+						"This whole facility...it's a breeding ground.",
+						"I've set the facility to self-destruct.",
+						"If you're hearing this, you still have a chance.",
+						"Get to the control room, stop the countdown, or... use it to destroy everything here.",
+						" It's your call...but whatever you do... don't let them win.",
+					};
 					// add recording here
-					//Mix_PlayChannel(-1, tape4_recording, 0);
-					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
+					Mix_PlayChannel(tape_channel, tape5_recording, 0);
 
 					break;
-				case 5: 
-					subtitle1 = "This is Commander Blake. This message is my last stand.";
-					subtitle2 = "They¡¯re using our bodies, our DNA... to create some... abomination. ";
-					subtitle3 = "We were never meant to return to Earth. This whole facility... it¡¯s a breeding ground. ";
-					subtitle4 = "I¡¯ve set the facility to self-destruct. If you¡¯re hearing this, you still have a chance.";
-					subtitle5 = "Get to the control room, stop the countdown, or... use it to destroy everything here.";
-					subtitle6 = " It¡¯s your call... but whatever you do... don¡¯t let them win.";
-					// add recording here
-					//Mix_PlayChannel(-1, tape5_recording, 0);
-					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
-					break;
 				case 6:
-					subtitle1 = "To whoever finds this... I hope you¡¯ve made it this far.";
-					subtitle2 = "We failed, but you... you can still escape. The Martians are desperate... ";
-					subtitle3 = "they¡¯ll stop at nothing to survive. But if you destroy this facility... ";
-					subtitle4 = "you might be able to stop them... for good. Whatever happens...";
-					subtitle5 = "don¡¯t forget us. Don¡¯t let them do this... to anyone else.";
+					subtitles = {
+						"To whoever finds this... ",
+						"I hope you've made it this far.",
+						"We failed, but you... you can still escape.",
+						"The Martians are desperate...",
+						"they'll do anything to survive. ",
+						"But if you destroy this facility... you might be able to stop them... for good. ",
+						" Whatever happens...don't forget us. Don't let them do this... to anyone else."
+					};
 					// add recording here
-					//Mix_PlayChannel(-1, tape6_recording, 0);
-					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle2, { 100.f, 720 - 180.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle3, { 100.f, 720 - 160.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle4, { 100.f, 720 - 140.f }, 20.f, { 1.f, 1.f, 1.f });
-					renderer->text_renderer.createText(subtitle5, { 100.f, 720 - 120.f }, 20.f, { 1.f, 1.f, 1.f });
+					Mix_PlayChannel(tape_channel, tape6_recording, 0);
 				default:
 					break;
 				}
 
+				startTextAnimation(subtitles, tape.tape_num);
+
 				tape.is_played = true;
 
-				// remove tape from the map
-				
 				if (registry.hints.has(entity)) {
 					Hint& hint = registry.hints.get(entity);
 					if (hint.is_visible) {
@@ -1099,7 +1263,9 @@ void GameScene::on_key(int key, int action, int mod) {
 					}
 					registry.hints.remove(entity);
 				}
+				// remove tape from the map
 				registry.remove_all_components_of(entity);
+
 			}
 		}
 	}
@@ -1676,30 +1842,12 @@ void GameScene::handle_collisions() {
 				//printf("Player health: %d\n", player.health);
 
 				if (!registry.damageCoolDowns.has(entity) && !registry.deathTimers.has(entity)) {
-					registry.damageCoolDowns.emplace(entity);
-
-					// Check if the player has shields
-					if (registry.shields.has(entity)) {
-						Shield& shield = registry.shields.get(entity);
-
-						// If the player has shield charges, block the damage and reduce the shield count
-						if (shield.charges > 0) {
-							shield.charges -= 1; // Use one shield charge
-							std::cout << "Shield absorbed the damage! Remaining shields: " << shield.charges << std::endl;
-
-							// Remove the shield component if all charges are used up
-							if (shield.charges == 0) {
-								registry.shields.remove(entity);
-								std::cout << "All shield charges used up!" << std::endl;
-							}
-
-							// Play shield block sound effect (optional)
-							Mix_PlayChannel(-1, health_pickup_sound, 0);
-
-							// Skip reducing health if shield absorbed the damage
-							continue;
-						}
+					// soldier power up: invincible when dashing
+					if (selected_profession == "Soldier" && registry.dashTimers.has(entity)) {
+						// skip the damage
+						continue;
 					}
+					registry.damageCoolDowns.emplace(entity);
 
 					player.health -= enemy.damage;
 
@@ -1858,6 +2006,10 @@ void GameScene::changeMap(std::string map_name) {
 	// also remove portals
 	while (registry.portals.entities.size() > 0)
 		registry.remove_all_components_of(registry.portals.entities.back());
+
+	// remove all tapes
+	while (registry.tapes.entities.size() > 0)
+		registry.remove_all_components_of(registry.tapes.entities.back());
 	
 	// spawn player
 	Entity& player_entity = registry.players.entities[0];
@@ -1985,6 +2137,15 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			Mix_PlayChannel(-1, monster_hurt_sound, 0);
 
 			std::cout << "Enemy is dead!" << std::endl;
+
+			// increase the player's ammo when enemy is killed
+			if (selected_profession == "Hacker") {
+				Player& player = registry.players.get(registry.players.entities[0]);
+				std::cout << "Player ammo: " << player.ammo << std::endl;
+				player.ammo += player.ammo_per_kill;
+				std::cout << "Player ammo increased to: " << player.ammo << std::endl;
+			}
+			
 		}
 	}
 }

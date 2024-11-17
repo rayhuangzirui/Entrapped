@@ -27,6 +27,25 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
                 << shield.charges << std::endl;
         }
     }
+    else if (type == PowerUpType::Soldier_init_powerup) {
+		// soldier init powerup:
+        // soldier has an invincible frame when dashing towards enemy (in game_scene)
+		// but the soldier has a longer dash cooldown
+		
+		//DashCoolDown& dashCoolDown = registry.dashCoolDowns.get(player);
+		//dashCoolDown.cooldown = 5000; //ms
+    }
+    else if (type == PowerUpType::Doctor_init_powerup) {
+		// heal 1 health point every 5 seconds
+		Player& player_component = registry.players.get(player);
+		// set the heal timer
+		player_component.heal_timer = 5000.f;
+	}
+	else if (type == PowerUpType::Hacker_init_powerup) {
+        // increase 3 ammo per enemy killed
+		Player& player_component = registry.players.get(player);
+		player_component.ammo_per_kill = 3;
+    }
 }
 
 

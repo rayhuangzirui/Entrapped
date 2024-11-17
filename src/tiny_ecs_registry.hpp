@@ -21,6 +21,7 @@ public:
 	ComponentContainer<Parent> parents;
 	ComponentContainer<FPS> fps;	
 	ComponentContainer<Tape> tapes;
+	ComponentContainer<Subtitle> subtitles;
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -96,6 +97,12 @@ public:
 	ComponentContainer<Shield> shields;
 	ComponentContainer<Refreshable> refreshables;
 
+	ComponentContainer<PowerUp> powerUps;
+	ComponentContainer<Shield> shields;
+	ComponentContainer<Soldier_init_powerup> soldier_init_powerups;
+	ComponentContainer<Doctor_init_powerup> doctor_init_powerups;
+	ComponentContainer<Hacker_init_powerup> hacker_init_powerups;
+
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
@@ -107,6 +114,8 @@ public:
 		registry_list.push_back(&aiTimers);
 		registry_list.push_back(&guns);
 		registry_list.push_back(&parents);
+		registry_list.push_back(&tapes);
+		registry_list.push_back(&subtitles);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
@@ -174,9 +183,13 @@ public:
 		registry_list.push_back(&itemCounts);
 		registry_list.push_back(&inventories);
 
-		// Power-Up related
+		// PowerUp
 		registry_list.push_back(&powerUps);
 		registry_list.push_back(&shields);
+		registry_list.push_back(&soldier_init_powerups);
+		registry_list.push_back(&doctor_init_powerups);
+		registry_list.push_back(&hacker_init_powerups);
+
 		registry_list.push_back(&tapes);
 		// Physics
 		registry_list.push_back(&collidables);

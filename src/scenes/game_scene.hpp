@@ -43,7 +43,9 @@ private:
 	Entity createBackground();
 
 	Entity createTape(vec2 pos, int tape_num);
-
+	void startTextAnimation(std::vector<std::string> text, int tape_num);
+	void updateTextAnimation(float elapsed_ms);
+	void renderAnimatedText(RenderSystem* renderer);
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
@@ -72,6 +74,13 @@ private:
 	Mix_Chunk* item_pickup_sound;
 	Mix_Chunk* reload_sound;
 	Mix_Chunk* stab_sound;
+	Mix_Chunk* tape1_recording;
+	Mix_Chunk* tape2_recording;
+	Mix_Chunk* tape3_recording;
+	Mix_Chunk* tape4_recording;
+	Mix_Chunk* tape5_recording;
+	Mix_Chunk* tape6_recording;
+	
 	vec2 player_velocity;
 
 	std::string next_scene = "";

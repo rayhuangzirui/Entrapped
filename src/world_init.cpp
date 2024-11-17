@@ -134,8 +134,39 @@ Entity createProfessionLayer(RenderSystem* renderer, vec2 pos, std::string profe
 					GEOMETRY_BUFFER_ID::SPRITE });
 		}
 	}
+	else if (profession == "Doctor") {
+		if (!is_clicked) {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::DOCTOR_PAGE,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+		}
+		else {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::DOCTOR_PAGE_CLICKED,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+		}
+	}
+	else if (profession == "Hacker") {
+		if (!is_clicked) {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::HACKER_PAGE,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
+		}
+		else {
+			registry.renderRequests.insert(
+				entity,
+				{ TEXTURE_ASSET_ID::HACKER_PAGE_CLICKED,
+					EFFECT_ASSET_ID::TEXTURED,
+					GEOMETRY_BUFFER_ID::SPRITE });
 
-
+		}
+	}
 	return entity;
 }
 

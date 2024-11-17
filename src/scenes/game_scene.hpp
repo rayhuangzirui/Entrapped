@@ -86,5 +86,14 @@ private:
 
 	// Create inventory
 	void createInventorySlots(Entity player);
+	void updateInventorySlots(Entity player);
+
+	// Function to initialize the inventory slots (called once during game initialization)
+	void initializeInventorySlots(Entity player);
+	// Function to update the inventory display (called when inventory changes)
+	void updateInventoryDisplay(Entity player);
+
+
+	void refreshInventoryUI(Entity player);
 	void refreshInventorySlots(Entity player);
 };

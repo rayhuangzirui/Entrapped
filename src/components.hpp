@@ -393,17 +393,51 @@ struct FOV {
     
 };
 //-------------------- Inventory system --------------------
+// Inventory item definition
 struct InventoryItem {
-	enum class Type { AmmoPack } type;
-	int count = 0;
+	enum class Type { None, AmmoPack, HealthPotion };
+	Type type = Type::None;
+	int count = 0;     // Number of items (if stackable)
+	int max_count = 10; // Maximum stack size for stackable items
 };
 
+// Inventory structure with items and slots
 struct Inventory {
-	std::vector<InventoryItem> items;
 	int max_slots = 4;
+	std::vector<InventoryItem> items; // List of items in the inventory
+};
+
+// New component to tag entities as inventory slots
+struct InventorySlot {
+	int slot_index;  // The index of this slot in the inventory
+};
+
+// New component to tag entities as item icons (e.g., AmmoPack icon)
+struct IconSprite {};
+
+// New component to tag entities as item count text
+struct ItemCount {
+	Entity text_entity;
 };
 //-------------------- Inventory system --------------------
 
+//-------------------- Power up system --------------------
+enum class PowerUpType {
+	Shield,
+	SpeedBoost, // For future power-ups
+};
+
+// Component for PowerUp entities
+struct PowerUp {
+	PowerUpType type;  // Type of power-up
+	int strength;      // Effect strength (e.g., shield points)
+};
+
+// Component for Shield effect on the player
+struct Shield {
+	int charges; // Number of shield charges
+};
+//-------------------- Power up system --------------------
 
 /**
  * The following enumerators represent global identifiers refering to graphic

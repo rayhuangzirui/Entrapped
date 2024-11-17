@@ -85,11 +85,16 @@ public:
 	//FOV shader 
 	ComponentContainer<FOV> fovs;
 	//Inventory Related
+	ComponentContainer<InventorySlot> inventorySlots;
 	ComponentContainer<InventoryItem> inventoryItems;
+	ComponentContainer<IconSprite> iconSprites;
+	ComponentContainer<ItemCount> itemCounts;
 	ComponentContainer<Inventory> inventories;
 
+	// Power-Up related components
+	ComponentContainer<PowerUp> powerUps;
+	ComponentContainer<Shield> shields;
 	ComponentContainer<Refreshable> refreshables;
-
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -163,9 +168,15 @@ public:
 		registry_list.push_back(&fovs);
 
 		// Inventory
+		registry_list.push_back(&inventorySlots);
 		registry_list.push_back(&inventoryItems);
+		registry_list.push_back(&iconSprites);
+		registry_list.push_back(&itemCounts);
 		registry_list.push_back(&inventories);
 
+		// Power-Up related
+		registry_list.push_back(&powerUps);
+		registry_list.push_back(&shields);
 		registry_list.push_back(&tapes);
 		// Physics
 		registry_list.push_back(&collidables);

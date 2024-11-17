@@ -6,6 +6,8 @@
 #include "render_system.hpp"
 #include <iostream>
 #include "components.hpp"
+#include "inventory_system.hpp"
+#include "power_up_system.hpp"
 
 const int cell_size = 48;
 
@@ -254,13 +256,15 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(ammo_text);
 	registry.refreshables.emplace(ammo_text);
 
+	// Refresh inventory display
+	refreshInventoryUI(player);
+	// Draw inventory slots
+	/*createInventorySlots(player);*/
+  
 	// create exp text
 	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), {window_width_px - 175.f, 20.f}, 20.f, {1.f, 1.f, 1.f});
 	registry.UIs.emplace(exp_text);
 	registry.refreshables.emplace(exp_text);
-
-	// refresh inventory
-	refreshInventorySlots(player);
 
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
@@ -375,6 +379,23 @@ void GameScene::initialize(RenderSystem* renderer) {
 	//enemy = createEnemy({ 700, 300 });
 	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
+	//------- Inventory -------//
+
+	InventorySystem::initializeInventory(player);
+
+	// Load inventory sounds
+	InventorySystem::initializeSounds();
+
+	// Add some items to the player's inventory for testing
+	InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 5);
+	InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 2);
+
+	// Attempt to remove an item
+	InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
+
+	//createInventorySlots(player);
+	//------- Inventory -------//
+  
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
 	player_hurt_sound = Mix_LoadWAV(audio_path("male-hurt.wav").c_str());
@@ -728,6 +749,9 @@ void GameScene::destroy() {
 	Mix_FreeChunk(item_pickup_sound);
 	Mix_FreeChunk(reload_sound);
 	Mix_FreeChunk(stab_sound);
+
+	// Clean up inventory sounds
+	InventorySystem::cleanupSounds();
 }
 
 std::string GameScene::get_next_scene() {
@@ -988,7 +1012,7 @@ void GameScene::on_key(int key, int action, int mod) {
 					subtitle3 = "The... creatures. They look like... us. I shot one down, and... it... ";
 					subtitle4 = "it screamed like a human. God, what have they done to us? Dr.Smack... ";
 					subtitle5 = "he lied to us. This whole mission... was a setup. If you are still alive...";
-					subtitle6 = "don¡¯t trust anything you see.";
+					subtitle6 = "donÂ¡Â¯t trust anything you see.";
 					// add recording here
 					//Mix_PlayChannel(-1, tape2_recording, 0);
 					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
@@ -999,11 +1023,11 @@ void GameScene::on_key(int key, int action, int mod) {
 					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
 					break;
 				case 3:
-					subtitle1 = "This is Dr. , geneticist. I found... logs, data... things I wasn¡¯t meant to see.";
-					subtitle2 = "Dr. Smack... he¡¯s not human. None of them are. They¡¯ve been using us... experimenting on us... ";
-					subtitle3 = "I don¡¯t know what they want, but they¡¯re... breeding something. ";
+					subtitle1 = "This is Dr. , geneticist. I found... logs, data... things I wasnÂ¡Â¯t meant to see.";
+					subtitle2 = "Dr. Smack... heÂ¡Â¯s not human. None of them are. TheyÂ¡Â¯ve been using us... experimenting on us... ";
+					subtitle3 = "I donÂ¡Â¯t know what they want, but theyÂ¡Â¯re... breeding something. ";
 					subtitle4 = "I tried to warn the others, but... they took them. If you find this...";
-					subtitle5 = "please, get out while you can. Don¡¯t end up like the rest of us.";
+					subtitle5 = "please, get out while you can. DonÂ¡Â¯t end up like the rest of us.";
 					// add recording here
 					//Mix_PlayChannel(-1, tape3_recording, 0);
 					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
@@ -1015,11 +1039,11 @@ void GameScene::on_key(int key, int action, int mod) {
 					break;
 				case 4:
 					subtitle1 = "Engineer Xu here. I managed to hack into the mainframe.";
-					subtitle2 = "It¡¯s all here. Mars... the whole program... it¡¯s a lie. ";
-					subtitle3 = "We were never on Mars. This place... it¡¯s a lab designed to study us, ";
-					subtitle4 = "to... harvest us. Dr. Smack and his team... they¡¯re Martians. ";
-					subtitle5 = "They need our DNA to save their dying race. It¡¯s... it¡¯s all about survival for them.";
-					subtitle6 = "They lured the best of us here to breed a new hybrid species.If you¡¯re still alive... find a way to destroy this place.";
+					subtitle2 = "ItÂ¡Â¯s all here. Mars... the whole program... itÂ¡Â¯s a lie. ";
+					subtitle3 = "We were never on Mars. This place... itÂ¡Â¯s a lab designed to study us, ";
+					subtitle4 = "to... harvest us. Dr. Smack and his team... theyÂ¡Â¯re Martians. ";
+					subtitle5 = "They need our DNA to save their dying race. ItÂ¡Â¯s... itÂ¡Â¯s all about survival for them.";
+					subtitle6 = "They lured the best of us here to breed a new hybrid species.If youÂ¡Â¯re still alive... find a way to destroy this place.";
 					// add recording here
 					//Mix_PlayChannel(-1, tape4_recording, 0);
 					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
@@ -1032,11 +1056,11 @@ void GameScene::on_key(int key, int action, int mod) {
 					break;
 				case 5: 
 					subtitle1 = "This is Commander Blake. This message is my last stand.";
-					subtitle2 = "They¡¯re using our bodies, our DNA... to create some... abomination. ";
-					subtitle3 = "We were never meant to return to Earth. This whole facility... it¡¯s a breeding ground. ";
-					subtitle4 = "I¡¯ve set the facility to self-destruct. If you¡¯re hearing this, you still have a chance.";
+					subtitle2 = "TheyÂ¡Â¯re using our bodies, our DNA... to create some... abomination. ";
+					subtitle3 = "We were never meant to return to Earth. This whole facility... itÂ¡Â¯s a breeding ground. ";
+					subtitle4 = "IÂ¡Â¯ve set the facility to self-destruct. If youÂ¡Â¯re hearing this, you still have a chance.";
 					subtitle5 = "Get to the control room, stop the countdown, or... use it to destroy everything here.";
-					subtitle6 = " It¡¯s your call... but whatever you do... don¡¯t let them win.";
+					subtitle6 = " ItÂ¡Â¯s your call... but whatever you do... donÂ¡Â¯t let them win.";
 					// add recording here
 					//Mix_PlayChannel(-1, tape5_recording, 0);
 					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
@@ -1047,11 +1071,11 @@ void GameScene::on_key(int key, int action, int mod) {
 					renderer->text_renderer.createText(subtitle6, { 100.f, 720 - 100.f }, 20.f, { 1.f, 1.f, 1.f });
 					break;
 				case 6:
-					subtitle1 = "To whoever finds this... I hope you¡¯ve made it this far.";
+					subtitle1 = "To whoever finds this... I hope youÂ¡Â¯ve made it this far.";
 					subtitle2 = "We failed, but you... you can still escape. The Martians are desperate... ";
-					subtitle3 = "they¡¯ll stop at nothing to survive. But if you destroy this facility... ";
+					subtitle3 = "theyÂ¡Â¯ll stop at nothing to survive. But if you destroy this facility... ";
 					subtitle4 = "you might be able to stop them... for good. Whatever happens...";
-					subtitle5 = "don¡¯t forget us. Don¡¯t let them do this... to anyone else.";
+					subtitle5 = "donÂ¡Â¯t forget us. DonÂ¡Â¯t let them do this... to anyone else.";
 					// add recording here
 					//Mix_PlayChannel(-1, tape6_recording, 0);
 					renderer->text_renderer.createText(subtitle1, { 100.f, 720 - 200.f }, 20.f, { 1.f, 1.f, 1.f });
@@ -1082,25 +1106,34 @@ void GameScene::on_key(int key, int action, int mod) {
 	
 	// Handle inventory slot usage with '1' '2' '3' '4'
 	if (action == GLFW_PRESS) {
-		if (key >= GLFW_KEY_1 && key <= GLFW_KEY_4) {
-			int slot_index = key - GLFW_KEY_1;
-			Entity player = registry.players.entities[0];
-			Inventory& inventory = registry.inventories.get(player);
+        // Handle inventory slot usage with keys 1, 2, 3, 4
+        if (key >= GLFW_KEY_1 && key <= GLFW_KEY_4) {
+            int slot_index = key - GLFW_KEY_1;
+            InventorySystem::consumeItem(player, slot_index);
+        }
+    }
 
-			if (slot_index < inventory.items.size() && inventory.items[slot_index].count > 0) {
-				// Check item type and consume it
-				if (inventory.items[slot_index].type == InventoryItem::Type::AmmoPack) {
-					Player& player_component = registry.players.get(player);
-					player_component.ammo += 10; // Increase ammo count
-					inventory.items[slot_index].count--;
+	// Remove later, this is shield powerup testing
+	if (action == GLFW_PRESS) {
+		switch (key) {
+		case GLFW_KEY_5:
+			// Give the player a shield when the '5' key is pressed
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
 
-					// Play sound effect for item usage
-					Mix_PlayChannel(-1, item_pickup_sound, 0);
-				}
+				// Apply a shield power-up to the player with 1 charge
+				PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, 1);
+
+				// Debug: Print confirmation of shield granted
+				std::cout << "[DEBUG] Shield power-up applied using key '5'!" << std::endl;
 			}
+			break;
+
+			// Handle other keys here...
+		default:
+			break;
 		}
 	}
-
 
 	if (action == GLFW_PRESS) {
 		switch (key) {
@@ -1220,15 +1253,6 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	player.health = 20;
 	player.ammo = 50;
 	player.profession = profession;
-
-
-	// Initialize player's inventory
-	Inventory& inventory = registry.inventories.emplace(entity);
-	inventory.items.resize(4); // 4 slots, all empty initially
-
-	// Add an initial ammo pack to slot 1 for testing
-	inventory.items[0] = { InventoryItem::Type::AmmoPack, 3 };
-
 
 
 	// Add the Health component to the player entity with initial health of 100
@@ -1653,6 +1677,30 @@ void GameScene::handle_collisions() {
 
 				if (!registry.damageCoolDowns.has(entity) && !registry.deathTimers.has(entity)) {
 					registry.damageCoolDowns.emplace(entity);
+
+					// Check if the player has shields
+					if (registry.shields.has(entity)) {
+						Shield& shield = registry.shields.get(entity);
+
+						// If the player has shield charges, block the damage and reduce the shield count
+						if (shield.charges > 0) {
+							shield.charges -= 1; // Use one shield charge
+							std::cout << "Shield absorbed the damage! Remaining shields: " << shield.charges << std::endl;
+
+							// Remove the shield component if all charges are used up
+							if (shield.charges == 0) {
+								registry.shields.remove(entity);
+								std::cout << "All shield charges used up!" << std::endl;
+							}
+
+							// Play shield block sound effect (optional)
+							Mix_PlayChannel(-1, health_pickup_sound, 0);
+
+							// Skip reducing health if shield absorbed the damage
+							continue;
+						}
+					}
+
 					player.health -= enemy.damage;
 
 					if (player.health > 0) {
@@ -2072,56 +2120,66 @@ void GameScene::updateCamera_smoothing(const vec2& player_position, const vec2& 
 
 }
 
+// TODO: Reloading logic
+void GameScene::refreshInventoryUI(Entity player) {
+	// Clear all existing UI elements related to the inventory
+	while (registry.inventorySlots.entities.size() > 0) {
+		registry.remove_all_components_of(registry.inventorySlots.entities.back());
+	}
 
-// Inventory creation
-void GameScene::createInventorySlots(Entity player) {
 	Inventory& inventory = registry.inventories.get(player);
 
+	// Configuration for slot positions
 	float slot_size = 48.f;
 	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - 2* slot_size;
-	float y_offset = 50.f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size + spacing)) / 2.0f;
+	float y_offset = 30.f; // Position at the top of the screen
 
+	// Loop through each inventory slot and recreate it
 	for (int i = 0; i < inventory.max_slots; ++i) {
 		float x_position = x_offset + i * (slot_size + spacing);
 		vec2 position = { x_position, y_offset };
 
 		// Create a slot entity
 		Entity slot = Entity();
-		Motion& motion = registry.motions.emplace(slot);
-		motion.position = position;
-		motion.scale = { slot_size, slot_size };
+		Motion& slot_motion = registry.motions.emplace(slot);
+		slot_motion.position = position;
+		slot_motion.scale = { slot_size, slot_size };
 		registry.UIs.emplace(slot);
 		registry.colors.insert(slot, { 1, 0, 0 });
 
-		// Render slot background
+		// Render the slot background
 		registry.renderRequests.insert(slot, {
 			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::BOX,
 			GEOMETRY_BUFFER_ID::DEBUG_LINE
 			});
 
-		// Render item icon if slot is not empty
-		if (inventory.items[i].count > 0) {
-			// Create a new icon entity for the item
+		// Check if there's an item in this slot
+		if (i < inventory.items.size() && inventory.items[i].type != InventoryItem::Type::None) {
+			InventoryItem& item = inventory.items[i];
+
+			// Create the icon for the item
 			Entity icon = Entity();
-
-			// Add a Motion component for position and scale
 			Motion& icon_motion = registry.motions.emplace(icon);
-			icon_motion.position = position; // Use screen position, not world position
+			icon_motion.position = position;
 			icon_motion.scale = { slot_size - 10, slot_size - 10 };
-
-			// Mark this entity as a UI element so it renders on the UI layer
 			registry.UIs.emplace(icon);
 
-			// Render the icon with the appropriate texture
+			// Select the texture based on the item type
+			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
+				TEXTURE_ASSET_ID::CHEST_CLOSED : TEXTURE_ASSET_ID::CHEST_OPENED;
+
 			registry.renderRequests.insert(icon, {
-				TEXTURE_ASSET_ID::CHEST_CLOSED,
+				item_texture,
 				EFFECT_ASSET_ID::TEXTURED,
 				GEOMETRY_BUFFER_ID::SPRITE
 				});
 
 			// Display the item count as text
+			std::string count_text = std::to_string(item.count);
+			Entity text_entity = renderer->text_renderer.createText(count_text, position + vec2(10, -15), 20.f, { 1.f, 1.f, 1.f });
+			registry.UIs.emplace(text_entity);
 			//std::string count_text = std::to_string(inventory.items[i].count);
 			//renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
 		}
@@ -2168,3 +2226,5 @@ void GameScene::refreshInventorySlots(Entity player) {
 		}
 	}
 }
+
+

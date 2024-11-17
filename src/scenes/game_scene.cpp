@@ -1147,7 +1147,7 @@ void GameScene::on_key(int key, int action, int mod) {
 					break;
 				case 2:
 					subtitles = {
-						"Security Officer Ali, reporting.I don't have much time...",
+						"Security Officer Ali, reporting. I don't have much time...",
 						"This isn't Mars. I don't know where the hell we are, but it's not Mars.",
 						"The... creatures. They look like... us. ",
 						"I shot one down, and... it... it screamed like a human. God, what have they done to us? ",

@@ -326,6 +326,12 @@ struct FPSText {
 
 };
 
+// Tape component
+struct Tape {
+	int tape_num;
+	bool is_played = false;
+};
+
 // Component for the Player hp bar
 struct PlayerHPBar {
 	float max_length = 100.f;
@@ -470,7 +476,12 @@ enum class TEXTURE_ASSET_ID {
 	CONFIRM_BUTTON = SOLDIER_PAGE_CLICKED + 1,
 	CONFIRM_BUTTON_CLICKED = CONFIRM_BUTTON + 1,
 	CONFIRM_BUTTON_DISABLED = CONFIRM_BUTTON_CLICKED + 1,
-	TEXTURE_COUNT = CONFIRM_BUTTON_DISABLED + 1
+	TAPE_1 = CONFIRM_BUTTON_DISABLED + 1,
+	TAPE_2 = TAPE_1 + 1,
+	TAPE_3 = TAPE_2 + 1,
+	TAPE_4 = TAPE_3 + 1,
+	TAPE_5 = TAPE_4 + 1,
+	TEXTURE_COUNT = TAPE_5 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

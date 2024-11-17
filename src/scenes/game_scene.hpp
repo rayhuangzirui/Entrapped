@@ -42,6 +42,9 @@ private:
 	Entity createAmmoChest(vec2 position);
 	Entity createDirectionMarker(vec2 position);
 	Entity createBackground();
+
+	Entity createTape(vec2 pos, int tape_num);
+
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 

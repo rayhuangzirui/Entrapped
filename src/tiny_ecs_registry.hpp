@@ -20,6 +20,7 @@ public:
 	ComponentContainer<Gun> guns;
 	ComponentContainer<Parent> parents;
 	ComponentContainer<FPS> fps;	
+	ComponentContainer<Tape> tapes;
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -159,6 +160,8 @@ public:
 		// Inventory
 		registry_list.push_back(&inventoryItems);
 		registry_list.push_back(&inventories);
+
+		registry_list.push_back(&tapes);
 	}
 
 	void clear_all_components() {

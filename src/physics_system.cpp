@@ -627,7 +627,6 @@ void PhysicsSystem::step(float elapsed_ms)
 
     // Mesh-box collision
     //handle_mesh_box_collision();
-    handle_mesh_box_collision();
 
 
     // Update gun position

@@ -398,12 +398,6 @@ struct FOV {
     
 };
 
-// Tape component
-struct Tape {
-	int tape_num;
-	bool is_played = false;
-};
-
 // Subtitle component
 struct Subtitle {
 	

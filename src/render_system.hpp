@@ -103,13 +103,7 @@ class RenderSystem {
 			textures_path("Tape_green.png"),
 			textures_path("Tape_light_blue.png"),
 			textures_path("Tape_orange.png"),
-			textures_path("Tape_rainbow.png"),
-
-			textures_path("Tape_blue.png"),
-			textures_path("Tape_green.png"),
-			textures_path("Tape_light_blue.png"),
-			textures_path("Tape_orange.png"),
-			textures_path("Tape_rainbow.png"),
+			textures_path("Tape_rainbow.png")
 
 	};
 

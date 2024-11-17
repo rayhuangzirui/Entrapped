@@ -97,8 +97,6 @@ public:
 	ComponentContainer<Shield> shields;
 	ComponentContainer<Refreshable> refreshables;
 
-	ComponentContainer<PowerUp> powerUps;
-	ComponentContainer<Shield> shields;
 	ComponentContainer<Soldier_init_powerup> soldier_init_powerups;
 	ComponentContainer<Doctor_init_powerup> doctor_init_powerups;
 	ComponentContainer<Hacker_init_powerup> hacker_init_powerups;

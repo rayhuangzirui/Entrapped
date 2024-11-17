@@ -936,6 +936,13 @@ void GameScene::step(float elapsed_ms) {
 	
 	renderAnimatedText(renderer);
 
+	// update fov
+	//for (Entity entity : registry.fovs.entities) {
+	//	// progress timer
+	//	Motion& motion = registry.motions.get(entity);
+	//	Motion& player_motion = registry.motions.get(player);
+	//	motion.position = player_motion.position;
+	//}
 }
 
 void GameScene::restart_game() {
@@ -1534,15 +1541,25 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
     Entity fov_entity = Entity();
     Motion& fov_motion = registry.motions.emplace(fov_entity);
 	registry.fovs.emplace(fov_entity);
-    fov_motion = registry.motions.get(entity); // Copy player's motion
-    
+	fov_motion.position = { window_width_px / 2.f, window_height_px / 2.f };
+	fov_motion.angle = 0;
+	fov_motion.velocity = { 0.f, 0.f };
+	fov_motion.scale = vec2({ 1296, window_height_px });
+
     // Add the FOV render request to the new entity
-    registry.renderRequests.insert( 			
-        fov_entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::FOV2, 			  
-          GEOMETRY_BUFFER_ID::SPRITE }
-    ); 	
+    //registry.renderRequests.insert( 			
+    //    fov_entity, 			
+    //    { TEXTURE_ASSET_ID::PLAYER_1, 			  
+    //      EFFECT_ASSET_ID::FOV2, 			  
+    //      GEOMETRY_BUFFER_ID::SPRITE }
+    //); 	
+	registry.renderRequests.insert(
+		fov_entity,
+		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::FOV_NEW,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE }
+	);
+	registry.colors.insert(fov_entity, { 0.f, 0.f, 0.f });
 	}
 
 	// Attach a gun to the player entity

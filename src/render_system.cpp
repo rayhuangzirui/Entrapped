@@ -135,6 +135,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			gl_has_errors();
 		}
 	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::FOV_NEW) {
+
+	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::COLOURED)
 {
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -694,7 +697,8 @@ for (Entity entity : registry.renderRequests.entities) {
 
 for (Entity entity : registry.renderRequests.entities) {
     if (registry.fovs.has(entity)) {
-        drawTexturedMesh(entity, camera_matrix);
+        //drawTexturedMesh(entity, camera_matrix);
+		drawTexturedMesh(entity, projection_2D);
     }
 }
 

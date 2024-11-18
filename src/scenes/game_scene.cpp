@@ -543,10 +543,18 @@ void GameScene::initialize(RenderSystem* renderer) {
 		player_component.max_health = state.saved_max_health;
 		player_component.health = state.saved_health;
 		player_component.ammo = state.saved_ammo;
-		InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, state.saved_ammo_pack);
-		InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, state.saved_health_potion);
-		PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, state.saved_shield);
-		PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, state.saved_speed_boost);
+		if (state.saved_ammo_pack > 0) {
+			InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, state.saved_ammo_pack);
+		}
+		if (state.saved_health_potion > 0) {
+			InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, state.saved_health_potion);
+		}
+		if (state.saved_shield > 0) {
+			PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, state.saved_shield);
+		}
+		if (state.saved_speed_boost > 0) {
+			PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, state.saved_speed_boost);
+		}
 	}
 
 	state.map_index++;
@@ -960,6 +968,7 @@ void GameScene::destroy() {
 
 	// Clean up inventory sounds
 	InventorySystem::cleanupSounds();
+	animatedText.is_done = true;
 }
 
 std::string GameScene::get_next_scene() {

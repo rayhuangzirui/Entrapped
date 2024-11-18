@@ -57,6 +57,8 @@ void StateManager::save() {
 		Entity& player = registry.players.entities[0];
 		Inventory& inventory = registry.inventories.get(player);
 
+		saved_ammo_pack = 0;
+		saved_health_potion = 0;
 		for (int i = 0; i < inventory.items.size(); i++) {
 			InventoryItem& item = inventory.items[i];
 			if (item.type == InventoryItem::Type::AmmoPack) {
@@ -71,11 +73,13 @@ void StateManager::save() {
 		saved_ammo = p.ammo;
 		saved_profession = p.profession;
 
+		saved_speed_boost = 0;
 		if (registry.speedBoosts.has(player)) {
 			SpeedBoost& speed_boost = registry.speedBoosts.get(player);
 			saved_speed_boost = speed_boost.count;
 		}
 
+		saved_shield = 0;
 		if (registry.shields.has(player)) {
 			Shield& shield = registry.shields.get(player);
 			saved_shield = shield.charges;

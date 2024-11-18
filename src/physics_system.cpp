@@ -524,6 +524,7 @@ void PhysicsSystem::step(float elapsed_ms)
             // Update dash timer
             dash.counter_ms -= elapsed_ms;
             if (dash.counter_ms <= 0) {
+                registry.dashTimers.remove(entity);
 				// Reset velocity multiplier
                 velocity_multiplier = 1.0f;
             }

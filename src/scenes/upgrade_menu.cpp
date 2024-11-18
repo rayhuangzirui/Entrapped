@@ -6,7 +6,6 @@
 
 void UpgradeMenu::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
-	renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), { 50.f, 50.f }, 20.f, { 1.f, 1.f, 1.f });
 
 	health_button = createButton(renderer, { 350.f, 100.f }, { 105.f, 30.f }, "Upgrade");
 	ammo_button = createButton(renderer, { 350.f, 150.f }, { 105.f, 30.f }, "Upgrade");
@@ -20,6 +19,9 @@ void UpgradeMenu::initialize(RenderSystem* renderer) {
 void UpgradeMenu::refreshUI() {
 	while (registry.refreshables.entities.size() > 0)
 		registry.remove_all_components_of(registry.refreshables.entities.back());
+
+	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), { 50.f, 50.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.refreshables.emplace(exp_text);
 
 	Entity hp_text = renderer->text_renderer.createText("Extra Max HP: " + std::to_string(state.health_upgrade.curVal), { 50.f, 100.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.refreshables.emplace(hp_text);

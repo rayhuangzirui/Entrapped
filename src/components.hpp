@@ -440,7 +440,7 @@ struct InventorySlot {
 struct IconSprite {};
 
 // New component to tag entities as item count text
-struct ItemCount {
+struct InventoryItemCount {
 	Entity text_entity;
 };
 //-------------------- Inventory system --------------------

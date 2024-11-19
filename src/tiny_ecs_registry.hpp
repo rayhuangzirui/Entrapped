@@ -90,7 +90,7 @@ public:
 	ComponentContainer<InventorySlot> inventorySlots;
 	ComponentContainer<InventoryItem> inventoryItems;
 	ComponentContainer<IconSprite> iconSprites;
-	ComponentContainer<ItemCount> itemCounts;
+	ComponentContainer<InventoryItemCount> itemCounts;
 	ComponentContainer<Inventory> inventories;
 
 	// Power-Up related components

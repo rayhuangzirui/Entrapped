@@ -48,7 +48,7 @@ void MainMenu::step(float elapsed_ms) {
 		}
 		else if (button_entity == debug_button) {
 			debugging.in_debug_mode = !debugging.in_debug_mode;
-			Button& btn = registry.buttons.get(debug_button);
+			Button1& btn = registry.buttons.get(debug_button);
 			Text& txt = registry.texts.get(btn.text);
 			if (debugging.in_debug_mode) {
 				txt.content = "Debug: On";

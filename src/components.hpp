@@ -51,7 +51,7 @@ struct CameraText {
 };
 
 
-struct Button {
+struct Button1 {
 	Entity text;
 };
 

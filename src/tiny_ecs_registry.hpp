@@ -62,7 +62,7 @@ public:
 	ComponentContainer<UI> UIs;
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
-	ComponentContainer<Button> buttons;
+	ComponentContainer<Button1> buttons;
 	ComponentContainer<PressedButton> pressedButtons;
 	ComponentContainer<Message> messages;
 

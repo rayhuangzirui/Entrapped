@@ -448,7 +448,8 @@ struct InventoryItemCount {
 //-------------------- Power up system --------------------
 enum class PowerUpType {
 	Shield,
-	SpeedBoost, // For future power-ups
+	SpeedBoost,
+	LifeSteal,
 	Soldier_init_powerup, 
 	Doctor_init_powerup,
 	Hacker_init_powerup,
@@ -468,6 +469,10 @@ struct Shield {
 // Component for SpeedBoost effect on the player
 struct SpeedBoost {
 	int count; // Number of times speed has been increased
+};
+
+struct LifeSteal {
+	int stacks; // Number of life steal stacks
 };
 
 struct PowerUpSlot {
@@ -570,8 +575,9 @@ enum class TEXTURE_ASSET_ID {
 
 	POWER_UP_SHIELD = ITEM_MEDKIT + 1,
 	POWER_UP_SPEED_UP = POWER_UP_SHIELD + 1,
+	POWER_UP_LIFE_STEAL = POWER_UP_SPEED_UP + 1,
 
-	CHOOSE_PROFESSION_TITLE = POWER_UP_SPEED_UP + 1,
+	CHOOSE_PROFESSION_TITLE = POWER_UP_LIFE_STEAL + 1,
 	SOLDIER_PAGE = CHOOSE_PROFESSION_TITLE + 1,
 	SOLDIER_PAGE_CLICKED = SOLDIER_PAGE + 1,
 	DOCTOR_PAGE = SOLDIER_PAGE_CLICKED + 1,

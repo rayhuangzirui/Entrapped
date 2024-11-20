@@ -55,6 +55,25 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
                 << registry.speedBoosts.get(player).count << std::endl;
         }
     }
+    else if (type == PowerUpType::LifeSteal) {
+        if (registry.players.has(player)) {
+            // Check if the player already has a LifeSteal component
+            if (registry.lifeSteals.has(player)) {
+                LifeSteal& life_steal = registry.lifeSteals.get(player);
+                life_steal.stacks += strength; // Increment the stack count
+            }
+            else {
+                // Add a new LifeSteal component with the initial stack count
+                LifeSteal& life_steal = registry.lifeSteals.emplace(player);
+                life_steal.stacks = strength;
+            }
+
+            // Debug: Print the updated number of stacks
+            std::cout << "[DEBUG] Life Steal power-up applied! Total stacks: "
+                << registry.lifeSteals.get(player).stacks << std::endl;
+        }
+    }
+
     else if (type == PowerUpType::Soldier_init_powerup) {
 		// soldier init powerup:
         // soldier has an invincible frame when dashing towards enemy (in game_scene)

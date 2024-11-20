@@ -95,6 +95,7 @@ class RenderSystem {
 			
 			textures_path("power_up_shield.png"),
 			textures_path("power_up_speedup.png"),
+			textures_path("power_up_lifesteal.png"),
 
 			textures_path("choose_profession_title.png"),
 			textures_path("soldier_page1.png"),

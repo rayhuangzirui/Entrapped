@@ -1381,6 +1381,14 @@ void GameScene::on_key(int key, int action, int mod) {
 				std::cout << "[DEBUG] Speed Boost power-up applied using key '6'!" << std::endl;
 			}
 			break;
+		case GLFW_KEY_7: // Add a life steal stack
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
+				PowerUpSystem::applyPowerUp(player, PowerUpType::LifeSteal, 1);
+				std::cout << "[DEBUG] Life Steal stack added! Total stacks: "
+					<< registry.lifeSteals.get(player).stacks << std::endl;
+			}
+			break;
 
 		default:
 			break;
@@ -2200,24 +2208,32 @@ void GameScene::apply_damage(Entity& target, int damage) {
 		// Get the target position for the damage number display
 		vec2 position = registry.motions.get(target).position;
 
-		// Show the damage number at the target's position
-		// show_damage_number(renderer, position, damage);
-
 		// If health falls to 0 or below, remove the entity
 		if (health.current_health <= 0) {
+			// Life steal effect: Heal the player based on life steal stacks
+			if (registry.players.has(player)) {
+				Player& player_component = registry.players.get(player);
+				if (registry.lifeSteals.has(player)) {
+					LifeSteal& life_steal = registry.lifeSteals.get(player);
+					player_component.health += life_steal.stacks; // Gain health based on stacks
+					if (player_component.health > player_component.max_health) {
+						player_component.health = player_component.max_health; // Cap at max health
+					}
+					std::cout << "[DEBUG] Player life steal triggered! Current health: "
+						<< player_component.health << std::endl;
+				}
+			}
+
 			// Check if the enemy has a hint component
 			if (registry.hints.has(target)) {
 				Hint& hint = registry.hints.get(target);
 				if (hint.is_visible) {
-					// Remove the hint text entity if visible
 					renderer->text_renderer.removeText(hint.text_entity);
 				}
-				// Clear the hint component from the entity
 				registry.hints.remove(target);
 			}
 
 			// Insert death animation timer or other removal actions
-			// Remove the hp bar
 			auto& enemy = registry.enemies.get(target);
 			registry.remove_all_components_of(enemy.health_bar_entity);
 			registry.enemies.remove(target);
@@ -2227,14 +2243,11 @@ void GameScene::apply_damage(Entity& target, int damage) {
 
 			std::cout << "Enemy is dead!" << std::endl;
 
-			// increase the player's ammo when enemy is killed
+			// Increase player's ammo when enemy is killed (for Hacker profession)
 			if (selected_profession == "Hacker") {
 				Player& player = registry.players.get(registry.players.entities[0]);
-				std::cout << "Player ammo: " << player.ammo << std::endl;
 				player.ammo += player.ammo_per_kill;
-				std::cout << "Player ammo increased to: " << player.ammo << std::endl;
 			}
-			
 		}
 	}
 }
@@ -2490,6 +2503,14 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		Shield& shield = registry.shields.get(player);
 		if (shield.charges > 0) {
 			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_SHIELD, shield.charges });
+		}
+	}
+
+	// Add the player's life steal power-up (if any)
+	if (registry.lifeSteals.has(player)) {
+		LifeSteal& life_steal = registry.lifeSteals.get(player);
+		if (life_steal.stacks > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_LIFE_STEAL, life_steal.stacks });
 		}
 	}
 

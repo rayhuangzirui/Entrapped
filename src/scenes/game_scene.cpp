@@ -1018,15 +1018,15 @@ void GameScene::on_key(int key, int action, int mod) {
 				if (motion.scale.x > 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
 					updateCamera_smoothing(motion.position, target_position);
-					Entity& gun = registry.guns.entities[0];
-					registry.motions.get(gun);
-					/*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
-					printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
+					//Entity& gun = registry.guns.entities[0];
+					//registry.motions.get(gun);
+					///*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
+					//printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
 
-					Gun& gun_component = registry.guns.get(gun);
-					gun_component.offset.x = -abs(gun_component.offset.x);
+					//Gun& gun_component = registry.guns.get(gun);
+					//gun_component.offset.x = -abs(gun_component.offset.x);
 				}
-				motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
+				//motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 				break;
 			case GLFW_KEY_D:
@@ -1037,13 +1037,13 @@ void GameScene::on_key(int key, int action, int mod) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
 					updateCamera_smoothing(motion.position, target_position);
 
-					Entity& gun = registry.guns.entities[0];
+					/*Entity& gun = registry.guns.entities[0];
 					registry.motions.get(gun);
 					Gun& gun_component = registry.guns.get(gun);
-					gun_component.offset.x = abs(gun_component.offset.x);
+					gun_component.offset.x = abs(gun_component.offset.x);*/
 				}
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
-				motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
+				//motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 				break;
 			case GLFW_KEY_LEFT_SHIFT:
 				isSprinting = true;
@@ -1132,10 +1132,10 @@ void GameScene::on_key(int key, int action, int mod) {
 
 				// Adjust sprite orientation for left or right movement
 				if (key == GLFW_KEY_A) {
-					motion.scale.x = -abs(motion.scale.x);  // Face left
+					//motion.scale.x = -abs(motion.scale.x);  // Face left
 				}
 				else if (key == GLFW_KEY_D) {
-					motion.scale.x = abs(motion.scale.x);  // Face right
+					//motion.scale.x = abs(motion.scale.x);  // Face right
 				}
 			}
 		}
@@ -2265,9 +2265,12 @@ void GameScene::show_damage_number(vec2 position, int damage) {
 }
 
 void GameScene::on_mouse_move(vec2 mouse_position) {
-	/*if (registry.guns.entities.size() == 0) {
-		return;
-	}*/
+	TEXTURE_ASSET_ID walking_sideways[3] = {
+	TEXTURE_ASSET_ID::PLAYER_1,
+	TEXTURE_ASSET_ID::PLAYER_2,
+	TEXTURE_ASSET_ID::PLAYER_3
+	};
+
 	// Get the gun entity
 	Entity entity = registry.guns.entities[0];
 
@@ -2282,11 +2285,25 @@ void GameScene::on_mouse_move(vec2 mouse_position) {
 	if (gun_motion.angle > (M_PIl / 2) || gun_motion.angle < -(M_PIl / 2)) {
 		if (gun_motion.scale.y > 0) {
 			gun_motion.scale.y = -gun_motion.scale.y;
+			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
+			player_motion.scale.x = -abs(player_motion.scale.x);
+			Entity& gun = registry.guns.entities[0];
+			registry.motions.get(gun);
+			
+			Gun& gun_component = registry.guns.get(gun);
+			gun_component.offset.x = -abs(gun_component.offset.x);
 		}
 	}
 	else {
 		if (gun_motion.scale.y < 0) {
 			gun_motion.scale.y = -gun_motion.scale.y;
+			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
+			player_motion.scale.x = abs(player_motion.scale.x);
+			Entity& gun = registry.guns.entities[0];
+			registry.motions.get(gun);
+
+			Gun& gun_component = registry.guns.get(gun);
+			gun_component.offset.x = abs(gun_component.offset.x);
 		}
 	}
 }

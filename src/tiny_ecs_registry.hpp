@@ -98,6 +98,8 @@ public:
 	ComponentContainer<Shield> shields;
 	ComponentContainer<SpeedBoost> speedBoosts;
 	ComponentContainer<LifeSteal> lifeSteals;
+	ComponentContainer<RicochetPowerUp> ricochetPowerUps;
+
 	ComponentContainer<PowerUpSlot> powerUpSlots;
 	ComponentContainer<Refreshable> refreshables;
 
@@ -193,6 +195,7 @@ public:
 		registry_list.push_back(&shields);
 		registry_list.push_back(&speedBoosts);
 		registry_list.push_back(&lifeSteals);
+		registry_list.push_back(&ricochetPowerUps);
 
 		registry_list.push_back(&powerUpSlots);
 		registry_list.push_back(&soldier_init_powerups);

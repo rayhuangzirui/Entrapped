@@ -102,6 +102,7 @@ struct Bullet
 	float speed = 500.f;
 	vec2 direction = { 0, 0 };
 
+	int ricochet_count = 0;
 };
 
 // FPS counter component
@@ -450,6 +451,7 @@ enum class PowerUpType {
 	Shield,
 	SpeedBoost,
 	LifeSteal,
+	RicochetPowerUp,
 	Soldier_init_powerup, 
 	Doctor_init_powerup,
 	Hacker_init_powerup,
@@ -473,6 +475,10 @@ struct SpeedBoost {
 
 struct LifeSteal {
 	int stacks; // Number of life steal stacks
+};
+
+struct RicochetPowerUp {
+	int stacks;
 };
 
 struct PowerUpSlot {

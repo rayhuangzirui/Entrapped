@@ -73,6 +73,25 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
                 << registry.lifeSteals.get(player).stacks << std::endl;
         }
     }
+    else if (type == PowerUpType::RicochetPowerUp) {
+        // RicochetPowerUp logic
+        if (registry.players.has(player)) {
+            if (registry.ricochetPowerUps.has(player)) {
+                RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
+                ricochet.stacks += strength;
+
+                std::cout << "[DEBUG] Ricochet power-up collected! Total stacks: "
+                    << ricochet.stacks << std::endl;
+            }
+            else {
+                RicochetPowerUp& ricochet = registry.ricochetPowerUps.emplace(player);
+                ricochet.stacks = strength;
+
+                std::cout << "[DEBUG] First Ricochet power-up collected! Total stacks: "
+                    << ricochet.stacks << std::endl;
+            }
+        }
+    }
 
     else if (type == PowerUpType::Soldier_init_powerup) {
 		// soldier init powerup:

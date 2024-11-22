@@ -1389,6 +1389,30 @@ void GameScene::on_key(int key, int action, int mod) {
 					<< registry.lifeSteals.get(player).stacks << std::endl;
 			}
 			break;
+		case GLFW_KEY_8: // Add a ricochet power-up stack
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
+
+				// Check if the player already has a RicochetPowerUp component
+				if (registry.ricochetPowerUps.has(player)) {
+					RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
+					ricochet.stacks += 1; // Increment the stack count
+
+					// Debug: Print confirmation of ricochet stack added
+					std::cout << "[DEBUG] Ricochet Power-Up stack added! Total stacks: "
+						<< ricochet.stacks << std::endl;
+				}
+				else {
+					// Add a new RicochetPowerUp component with an initial stack of 1
+					RicochetPowerUp& ricochet = registry.ricochetPowerUps.emplace(player);
+					ricochet.stacks = 1;
+
+					// Debug: Print confirmation of the first stack added
+					std::cout << "[DEBUG] First Ricochet Power-Up stack added!" << std::endl;
+				}
+			}
+			break;
+
 
 		default:
 			break;
@@ -2166,6 +2190,16 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	// Associate bullet to gun
 	Entity gun = registry.guns.entities[0];
 	registry.parents.emplace(entity, Parent{ gun });
+
+	// Transfer RicochetPowerUp stacks from player to bullet
+	if (registry.ricochetPowerUps.has(player)) {
+		RicochetPowerUp& player_ricochet = registry.ricochetPowerUps.get(player);
+		RicochetPowerUp& bullet_ricochet = registry.ricochetPowerUps.emplace(entity);
+		bullet_ricochet.stacks = player_ricochet.stacks;
+
+		// Debug: Print transfer of ricochet stacks
+		std::cout << "[DEBUG] Transferred " << bullet_ricochet.stacks << " ricochet stacks to bullet." << std::endl;
+	}
 
 	// Gun's ammo - 1
 	registry.guns.get(gun);

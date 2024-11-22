@@ -770,58 +770,58 @@ void GameScene::step(float elapsed_ms) {
 
 	(RenderSystem*)renderer;
 
-	//if (registry.enemies.size() > 0) {
-	//	// Enemy walking frames and animations
-	//	for (int i = 0; i < registry.enemies.size(); i++) {
-	//		static int enemy_frame = 0;
-	//		static float frame_delay = 150.f;
-	//		static float frame_timer = 0.f;
+	if (registry.enemies.size() > 0) {
+		// Enemy walking frames and animations
+		for (int i = 0; i < registry.enemies.size(); i++) {
+			static int enemy_frame = 0;
+			static float frame_delay = 900.f;
+			static float frame_timer = 0.f;
 
-	//		auto& enemy = registry.enemies.entities[i];
-	//		auto& motion = registry.motions.get(enemy);
+			auto& enemy = registry.enemies.entities[i];
+			auto& motion = registry.motions.get(enemy);
 
-	//		TEXTURE_ASSET_ID enemy_walking_frames[4] = {
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_1,
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_2,
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_3,
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_4
-	//		};
+			TEXTURE_ASSET_ID enemy_walking_frames[4] = {
+				TEXTURE_ASSET_ID::WOMAN_WALK_1,
+				TEXTURE_ASSET_ID::WOMAN_WALK_2,
+				TEXTURE_ASSET_ID::WOMAN_WALK_3,
+				TEXTURE_ASSET_ID::WOMAN_WALK_4
+			};
 
-	//		frame_timer += elapsed_ms;
-	//		if (frame_timer >= frame_delay) {
-	//			frame_timer = 0.f;
-	//			enemy_frame = (enemy_frame + 1) % 4;
-	//		}
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f;
+				enemy_frame = (enemy_frame + 1) % 4;
+			}
 
-	//		auto& texture = registry.renderRequests.get(enemy);
-	//		texture.used_texture = enemy_walking_frames[enemy_frame];
+			auto& texture = registry.renderRequests.get(enemy);
+			texture.used_texture = enemy_walking_frames[enemy_frame];
 
-	//		static float last_direction_x = motion.velocity.x;
-	//		static float flip_cooldown = 1000.f;
-	//		static float flip_timer = 0.f;
+			static float last_direction_x = motion.velocity.x;
+			static float flip_cooldown = 1000.f;
+			static float flip_timer = 0.f;
 
-	//		flip_timer += elapsed_ms;
+			flip_timer += elapsed_ms;
 
-	//		if (flip_timer >= flip_cooldown) {
-	//			if (motion.velocity.x < 0 && last_direction_x >= 0) {
-	//				motion.scale.x = -abs(motion.scale.x);
-	//				last_direction_x = motion.velocity.x;
-	//				flip_timer = 0.f; 
-	//			}
-	//			else if (motion.velocity.x > 0 && last_direction_x <= 0) {
-	//				motion.scale.x = abs(motion.scale.x);
-	//				last_direction_x = motion.velocity.x;
-	//				flip_timer = 0.f;
-	//			}
-	//		}
+			if (flip_timer >= flip_cooldown) {
+				if (motion.velocity.x < 0 && last_direction_x >= 0) {
+					motion.scale.x = -abs(motion.scale.x);
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f; 
+				}
+				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+					motion.scale.x = abs(motion.scale.x);
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f;
+				}
+			}
 
-	//		if (motion.velocity.x == 0) {
-	//			texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
-	//		}
+			if (motion.velocity.x == 0) {
+				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
+			}
 
 	//		// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
-	//	}
-	//}
+		}
+	}
 	// deal with enemy death animation
 	if (registry.enemyDeathTimers.size() > 0) {
 		auto& enemyDeathTimers = registry.enemyDeathTimers;

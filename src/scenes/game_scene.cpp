@@ -1728,13 +1728,13 @@ Entity GameScene::createGun(Entity player) {
 	gun_motion.scale = {35, 30};
 	
 	// gun's states
-	gun.ammo_capacity = 30;
-	gun.current_ammo = gun.ammo_capacity;
-	gun.bullet_damage = 1;
-	gun.bullet_speed = 100.f;
-	gun.reload_time = 0.5f;
-	gun.fire_rate = 0.5f;
-	gun.direction = { 0.f, 0.f };
+	//gun.ammo_capacity = 30;
+	//gun.current_ammo = gun.ammo_capacity;
+	//gun.bullet_damage = 1;
+	//gun.bullet_speed = 100.f;
+	//gun.reload_time = 0.5f;
+	//gun.fire_rate = 0.5f;
+	//gun.direction = { 0.f, 0.f };
 
 	// Add the parent component to the gun entity, linking it to the player
 	registry.parents.emplace(entity, Parent{ player });
@@ -2184,7 +2184,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	//bullet.damage = gun_component.bullet_damage;
 
 	bullet.damage = 1;
-	bullet.speed = 100.f;
+	bullet.speed = 500.f;
 	bullet.direction = direction;
 
 	// Associate bullet to gun
@@ -2545,6 +2545,14 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		LifeSteal& life_steal = registry.lifeSteals.get(player);
 		if (life_steal.stacks > 0) {
 			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_LIFE_STEAL, life_steal.stacks });
+		}
+	}
+
+	// Add the player's ricochet bullet power-up (if any)
+	if (registry.ricochetPowerUps.has(player)) {
+		RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
+		if (ricochet.stacks > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_RICOCHET, ricochet.stacks });
 		}
 	}
 

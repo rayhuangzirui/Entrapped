@@ -68,7 +68,7 @@ struct Gun
 	int damage = 1;
 
 	// Gun's fire rate in bullets per second
-	float fire_rate = 0.5f;
+	float fire_rate = 5.f;
 
 	// Gun's reload time in seconds
 	float reload_time = 0.5f;
@@ -76,7 +76,7 @@ struct Gun
 	// Gun's ammo capacity
 	int ammo_capacity = 30;
 	int current_ammo = 30;
-	float bullet_speed = 500.f;
+	float bullet_speed = 1000.f;
 
 	// Gun's bullet direction
 	vec2 direction = { 0, 0 };

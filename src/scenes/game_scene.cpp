@@ -1435,7 +1435,17 @@ void GameScene::on_key(int key, int action, int mod) {
 				}
 			}
 			break;
+		
+		case GLFW_KEY_9:
+        // Add an attack speed power-up stack when '9' is pressed
+        if (!registry.players.entities.empty()) {
+            Entity player = registry.players.entities[0];
+            PowerUpSystem::applyPowerUp(player, PowerUpType::AttackSpeedPowerUp, 1);
 
+            // Debug: Print confirmation of attack speed power-up applied
+            std::cout << "[DEBUG] Attack Speed Power-Up stack added!" << std::endl;
+        }
+        break;
 
 		default:
 			break;
@@ -2572,6 +2582,14 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
 		if (ricochet.stacks > 0) {
 			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_RICOCHET, ricochet.stacks });
+		}
+	}
+
+	// Add the player's attack speed power-up (if any)
+	if (registry.attackSpeedPowerUps.has(player)) {
+		AttackSpeedPowerUp& powerup = registry.attackSpeedPowerUps.get(player);
+		if (powerup.stacks > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_ATTACK_SPEED, powerup.stacks });
 		}
 	}
 

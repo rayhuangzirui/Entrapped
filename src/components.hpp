@@ -76,7 +76,7 @@ struct Gun
 	// Gun's ammo capacity
 	int ammo_capacity = 30;
 	int current_ammo = 30;
-	float bullet_speed = 1000.f;
+	float bullet_speed = 500.f;
 
 	// Gun's bullet direction
 	vec2 direction = { 0, 0 };

@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <array>
 #include "common.hpp"
 
 struct MapState {
@@ -14,9 +15,12 @@ struct UpgradeState {
 	int upgrade_cost = 0;
 };
 
+const int TILE_NUMBER = 18;
+
 class StateManager
 {
 public:
+	// map
 	const int TILE_SIZE = 48;
 	int map_height;
 	int map_width;
@@ -24,6 +28,7 @@ public:
 	uint map_index;
 	std::vector<std::string> map_lists;
 	MapState current_map_state;
+	std::array<GLuint, TILE_NUMBER> map_tile_textures;
 	
 	// save
 	uint saved_map_index;

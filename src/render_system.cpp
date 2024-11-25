@@ -517,8 +517,9 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 			GLfloat ypos = y;
 			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
 			if (state.is_wall(state.map[row][col])) {
-				texture_id =
-					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+				//texture_id =
+				//	texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+				texture_id = state.map_tile_textures[0];
 			}
 			else if (state.is_floor(state.map[row][col])) {
 				texture_id =

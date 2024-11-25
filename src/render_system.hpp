@@ -148,6 +148,8 @@ public:
 
 	void initializeGlTextures();
 
+	void initializeMapTextures();
+
 	void initializeGlEffects();
 
 	void initializeGlMeshes();

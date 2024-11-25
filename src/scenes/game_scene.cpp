@@ -268,7 +268,7 @@ void GameScene::spawnEnemiesAndItems() {
 	for (int row = 0; row < state.map_height; ++row) {
 		for (int col = 0; col < state.map_width; ++col) {
 			vec2 pos = { (col + 0.5) * state.TILE_SIZE, (row + 0.5) * state.TILE_SIZE };
-			if (state.map[row][col] == 2) {
+			if (state.map.interactive_layer[row][col] == 2) {
 				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
@@ -280,11 +280,11 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(enemy, hint);
 				}
 			}
-			else if (state.map[row][col] == 3) {
+			else if (state.map.interactive_layer[row][col] == 3) { // random loot: chest or power up
 				Entity chest = createChest(pos);
 				registry.randomChests.emplace(chest);
 			}
-			else if (state.map[row][col] == 4) {
+			else if (state.map.interactive_layer[row][col] == 4) {
 				Entity chest = createChest(pos);
 				registry.healthChests.emplace(chest);
 				if (state.map_index == 0) {
@@ -294,7 +294,7 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
-			else if (state.map[row][col] == 5) {
+			else if (state.map.interactive_layer[row][col] == 5) {
 				Entity chest = createChest(pos);
 				registry.ammoChests.emplace(chest);
 				if (state.map_index == 0) {
@@ -303,6 +303,13 @@ void GameScene::spawnEnemiesAndItems() {
 					hint.radius = 200.0f;  // Set the radius for the hint display
 					registry.hints.emplace(chest, hint);
 				}
+			}
+			else if (state.map.interactive_layer[row][col] == 6) {
+				// add random power-up pickups
+			}
+			else if (state.map.interactive_layer[row][col] == 7) {
+				// faster enemy
+
 			}
 		}
 	}

@@ -3,20 +3,23 @@
 #include "common.hpp"
 
 struct MapState {
-	std::string map_name = "test";
+	std::string name = "test";
 	vec2 player_spawn = { 5, 5 };
 	vec2 exit = { 2, 2 };
-	std::vector<std::vector<int>> colission_layer;
+	int width = 0;
+	int height = 0;
+	std::vector<std::vector<int>> collision_layer;
 	std::vector<std::vector<int>> decoration_layer;
 	std::vector<std::vector<int>> interactive_layer;
 };
 
 MapState CreateTestMap();
 
-bool GetTextureID(int id);
-bool is_blocked(int id);
-bool is_floor(int id);
-bool is_wall(int id);
+MapState CreateTutorialMap();
 
+MapState CreateTutorialMap_new();
 
+MapState CreateMap1();
+
+MapState CreateMap2();
 

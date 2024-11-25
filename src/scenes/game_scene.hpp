@@ -81,7 +81,11 @@ private:
 	Mix_Chunk* tape4_recording;
 	Mix_Chunk* tape5_recording;
 	Mix_Chunk* tape6_recording;
-	
+	Mix_Chunk* player_footstep;
+	Mix_Chunk* enemy_footstep;
+	Mix_Chunk* enemy_get_hit;
+	Mix_Chunk* tape_pickup;
+
 	vec2 player_velocity;
 
 	std::string next_scene = "";

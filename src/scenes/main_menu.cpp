@@ -28,10 +28,12 @@ void MainMenu::initialize(RenderSystem* renderer) {
 	if (state.saved_map_index > 0) {
 		continue_game_button = createButton(renderer, { 50.f, window_height_px - 200.f }, { 200.f, 30.f }, "Continue Game");
 	}
+	button_click = Mix_LoadWAV(audio_path("main-click.wav").c_str());
 }
 
 void MainMenu::step(float elapsed_ms) {
 	for (Entity button_entity : registry.pressedButtons.entities) {
+		Mix_PlayChannel(-1, button_click, 0);
 		if (button_entity == new_game_button) {
 			state.map_index = 0;
 			next_scene = "profession_menu";

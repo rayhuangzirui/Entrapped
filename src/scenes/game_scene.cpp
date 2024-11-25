@@ -584,6 +584,11 @@ void GameScene::initialize(RenderSystem* renderer) {
 	tape5_recording = Mix_LoadWAV(audio_path("Commander_Blake_tape5.wav").c_str());
 	tape6_recording = Mix_LoadWAV(audio_path("We_failed_tape6.wav").c_str());
 
+	player_footstep = Mix_LoadWAV(audio_path("player_footstep(1).wav").c_str());
+	// enemy_footstep = Mix_LoadWAV(audio_path("enemy-footstep.wav").c_str());
+	enemy_get_hit = Mix_LoadWAV(audio_path("enemy-get-hit(1).wav").c_str());
+	tape_pickup = Mix_LoadWAV(audio_path("tape-pickup.wav").c_str());
+
 
 	if (background_music == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n make sure the data directory is present",
@@ -774,7 +779,7 @@ void GameScene::step(float elapsed_ms) {
 		// Enemy walking frames and animations
 		for (int i = 0; i < registry.enemies.size(); i++) {
 			static int enemy_frame = 0;
-			static float frame_delay = 900.f;
+			static float frame_delay = 2000.f;
 			static float frame_timer = 0.f;
 
 			auto& enemy = registry.enemies.entities[i];
@@ -818,8 +823,6 @@ void GameScene::step(float elapsed_ms) {
 			if (motion.velocity.x == 0) {
 				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
 			}
-
-	//		// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
 		}
 	}
 	// deal with enemy death animation
@@ -881,6 +884,7 @@ void GameScene::step(float elapsed_ms) {
 	// deal with player death animation
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
+	int player_footstep_channel = 2;
 
 	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
@@ -900,8 +904,15 @@ void GameScene::step(float elapsed_ms) {
 		}
 	}
 
+	static bool isPlayingFootstep = false;
+
 	// deal with player walking animation
 	if (player_velocity.x != 0 || player_velocity.y != 0) {
+		if (!isPlayingFootstep) {
+			Mix_PlayChannel(player_footstep_channel, player_footstep, -1);
+			isPlayingFootstep = true;
+		}
+
 		static int player_frame = 0;
 		static float frame_delay = 150.f;
 		static float frame_timer = 0.f;
@@ -910,6 +921,18 @@ void GameScene::step(float elapsed_ms) {
 			TEXTURE_ASSET_ID::PLAYER_1,
 			TEXTURE_ASSET_ID::PLAYER_2,
 			TEXTURE_ASSET_ID::PLAYER_3
+		};
+
+		TEXTURE_ASSET_ID doc_sideways[3] = {
+			TEXTURE_ASSET_ID::DOC_1,
+			TEXTURE_ASSET_ID::DOC_2,
+			TEXTURE_ASSET_ID::DOC_3
+		};
+
+		TEXTURE_ASSET_ID hack_sideways[3] = {
+			TEXTURE_ASSET_ID::HACK_1,
+			TEXTURE_ASSET_ID::HACK_2,
+			TEXTURE_ASSET_ID::HACK_3
 		};
 
 		// Update the frame timer
@@ -925,6 +948,11 @@ void GameScene::step(float elapsed_ms) {
 	}
 	// when player is not moving, set the texture to idle
 	else {
+		if (isPlayingFootstep) {
+			Mix_HaltChannel(player_footstep_channel); // Stop the sound
+			isPlayingFootstep = false;
+		}
+
 		auto& texture = registry.renderRequests.get(player);
 		texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
 	}
@@ -965,6 +993,16 @@ void GameScene::destroy() {
 	Mix_FreeChunk(item_pickup_sound);
 	Mix_FreeChunk(reload_sound);
 	Mix_FreeChunk(stab_sound);
+	Mix_FreeChunk(tape1_recording);
+	Mix_FreeChunk(tape2_recording);
+	Mix_FreeChunk(tape3_recording);
+	Mix_FreeChunk(tape4_recording);
+	Mix_FreeChunk(tape5_recording);
+	Mix_FreeChunk(tape6_recording);
+	Mix_FreeChunk(player_footstep);
+	Mix_FreeChunk(enemy_get_hit);
+	Mix_FreeChunk(tape_pickup);
+	//Mix_FreeChunk(enemy_footstep);
 
 	// Clean up inventory sounds
 	InventorySystem::cleanupSounds();
@@ -980,16 +1018,17 @@ void GameScene::on_key(int key, int action, int mod) {
 	static int frame_counter = 0;
 	static int first_round_frame_counter = 0;
 	const int frame_delay = 2;
-	TEXTURE_ASSET_ID walking_sideways[3] = {
+	/*TEXTURE_ASSET_ID walking_sideways[3] = {
 	TEXTURE_ASSET_ID::PLAYER_1,
 	TEXTURE_ASSET_ID::PLAYER_2,
 	TEXTURE_ASSET_ID::PLAYER_3
-	};
+	};*/
 
 	Motion& motion = registry.motions.get(player);
 	Player& player_component = registry.players.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
+	int player_footstep_channel = 2;
 
 	// Handle movement keys (W, A, S, D)
 	if (!registry.deathTimers.has(player)) {
@@ -1004,17 +1043,17 @@ void GameScene::on_key(int key, int action, int mod) {
 			case GLFW_KEY_W:
 				//player_velocity.y += -PLAYER_SPEED;
 				player_movement_state.x = 1;
-				texture.used_texture = walking_sideways[frame];
+				//texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_S:
 				//player_velocity.y += PLAYER_SPEED;
 				player_movement_state.y = 1;
-				texture.used_texture = walking_sideways[frame];
+				//texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_A:
 				//player_velocity.x += -PLAYER_SPEED;
 				player_movement_state.z = 1;
-				texture.used_texture = walking_sideways[frame];
+				//texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x > 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
 					updateCamera_smoothing(motion.position, target_position);
@@ -1032,7 +1071,7 @@ void GameScene::on_key(int key, int action, int mod) {
 			case GLFW_KEY_D:
 				//player_velocity.x += PLAYER_SPEED;
 				player_movement_state.w = 1;
-				texture.used_texture = walking_sideways[frame];
+				// texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x < 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
 					updateCamera_smoothing(motion.position, target_position);
@@ -1239,6 +1278,7 @@ void GameScene::on_key(int key, int action, int mod) {
 
 			if (distance(motion.position, player_motion.position) < 100.f && !tape.is_played) {
 				// stop the audio on the tape channel
+				Mix_PlayChannel(-1, tape_pickup, 0);
 				Mix_HaltChannel(tape_channel);
 				std::vector<std::string> subtitles;
 				// Play the recording based on the tape number
@@ -1536,35 +1576,94 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	// 		  GEOMETRY_BUFFER_ID::SPRITE });
 	// }
 
-	if (debugging.in_debug_mode) { 		
+	if (debugging.in_debug_mode && profession == "Soldier") {
 		registry.renderRequests.insert( 			
 			entity, 			
 			{ TEXTURE_ASSET_ID::PLAYER_1, 			  
 			  EFFECT_ASSET_ID::MESHED, 			  
 			  GEOMETRY_BUFFER_ID::PLAYER }
 		); 	
-	} else { 		
-    // Player entity gets the textured effect
-    registry.renderRequests.insert( 			
-        entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::TEXTURED, 			  
-          GEOMETRY_BUFFER_ID::SPRITE }
-    );
-    
-    Entity fov_entity = Entity();
-    Motion& fov_motion = registry.motions.emplace(fov_entity);
-	registry.fovs.emplace(fov_entity);
-    fov_motion = registry.motions.get(entity); // Copy player's motion
-    
-    // Add the FOV render request to the new entity
-    registry.renderRequests.insert( 			
-        fov_entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::FOV2, 			  
-          GEOMETRY_BUFFER_ID::SPRITE }
-    ); 	
 	}
+	else if (!debugging.in_debug_mode && profession == "Soldier") {
+		// Player entity gets the textured effect
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
+
+		Entity fov_entity = Entity();
+		Motion& fov_motion = registry.motions.emplace(fov_entity);
+		registry.fovs.emplace(fov_entity);
+		fov_motion = registry.motions.get(entity); // Copy player's motion
+
+		// Add the FOV render request to the new entity
+		registry.renderRequests.insert(
+			fov_entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1,
+			  EFFECT_ASSET_ID::FOV2,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
+	}
+	//else if (debugging.in_debug_mode && profession == "Doctor") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::DOC_1,
+	//		  EFFECT_ASSET_ID::MESHED,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+	//}
+	//else if (!debugging.in_debug_mode && profession == "Doctor") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::DOC_1,
+	//		  EFFECT_ASSET_ID::TEXTURED,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+
+	//	Entity fov_entity = Entity();
+	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
+	//	registry.fovs.emplace(fov_entity);
+	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+
+	//	// Add the FOV render request to the new entity
+	//	registry.renderRequests.insert(
+	//		fov_entity,
+	//		{ TEXTURE_ASSET_ID::DOC_1,
+	//		  EFFECT_ASSET_ID::FOV2,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+	//}
+	//else if (debugging.in_debug_mode && profession == "Hacker") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::HACK_1,
+	//		  EFFECT_ASSET_ID::MESHED,
+	//		  GEOMETRY_BUFFER_ID::PLAYER }
+	//	);
+	//}
+	//else if (!debugging.in_debug_mode && profession == "Hacker") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::HACK_1,
+	//		  EFFECT_ASSET_ID::TEXTURED,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+
+	//	Entity fov_entity = Entity();
+	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
+	//	registry.fovs.emplace(fov_entity);
+	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+
+	//	// Add the FOV render request to the new entity
+	//	registry.renderRequests.insert(
+	//		fov_entity,
+	//		{ TEXTURE_ASSET_ID::HACK_1,
+	//		  EFFECT_ASSET_ID::FOV2,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+	//}
 
 	// Attach a gun to the player entity
 	createGun(entity);
@@ -1975,6 +2074,7 @@ void GameScene::handle_collisions() {
 		// Bullet & Enemy collision
 		if (registry.bullets.has(entity)) {
 			if (registry.enemies.has(entity_other)) {
+				
 				// Bullet and enemy components
 				Bullet& bullet = registry.bullets.get(entity);
 
@@ -2190,9 +2290,10 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 }
 
 void GameScene::apply_damage(Entity& target, int damage) {
+	int monster_hurt_channel = 3;
 	// Check if the target has a Health component
 	if (registry.healths.has(target)) {
-		Mix_PlayChannel(-1, monster_dead_sound, 0);
+		Mix_PlayChannel(monster_hurt_channel, enemy_get_hit, 0);
 		Health& health = registry.healths.get(target);
 		health.current_health -= damage;  // Apply the damage
 		std::cout << "Enemy lost " << damage << " health. Current health: " << health.current_health << std::endl;
@@ -2223,7 +2324,7 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			registry.enemies.remove(target);
 			registry.enemyDeathTimers.insert(target, { 3000.0f, 3000.0f });
 			state.exp += 1;
-			Mix_PlayChannel(-1, monster_hurt_sound, 0);
+			Mix_PlayChannel(monster_hurt_channel, monster_hurt_sound, 0);
 
 			std::cout << "Enemy is dead!" << std::endl;
 
@@ -2265,11 +2366,11 @@ void GameScene::show_damage_number(vec2 position, int damage) {
 }
 
 void GameScene::on_mouse_move(vec2 mouse_position) {
-	TEXTURE_ASSET_ID walking_sideways[3] = {
+	/*TEXTURE_ASSET_ID walking_sideways[3] = {
 	TEXTURE_ASSET_ID::PLAYER_1,
 	TEXTURE_ASSET_ID::PLAYER_2,
 	TEXTURE_ASSET_ID::PLAYER_3
-	};
+	};*/
 
 	// Get the gun entity
 	Entity entity = registry.guns.entities[0];

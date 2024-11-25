@@ -587,7 +587,16 @@ enum class TEXTURE_ASSET_ID {
 	TAPE_3 = TAPE_2 + 1,
 	TAPE_4 = TAPE_3 + 1,
 	TAPE_5 = TAPE_4 + 1,
-	TEXTURE_COUNT = TAPE_5 + 1
+	
+	DOC_1 = TAPE_5 + 1,
+	DOC_2 = DOC_1 + 1,
+	DOC_3 = DOC_2 + 1,
+
+	HACK_1 = DOC_3 + 1,
+	HACK_2 = HACK_1 + 1,
+	HACK_3 = HACK_2 + 1,
+	
+	TEXTURE_COUNT = HACK_3 + 1
 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

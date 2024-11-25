@@ -43,14 +43,6 @@ class RenderSystem {
 			textures_path("player_3_new.png"),
 			textures_path("player_2_new.png"),
 
-			/*textures_path("player_back_1.png"),
-			textures_path("player_back_2.png"),
-			textures_path("player_back_3.png"),
-
-			textures_path("player_front_1.png"),
-			textures_path("player_front_2.png"),
-			textures_path("player_front_3.png"),*/
-
 			textures_path("tile_door_open.png"),
 			textures_path("tile_door_closed.png"),
 
@@ -111,8 +103,15 @@ class RenderSystem {
 			textures_path("Tape_green.png"),
 			textures_path("Tape_light_blue.png"),
 			textures_path("Tape_orange.png"),
-			textures_path("Tape_rainbow.png")
+			textures_path("Tape_rainbow.png"),
 
+			textures_path("doc_1.png"),
+			textures_path("doc_2.png"),
+			textures_path("doc_3.png"),
+
+			textures_path("hacker_1.png"),
+			textures_path("hacker_2.png"),
+			textures_path("hacker_3.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

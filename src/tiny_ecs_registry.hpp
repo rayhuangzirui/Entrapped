@@ -22,6 +22,8 @@ public:
 	ComponentContainer<FPS> fps;	
 	ComponentContainer<Tape> tapes;
 	ComponentContainer<Subtitle> subtitles;
+	ComponentContainer<TransState> transStates;
+	ComponentContainer<TransMask> transMasks;
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -119,6 +121,8 @@ public:
 		registry_list.push_back(&parents);
 		registry_list.push_back(&tapes);
 		registry_list.push_back(&subtitles);
+		registry_list.push_back(&transStates);
+		registry_list.push_back(&transMasks);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);

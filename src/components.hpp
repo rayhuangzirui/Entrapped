@@ -443,6 +443,20 @@ struct IconSprite {};
 struct ItemCount {
 	Entity text_entity;
 };
+
+// Dissovle transition component
+struct TransState {
+	bool is_fade_in = false;
+	bool is_fade_out = false;
+	float timer = 0.0f;
+	float duration = 500.0f; // ms
+};
+
+struct TransMask {
+
+};
+
+
 //-------------------- Inventory system --------------------
 
 //-------------------- Power up system --------------------

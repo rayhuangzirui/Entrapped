@@ -20,10 +20,11 @@ public:
 	void destroy();
 	void on_key(int key, int action, int mod);
 	std::string get_next_scene();
-	void handle_collisions();
+	void handle_collisions(float elapsed_ms_since_last_update);
 	void on_mouse_move(vec2 mouse_position);
 	void on_mouse_click(int button, int action, int mod);
 	std::string selected_profession;
+	TransState transState;
 private:
 	RenderSystem* renderer;
 	std::string next_scene = "";

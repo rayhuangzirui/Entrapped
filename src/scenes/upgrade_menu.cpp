@@ -74,8 +74,9 @@ std::string UpgradeMenu::get_next_scene() {
 }
 
 
-void UpgradeMenu::handle_collisions() {
+void UpgradeMenu::handle_collisions(float elapsed_ms_since_last_update) {
 	// dummy to avoid compiler warning
+	(float)elapsed_ms_since_last_update;
 }
 
 void UpgradeMenu::on_mouse_move(vec2 mouse_position) {

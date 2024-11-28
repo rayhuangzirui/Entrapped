@@ -39,8 +39,9 @@ std::string OverScene::get_next_scene() {
 }
 
 
-void OverScene::handle_collisions() {
+void OverScene::handle_collisions(float elapsed_ms_since_last_update) {
 	// dummy to avoid compiler warning
+	(float)elapsed_ms_since_last_update;
 }
 
 void OverScene::on_mouse_move(vec2 mouse_position) {

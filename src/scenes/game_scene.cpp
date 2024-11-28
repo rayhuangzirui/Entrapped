@@ -519,9 +519,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 		PowerUpSystem::applyPowerUp(player, PowerUpType::Hacker_init_powerup, 0);
 	}
 
-	//enemy = createEnemy({ 700, 300 });
-	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
-
 	//------- Inventory -------//
 
 	InventorySystem::initializeInventory(player);
@@ -1876,13 +1873,73 @@ Entity GameScene::createEnemy(vec2 pos) {
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 10;
 	health.max_health = 10;
-
-
-	// health bar for enemy
-	//vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
- //   vec2 size = {100.f, 10.f};   // Initial size of the health bar
- //   enemy.health_bar_entity = createHealthBar(renderer, entity, offset, size);
 	
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	registry.enemyAIs.emplace(entity);
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
+Entity GameScene::createEnemyAgile(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 80.f ,80.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
 	aiTimer.interval = 1000.f;

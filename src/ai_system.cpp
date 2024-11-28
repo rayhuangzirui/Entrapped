@@ -167,7 +167,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 					float random_y = (rand() % 200 - 100) / 100.f; // Random number between -1 and 1
 
 					vec2 random_direction = normalize(vec2(random_x, random_y));
-					motion.velocity = random_direction * 100.f;
+					motion.velocity = random_direction * enemyAI.speed;
 
 					enemyAI.wander_timer = 2000.f;
 				}

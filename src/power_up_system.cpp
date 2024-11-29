@@ -93,6 +93,42 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
         }
     }
 
+    else if (type == PowerUpType::AttackSpeedPowerUp) {
+        if (registry.players.has(player)) {
+            // Add or update the AttackSpeedPowerUp component on the player
+            if (registry.attackSpeedPowerUps.has(player)) {
+                AttackSpeedPowerUp& attack_speed = registry.attackSpeedPowerUps.get(player);
+                attack_speed.stacks += strength; // Increment stack count
+            }
+            else {
+                AttackSpeedPowerUp& attack_speed = registry.attackSpeedPowerUps.emplace(player);
+                attack_speed.stacks = strength;
+            }
+
+            // Dynamically apply the effect to the first gun associated with the player
+            if (registry.guns.entities.size() > 0) {
+                Entity gun_entity = registry.guns.entities[0]; // Assume the first gun is associated with the player
+                Gun& gun = registry.guns.get(gun_entity);
+
+                // Update the gun's fire rate based on the total stacks
+                gun.fire_rate += 1.0f * strength;
+
+                // Debug message
+                std::cout << "[DEBUG] Attack Speed Power-Up applied to player! New fire rate: "
+                    << gun.fire_rate << ", Total stacks: "
+                    << registry.attackSpeedPowerUps.get(player).stacks << std::endl;
+            }
+            else {
+                // If no gun exists, store the power-up but don't apply its effect yet
+                std::cout << "[DEBUG] Player has no gun. Attack Speed Power-Up stored for later use." << std::endl;
+            }
+        }
+        else {
+            // If the player entity does not exist
+            std::cout << "[DEBUG] Player not found. Attack Speed Power-Up not applied." << std::endl;
+        }
+    }
+
     else if (type == PowerUpType::Soldier_init_powerup) {
 		// soldier init powerup:
         // soldier has an invincible frame when dashing towards enemy (in game_scene)

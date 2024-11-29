@@ -1054,6 +1054,29 @@ void GameScene::step(float elapsed_ms) {
 		texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
 	}
 
+	// Update fire timer
+	fire_timer -= elapsed_ms / 1000.f;  // Convert to seconds
+
+	// Full-auto shooting logic
+	if (is_left_mouse_pressed && fire_timer <= 0.f) {
+		// Get the gun entity and its motion
+		if (!registry.guns.entities.empty()) {
+			Entity gun = registry.guns.entities[0];
+			Motion& gun_motion = registry.motions.get(gun);
+
+			// Get the direction the gun is facing
+			vec2 direction = { cos(gun_motion.angle), sin(gun_motion.angle) };
+			direction = normalize(direction);  // Ensure consistent bullet speed
+
+			// Shoot bullet
+			shoot_bullet(gun_motion.position, direction);
+
+			// Reset fire timer based on gun's fire rate
+			Gun& gun_component = registry.guns.get(gun);
+			fire_timer = 1.f / gun_component.fire_rate;  // Fire rate is bullets per second
+		}
+	}
+
 
 	// update text animation
 	updateTextAnimation(elapsed_ms);
@@ -1558,7 +1581,17 @@ void GameScene::on_key(int key, int action, int mod) {
 				}
 			}
 			break;
+		
+		case GLFW_KEY_9:
+        // Add an attack speed power-up stack when '9' is pressed
+        if (!registry.players.entities.empty()) {
+            Entity player = registry.players.entities[0];
+            PowerUpSystem::applyPowerUp(player, PowerUpType::AttackSpeedPowerUp, 1);
 
+            // Debug: Print confirmation of attack speed power-up applied
+            std::cout << "[DEBUG] Attack Speed Power-Up stack added!" << std::endl;
+        }
+        break;
 
 		default:
 			break;
@@ -2391,7 +2424,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = position;
-	motion.velocity = direction * 500.f;
+	motion.velocity = direction * 1000.f;
 	motion.angle = atan2(direction.y, direction.x); // Calculate angle from direction, in radians for sprite rotation
 	motion.scale = vec2({ 15.f, 15.f });
 
@@ -2593,17 +2626,13 @@ void GameScene::on_mouse_click(int button, int action, int mod) {
 		return;
 	}
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		Motion& gun_motion = registry.motions.get(gun);
-
-		// get the gun facing direction
-		vec2 direction = { cos(gun_motion.angle), sin(gun_motion.angle) };
-
-		// Normalize the direction vector, to ensure consistent bullet speed
-		direction = normalize(direction);
-
-		// Shoot a bullet
-		shoot_bullet(gun_motion.position, direction);
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (action == GLFW_PRESS) {
+			is_left_mouse_pressed = true;
+		}
+		else if (action == GLFW_RELEASE) {
+			is_left_mouse_pressed = false;
+		}
 	}
 
 	(int)button;
@@ -2794,6 +2823,14 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
 		if (ricochet.stacks > 0) {
 			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_RICOCHET, ricochet.stacks });
+		}
+	}
+
+	// Add the player's attack speed power-up (if any)
+	if (registry.attackSpeedPowerUps.has(player)) {
+		AttackSpeedPowerUp& powerup = registry.attackSpeedPowerUps.get(player);
+		if (powerup.stacks > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_ATTACK_SPEED, powerup.stacks });
 		}
 	}
 

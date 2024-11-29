@@ -1772,7 +1772,7 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 		// Add the FOV render request to the new entity
 		registry.renderRequests.insert(
 			fov_entity,
-			{ TEXTURE_ASSET_ID::PLAYER_1,
+			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			  EFFECT_ASSET_ID::FOV2,
 			  GEOMETRY_BUFFER_ID::SPRITE }
 		);

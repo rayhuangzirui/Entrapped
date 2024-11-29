@@ -8,6 +8,7 @@
 void ProfessionMenu::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
 	create_profession();
+	button_click = Mix_LoadWAV(audio_path("button-clicking.wav").c_str());
 }
 
 void ProfessionMenu::step(float elapsed_ms) {
@@ -107,6 +108,7 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 				on_profession_selected(profession.name);
 				time_since_selection = 0.f;
 				selection_delay_complete = false;
+				Mix_PlayChannel(-1, button_click, 0);
 			}
 		}
 		
@@ -117,6 +119,7 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 				confirm_button_clicked = true;
 				printf("Confirm button clicked\n");
 				time_since_last_click = 0.f;
+				Mix_PlayChannel(-1, button_click, 0);
 			}
 		}
 	}

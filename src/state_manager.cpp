@@ -50,7 +50,10 @@ MapState StateManager::changeMap(std::string map_name) {
 	}
 	else if (map_name.compare("tutorial") == 0) {
 		//map_state = CreateTutorialMap();
-		map_state = CreateTutorialMap_new();
+		map_state = CreateTutorialMap();
+	}
+	else if (map_name.compare("map1") == 0) {
+		map_state = CreateMap1();
 	}
 	map_height = map_state.height;
 	map_width = map_state.width;

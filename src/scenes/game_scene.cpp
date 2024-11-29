@@ -108,8 +108,6 @@ void GameScene::renderAnimatedText(RenderSystem* renderer) {
 	registry.subtitles.emplace(subtitle);
 }
 
-
-
 // Debug Component
 Entity createRing(vec2 position, vec2 scale)
 {
@@ -316,19 +314,19 @@ void GameScene::spawnEnemiesAndItems() {
 
 	// tutorial specific elements
 	if (state.map_index == 0) {
-		Entity marker = createInvisible({ 10, 10 });
+		Entity marker = createInvisible({ (13 + 0.5) * 48, (9 + 0.5) * 48 });
 		Hint hint1;
 		hint1.text = "WASD to move player";
 		hint1.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint1);
 
-		marker = createInvisible({ (15+0.5)*48, (16 + 0.5) * 48 });
+		marker = createInvisible({ (26+0.5)*48, (25 + 0.5) * 48 });
 		Hint hint2;
 		hint2.text = "Hold shift to sprint";
 		hint2.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint2);
 	}
-	else {
+	else if (state.map_index == 1) {
 		Entity marker = createInvisible({ 10, 10 });
 		Hint hint3;
 		hint3.text = "Look for the exit of the maze!";
@@ -994,6 +992,11 @@ void GameScene::on_key(int key, int action, int mod) {
 	Player& player_component = registry.players.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
+
+	// display the current cell player is at
+	float grid_x = floor(motion.position.x / state.TILE_SIZE);
+	float grid_y = floor(motion.position.y / state.TILE_SIZE);
+	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
 
 	// Handle movement keys (W, A, S, D)
 	if (!registry.deathTimers.has(player)) {

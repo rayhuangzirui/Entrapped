@@ -39,7 +39,7 @@ int countAgainstWall(vec2 v) {
 	for (int i = v.y - 1; i <= v.y + 1; i++) {
 		for (int j = v.x - 1; j <= v.x + 1; j++) {
 			if (j >= 0 && j < state.map_width && i >= 0 && i < state.map_height && vec2(j, i) != v) {
-				if (state.map[i][j] != 0) {
+				if (state.map.collision_layer[i][j] != 0) {
 					walls++;
 				}
 			}
@@ -99,7 +99,7 @@ std::vector<vec2> AISystem::findPath(vec2 start, vec2 end) {
 		// generate neighbours
 		std::vector<vec2> neighbours = findNeighbours(current_coords);
 		for (vec2 neighbour : neighbours) {
-			if (state.map[neighbour.y][neighbour.x] != 0 || std::find(closed_set.begin(), closed_set.end(), neighbour) != closed_set.end()) {
+			if (state.map.collision_layer[neighbour.y][neighbour.x] != 0 || std::find(closed_set.begin(), closed_set.end(), neighbour) != closed_set.end()) {
 				continue;
 			}
 
@@ -167,7 +167,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 					float random_y = (rand() % 200 - 100) / 100.f; // Random number between -1 and 1
 
 					vec2 random_direction = normalize(vec2(random_x, random_y));
-					motion.velocity = random_direction * 100.f;
+					motion.velocity = random_direction * enemyAI.speed;
 
 					enemyAI.wander_timer = 2000.f;
 				}

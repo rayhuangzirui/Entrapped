@@ -13,6 +13,9 @@
 #include <iostream>
 #include <sstream>
 
+// state
+#include <state_manager.hpp>
+
 // World initialization
 bool RenderSystem::init(GLFWwindow* window_arg)
 {
@@ -57,6 +60,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	gl_has_errors();
 	initScreenTexture();
     initializeGlTextures();
+	initializeMapTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 	//initializeMap();
@@ -114,6 +118,66 @@ void RenderSystem::initializeGlTextures()
 		gl_has_errors();
 		stbi_image_free(data);
     }
+	gl_has_errors();
+}
+
+void RenderSystem::initializeMapTextures()
+{
+	glGenTextures((GLsizei)state.map_tile_textures.size(), state.map_tile_textures.data());
+	const std::string& path = textures_path("map_tiles.png");
+	ivec2 dimensions = { 0, 0 };
+	unsigned char* data;
+	int nChannels;
+	data = stbi_load(path.c_str(), &dimensions.x, &dimensions.y, &nChannels, 4);
+	if (data == NULL)
+	{
+		const std::string message = "Could not load the file " + path + ".";
+		fprintf(stderr, "%s", message.c_str());
+		assert(false);
+	}
+
+
+	int ts = state.TILE_SIZE;
+	int iw = floor(dimensions.x / state.TILE_SIZE);
+	int ih = floor(dimensions.y / state.TILE_SIZE);
+	int texture_index = 0;
+	unsigned char* subData;
+	for (uint i = 0; i < ih; i++) {
+		for (uint j = 0; j < iw; j++) {
+
+			// crop the image
+			int x = j * ts;
+			int y = i * ts;
+			std::cout << "x: " << x  << " y: " << y << std::endl;
+			subData = new unsigned char[ts * ts * nChannels];
+			for (int k = 0; k < ts; ++k) {
+				for (int h = 0; h < ts; ++h) {
+					for (int c = 0; c < nChannels; ++c) {
+						subData[(k * ts + h) * nChannels + c] =
+							data[((y + k) * dimensions.x + (x + h)) * nChannels + c];
+						//subData[(k * ts + h) * nChannels + c] = 0;
+					}
+				}
+			}
+
+			// bind to texture
+			glBindTexture(GL_TEXTURE_2D, state.map_tile_textures[texture_index]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ts, ts, 0, GL_RGBA, GL_UNSIGNED_BYTE, subData);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			gl_has_errors();
+
+			delete[] subData;
+			texture_index++;
+			if (texture_index >= state.map_tile_textures.size()) {
+				break;
+			}
+		}
+		if (texture_index >= state.map_tile_textures.size()) {
+			break;
+		}
+	}
+	stbi_image_free(data);
 	gl_has_errors();
 }
 

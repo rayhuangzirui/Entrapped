@@ -305,7 +305,7 @@ bool check_box_in_the_wall(Motion motion) {
 
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.is_blocked(state.map[y][x])) {
+            if (state.is_blocked(state.map.collision_layer[y][x])) {
                 return true;
             }
         }
@@ -351,7 +351,7 @@ void handle_mesh_wall_collision(Entity entity) {
     // For each tile that the entity overlaps with
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.is_blocked(state.map[y][x])) {
+            if (state.is_blocked(state.map.collision_layer[y][x])) {
                 vec2 wall_pos = vec2((x + 0.5f) * TILE_SIZE, (y + 0.5f) * TILE_SIZE);
 
                 vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);

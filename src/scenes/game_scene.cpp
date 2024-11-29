@@ -108,8 +108,6 @@ void GameScene::renderAnimatedText(RenderSystem* renderer) {
 	registry.subtitles.emplace(subtitle);
 }
 
-
-
 // Debug Component
 Entity createRing(vec2 position, vec2 scale)
 {
@@ -268,7 +266,7 @@ void GameScene::spawnEnemiesAndItems() {
 	for (int row = 0; row < state.map_height; ++row) {
 		for (int col = 0; col < state.map_width; ++col) {
 			vec2 pos = { (col + 0.5) * state.TILE_SIZE, (row + 0.5) * state.TILE_SIZE };
-			if (state.map[row][col] == 2) {
+			if (state.map.interactive_layer[row][col] == 2) {
 				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
@@ -280,11 +278,11 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(enemy, hint);
 				}
 			}
-			else if (state.map[row][col] == 3) {
+			else if (state.map.interactive_layer[row][col] == 3) { // random loot: chest or power up
 				Entity chest = createChest(pos);
 				registry.randomChests.emplace(chest);
 			}
-			else if (state.map[row][col] == 4) {
+			else if (state.map.interactive_layer[row][col] == 4) {
 				Entity chest = createChest(pos);
 				registry.healthChests.emplace(chest);
 				if (state.map_index == 0) {
@@ -294,7 +292,7 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
-			else if (state.map[row][col] == 5) {
+			else if (state.map.interactive_layer[row][col] == 5) {
 				Entity chest = createChest(pos);
 				registry.ammoChests.emplace(chest);
 				if (state.map_index == 0) {
@@ -304,24 +302,31 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
+			else if (state.map.interactive_layer[row][col] == 6) {
+				// add random power-up pickups
+			}
+			else if (state.map.interactive_layer[row][col] == 7) {
+				// faster enemy
+
+			}
 		}
 	}
 
 	// tutorial specific elements
 	if (state.map_index == 0) {
-		Entity marker = createInvisible({ 10, 10 });
+		Entity marker = createInvisible({ (13 + 0.5) * 48, (9 + 0.5) * 48 });
 		Hint hint1;
 		hint1.text = "WASD to move player";
 		hint1.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint1);
 
-		marker = createInvisible({ (15+0.5)*48, (16 + 0.5) * 48 });
+		marker = createInvisible({ (26+0.5)*48, (25 + 0.5) * 48 });
 		Hint hint2;
 		hint2.text = "Hold shift to sprint";
 		hint2.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint2);
 	}
-	else {
+	else if (state.map_index == 1) {
 		Entity marker = createInvisible({ 10, 10 });
 		Hint hint3;
 		hint3.text = "Look for the exit of the maze!";
@@ -511,9 +516,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 		// Ability to craft ammo, collect materials by killing enemy, increase 3 ammo per enemy killed
 		PowerUpSystem::applyPowerUp(player, PowerUpType::Hacker_init_powerup, 0);
 	}
-
-	//enemy = createEnemy({ 700, 300 });
-	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
 	//------- Inventory -------//
 
@@ -990,6 +992,11 @@ void GameScene::on_key(int key, int action, int mod) {
 	Player& player_component = registry.players.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
+
+	// display the current cell player is at
+	float grid_x = floor(motion.position.x / state.TILE_SIZE);
+	float grid_y = floor(motion.position.y / state.TILE_SIZE);
+	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
 
 	// Handle movement keys (W, A, S, D)
 	if (!registry.deathTimers.has(player)) {
@@ -1869,13 +1876,73 @@ Entity GameScene::createEnemy(vec2 pos) {
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 10;
 	health.max_health = 10;
-
-
-	// health bar for enemy
-	//vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
- //   vec2 size = {100.f, 10.f};   // Initial size of the health bar
- //   enemy.health_bar_entity = createHealthBar(renderer, entity, offset, size);
 	
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	registry.enemyAIs.emplace(entity);
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
+Entity GameScene::createEnemyAgile(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 80.f ,80.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
 	aiTimer.interval = 1000.f;

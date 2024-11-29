@@ -21,7 +21,7 @@ public:
 	void on_key(int key, int action, int mod);
 	void popScene();
 	void changeScene(std::string name);
-	void handle_collisions();
+	void handle_collisions(float elapsed_ms_since_last_update);
 	void on_mouse_move(vec2 mouse_position);
 	void on_mouse_click(int button, int action, int mod);
 	void before_exit();

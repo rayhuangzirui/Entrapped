@@ -108,6 +108,39 @@ void GameScene::renderAnimatedText(RenderSystem* renderer) {
 	registry.subtitles.emplace(subtitle);
 }
 
+Entity GameScene::createTransitionMask(RenderSystem* renderer, float progress) {
+	Entity entity = Entity();
+	//Motion& playerMotion = registry.motions.get(player);
+
+	// Create motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = {0,0};
+	motion.scale = {window_width_px*10, window_height_px*10};
+
+	registry.transMasks.emplace(entity);
+	//transState = registry.transStates.emplace(entity);
+	//transState.is_fade_in = false;
+	//transState.is_fade_out = false;
+	//transState.timer = 0.f;
+	//transState.duration = 1000.f;
+
+	registry.colors.insert(entity, { 0, 0, 0 }); // Black color
+	// add opacity component
+	registry.opacities.emplace(entity, Opacity{progress});
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+
+	return entity;
+}
+
 // Debug Component
 Entity createRing(vec2 position, vec2 scale)
 {
@@ -492,7 +525,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	std::string map_name = state.map_lists[state.map_index];
 	MapState map_state = state.changeMap(map_name);
 	state.save();
-	createMaze(); 
+	createMaze();
 
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
@@ -613,6 +646,9 @@ void GameScene::initialize(RenderSystem* renderer) {
 	// Draw inventory slots
 	createInventorySlots(player);
 	refreshUI(player);
+	transState.is_fade_in = true;
+	transState.timer = 0.f;        
+	transState.duration = 1000.f;
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -625,6 +661,65 @@ void GameScene::step(float elapsed_ms) {
 	// remove all text component
 	while (registry.subtitles.entities.size() > 0)
 		registry.remove_all_components_of(registry.subtitles.entities.back());
+
+	while (registry.transMasks.entities.size() > 0)
+		registry.remove_all_components_of(registry.transMasks.entities.back());
+
+	
+	//transState.is_fade_in = true;
+	if (transState.is_fade_in) {
+		// print out
+		printf("fading in\n");
+	}
+	else {
+		printf("not fading in\n");
+
+	}
+
+	if (transState.is_fade_out) {
+		printf("fading out\n");
+	}
+
+	if (transState.is_fade_out) {
+		printf("fading out\n");
+		transState.timer += elapsed_ms;
+		printf("Timer: %f\n", transState.timer);
+		printf("Duration: %f\n", transState.duration);
+
+		// Increase opacity over time
+		float progress = transState.timer / transState.duration;
+		// print out
+		printf("progress: %f\n", progress);
+		if (progress > 1.f) progress = 1.f;
+		createTransitionMask(renderer, progress);
+		//registry.opacities.get(transMaskEntity).opacity = progress;
+
+		if (transState.timer >= transState.duration) {
+			// Finish fade-out, change map
+			transState.is_fade_out = false;
+			changeMap(next_map_name, elapsed_ms);
+
+			// Start fade-in
+			transState.is_fade_in = true;
+			transState.timer = 0.f;
+		}
+	}
+	else if (transState.is_fade_in) {
+		transState.timer += elapsed_ms;
+
+		// Decrease opacity over time
+		float progress = transState.timer / transState.duration;
+		if (progress > 1.f) progress = 1.f;
+		createTransitionMask(renderer, (1.f - progress));
+
+		if (transState.timer >= transState.duration) {
+			// Finish fade-in
+			transState.is_fade_in = false;
+			transState.timer = 0.f;
+		}
+		//registry.remove_all_components_of(registry.transMasks.entities.back());
+	}
+
 
 	updateHints(player);
 
@@ -964,7 +1059,6 @@ void GameScene::step(float elapsed_ms) {
 	updateTextAnimation(elapsed_ms);
 	
 	renderAnimatedText(renderer);
-
 }
 
 void GameScene::restart_game() {
@@ -1016,6 +1110,10 @@ std::string GameScene::get_next_scene() {
 }
 
 void GameScene::on_key(int key, int action, int mod) {
+	/*if (transState.is_fade_in || transState.is_fade_out)
+		return;*/
+
+
 	static int frame = 0;
 	static int frame_counter = 0;
 	static int first_round_frame_counter = 0;
@@ -1036,6 +1134,7 @@ void GameScene::on_key(int key, int action, int mod) {
 	float grid_x = floor(motion.position.x / state.TILE_SIZE);
 	float grid_y = floor(motion.position.y / state.TILE_SIZE);
 	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
+
 
 	// Handle movement keys (W, A, S, D)
 	if (!registry.deathTimers.has(player)) {
@@ -2083,7 +2182,7 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 }
 
 // Compute collisions between entities
-void GameScene::handle_collisions() {
+void GameScene::handle_collisions(float elapsed_ms_since_last_update) {
 	// Loop over all collisions detected by the physics system
 	auto& collisionsRegistry = registry.collisions;
 
@@ -2185,65 +2284,17 @@ void GameScene::handle_collisions() {
 			}
 		}
 
-		//// Bullet & Wall collision check for each bullet in the registry
-		//for (Entity bullet_entity : registry.bullets.entities) {
-		//	Motion& bullet_motion = registry.motions.get(bullet_entity);
-		//	vec2 bullet_min = bullet_motion.position - (bullet_motion.scale / 2.0f);
-		//	vec2 bullet_max = bullet_motion.position + (bullet_motion.scale / 2.0f);
-
-		//	// Loop through all entities with bounding boxes (assuming walls are part of this)
-		//	for (uint i = 0; i < registry.boundingBoxes.components.size(); i++) {
-		//		BoundingBox& wall_box = registry.boundingBoxes.components[i];
-		//		vec2 wall_min = wall_box.min;
-		//		vec2 wall_max = wall_box.max;
-
-		//		// Check AABB collision between the bullet and wall
-		//		if (check_aabb_collision(bullet_min, bullet_max, wall_min, wall_max)) {
-		//			// Collision detected, remove the bullet
-		//			registry.remove_all_components_of(bullet_entity);
-		//			break;  // Exit inner loop once bullet is removed
-		//		}
-		//	}
-		//}
-
-		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
-		// if (registry.bullets.has(entity)) {
-		// if (registry.enemies.has(entity_other)) {
-		//		// Bullet and enemy components
-		//		Bullet& bullet = registry.bullets.get(entity);
-		//		Enemy& enemy = registry.enemies.get(entity_other);
-
-		//		// Reduce enemy health
-		//		enemy.health -= bullet.damage;
-
-		//		// Red tint light up effect on enemy
-		//		registry.lightUps.emplace(entity_other);
-		//		//registry.colors.get(entity_other) = { 1.f, 0.f, 0.f }; // Red tint
-
-		//		// Play the bullet hit sound
-		//		//Mix_PlayChannel(-1, bullet_hit_sound, 0);
-
-		//		// Check if the enemy is dead
-		//		if (enemy.health <= 0) {
-		//			// TODO: play the enemy dead animation
-
-		//			// Play the enemy dead sound
-		//			//Mix_PlayChannel(-1, enemy_dead_sound, 0);
-
-		//			// Remove the enemy
-		//			registry.remove_all_components_of(entity_other);
-		//		}
-
-		//		// Remove the bullet
-		//		registry.remove_all_components_of(entity);
-		//	}
-		//}
-
 		// Player & Portal Collision
 		if (registry.players.has(entity)) {
 			if (registry.portals.has(entity_other)) {
 				Portal& portal = registry.portals.get(entity_other);
-				changeMap(portal.next_map);
+				transState.is_fade_out = true;
+				next_map_name = portal.next_map;
+
+				printf("ms: %f\n", elapsed_ms_since_last_update);
+
+				//float elapsed_seconds = elapsed_ms_since_last_update / 1000.f;
+				//changeMap(portal.next_map, elapsed_ms_since_last_update);
 			}
 		}
 	}
@@ -2252,11 +2303,12 @@ void GameScene::handle_collisions() {
 	registry.collisions.clear();
 }
 
-void GameScene::changeMap(std::string map_name) {
+void GameScene::changeMap(std::string map_name, float elapsed_ms_since_last_update) {
 	if (state.map_index >= state.map_lists.size()) {
 		next_scene = "over_scene";
 		return;
 	}
+
 	MapState map_state = state.changeMap(map_name);
 	// remove bullets and enemies
 	while (registry.hints.entities.size() > 0) {
@@ -2295,7 +2347,11 @@ void GameScene::changeMap(std::string map_name) {
 	// remove all tapes
 	while (registry.tapes.entities.size() > 0)
 		registry.remove_all_components_of(registry.tapes.entities.back());
-	
+
+	// remove the transition mask
+	//while (registry.transMasks.entities.size() > 0)
+	//	registry.remove_all_components_of(registry.transMasks.entities.back());
+
 	// spawn player
 	Entity& player_entity = registry.players.entities[0];
 	Motion& player_motion = registry.motions.get(player_entity);

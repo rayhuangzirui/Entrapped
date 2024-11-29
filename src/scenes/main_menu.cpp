@@ -84,8 +84,9 @@ std::string MainMenu::get_next_scene() {
 }
 
 
-void MainMenu::handle_collisions() {
+void MainMenu::handle_collisions(float elapsed_ms_since_last_update) {
 	// dummy to avoid compiler warning
+	(float)elapsed_ms_since_last_update;
 }
 
 void MainMenu::on_mouse_move(vec2 mouse_position) {

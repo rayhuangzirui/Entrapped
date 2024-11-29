@@ -134,6 +134,21 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
 			gl_has_errors();
 		}
+
+		if (render_request.used_effect == EFFECT_ASSET_ID::BOX) {
+			if (registry.opacities.has(entity)) {
+				// Set the opacity
+				GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+				assert(opacity_uloc >= 0);
+				glUniform1f(opacity_uloc, registry.opacities.get(entity).opacity);
+			}
+			else {
+				// Set the opacity
+				GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+				assert(opacity_uloc >= 0);
+				glUniform1f(opacity_uloc, 1.0f);
+			}
+		}
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::COLOURED)
 {

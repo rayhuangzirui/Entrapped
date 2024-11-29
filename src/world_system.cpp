@@ -119,7 +119,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	this->scene_system.step(elapsed_ms_since_last_update);
-	this->scene_system.handle_collisions();
+	this->scene_system.handle_collisions(elapsed_ms_since_last_update);
 
 	this->ui_system.step(elapsed_ms_since_last_update);
 	return true;

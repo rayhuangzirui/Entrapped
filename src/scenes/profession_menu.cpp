@@ -7,6 +7,7 @@
 
 void ProfessionMenu::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
+	transState.is_fade_in = true;
 	create_profession();
 	button_click = Mix_LoadWAV(audio_path("button-clicking.wav").c_str());
 }
@@ -19,6 +20,10 @@ void ProfessionMenu::step(float elapsed_ms) {
 	while (registry.backgrounds.entities.size() > 0)
 		registry.remove_all_components_of(registry.backgrounds.entities.back());
 
+	while (registry.transMasks.entities.size() > 0)
+		registry.remove_all_components_of(registry.transMasks.entities.back());
+
+
 	if (!selection_delay_complete && selected_profession != "") {
 		time_since_selection += elapsed_ms;
 		if (time_since_selection >= 200.f) {
@@ -29,10 +34,12 @@ void ProfessionMenu::step(float elapsed_ms) {
 
 	if (confirm_button_clicked) {
 		time_since_last_click += elapsed_ms;
-		if (time_since_last_click >= 500.f) {
+		//transState.is_fade_out = true;
+		if (time_since_last_click >= 400.f) {
 			confirm_button_clicked = false;
 			transition_complete = true;
 		}
+		
 	}
  
 	createBackground(renderer);
@@ -52,8 +59,43 @@ void ProfessionMenu::step(float elapsed_ms) {
 		createConfirmButton(renderer, { window_width_px / 2, window_height_px - 100 }, false, false);
 	}
 
-	if (transition_complete) {
-		next_scene = "game_scene";
+	if (transState.is_fade_out) {
+		printf("fading out\n");
+		transState.timer += elapsed_ms;
+		printf("Timer: %f\n", transState.timer);
+		printf("Duration: %f\n", transState.duration);
+
+		// Increase opacity over time
+		float progress = transState.timer / transState.duration;
+		// print out
+		printf("progress: %f\n", progress);
+		if (progress > 1.f) progress = 1.f;
+		createTransitionMask(renderer, progress);
+
+		if (transState.timer >= transState.duration) {
+			// Finish fade-out, change map
+			//transState.is_fade_in = true;
+			if (transition_complete) {
+				transState.is_fade_out = false;	
+				transState.timer = 0.f;
+				transState.duration = 1000.f;
+				transState.is_fade_in = true;
+				next_scene = "game_scene";
+			}
+		}
+	}
+	else if (transState.is_fade_in) {
+		transState.timer += elapsed_ms;
+
+		// Decrease opacity over time
+		float progress = transState.timer / transState.duration;
+		if (progress > 1.f) progress = 1.f;
+		createTransitionMask(renderer, (1.f - progress));
+
+		if (transState.timer >= transState.duration) {
+			// Finish fade-in
+			transState.is_fade_in = false;
+		}
 	}
 }
 
@@ -83,8 +125,9 @@ std::string ProfessionMenu::get_next_scene() {
 }
 
 
-void ProfessionMenu::handle_collisions() {
+void ProfessionMenu::handle_collisions(float elapsed_ms_since_last_update) {
 	// dummy to avoid compiler warning
+	(float)elapsed_ms_since_last_update;
 }
 
 void ProfessionMenu::on_mouse_move(vec2 mouse_position) {
@@ -119,6 +162,9 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 				confirm_button_clicked = true;
 				printf("Confirm button clicked\n");
 				time_since_last_click = 0.f;
+				transState.is_fade_out = true;
+				transState.timer = 0.f;        // Reset the timer
+				transState.duration = 700.f;
 				Mix_PlayChannel(-1, button_click, 0);
 			}
 		}

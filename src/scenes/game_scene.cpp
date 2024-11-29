@@ -638,6 +638,9 @@ void GameScene::initialize(RenderSystem* renderer) {
 	// Draw inventory slots
 	createInventorySlots(player);
 	refreshUI(player);
+	transState.is_fade_in = true;
+	transState.timer = 0.f;        
+	transState.duration = 1000.f;
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -653,6 +656,21 @@ void GameScene::step(float elapsed_ms) {
 
 	while (registry.transMasks.entities.size() > 0)
 		registry.remove_all_components_of(registry.transMasks.entities.back());
+
+	
+	//transState.is_fade_in = true;
+	if (transState.is_fade_in) {
+		// print out
+		printf("fading in\n");
+	}
+	else {
+		printf("not fading in\n");
+
+	}
+
+	if (transState.is_fade_out) {
+		printf("fading out\n");
+	}
 
 	if (transState.is_fade_out) {
 		printf("fading out\n");
@@ -689,6 +707,7 @@ void GameScene::step(float elapsed_ms) {
 		if (transState.timer >= transState.duration) {
 			// Finish fade-in
 			transState.is_fade_in = false;
+			transState.timer = 0.f;
 		}
 		//registry.remove_all_components_of(registry.transMasks.entities.back());
 	}

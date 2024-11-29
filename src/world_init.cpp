@@ -262,11 +262,7 @@ Entity createTransitionMask(RenderSystem* renderer, float progress) {
 	motion.scale = { window_width_px * 10, window_height_px * 10 };
 
 	registry.transMasks.emplace(entity);
-	//transState = registry.transStates.emplace(entity);
-	//transState.is_fade_in = false;
-	//transState.is_fade_out = false;
-	//transState.timer = 0.f;
-	//transState.duration = 1000.f;
+
 
 	registry.colors.insert(entity, { 0, 0, 0 }); // Black color
 	// add opacity component

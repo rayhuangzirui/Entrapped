@@ -33,11 +33,12 @@ void ProfessionMenu::step(float elapsed_ms) {
 
 	if (confirm_button_clicked) {
 		time_since_last_click += elapsed_ms;
-		transState.is_fade_out = true;
-		if (time_since_last_click >= 500.f) {
+		//transState.is_fade_out = true;
+		if (time_since_last_click >= 400.f) {
 			confirm_button_clicked = false;
 			transition_complete = true;
 		}
+		
 	}
  
 	createBackground(renderer);
@@ -69,18 +70,17 @@ void ProfessionMenu::step(float elapsed_ms) {
 		printf("progress: %f\n", progress);
 		if (progress > 1.f) progress = 1.f;
 		createTransitionMask(renderer, progress);
-		//registry.opacities.get(transMaskEntity).opacity = progress;
 
 		if (transState.timer >= transState.duration) {
 			// Finish fade-out, change map
-			transState.is_fade_out = false;
-			transState.is_fade_in = true;
-			transState.timer = 0.f;
+			//transState.is_fade_in = true;
 			if (transition_complete) {
+				transState.is_fade_out = false;	
+				transState.timer = 0.f;
+				transState.duration = 1000.f;
+				transState.is_fade_in = true;
 				next_scene = "game_scene";
 			}
-
-			// Start fade-in
 		}
 	}
 	else if (transState.is_fade_in) {
@@ -160,6 +160,9 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 				confirm_button_clicked = true;
 				printf("Confirm button clicked\n");
 				time_since_last_click = 0.f;
+				transState.is_fade_out = true;
+				transState.timer = 0.f;        // Reset the timer
+				transState.duration = 700.f;
 			}
 		}
 	}

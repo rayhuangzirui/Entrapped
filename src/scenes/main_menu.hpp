@@ -2,6 +2,7 @@
 
 #include "base_scene.hpp"
 #include "render_system.hpp"
+#include <SDL_mixer.h>
 
 class MainMenu : public BaseScene {
 public:
@@ -23,4 +24,6 @@ private:
 	Entity upgrade_button;
 	Entity exit_game_button;
 	Entity debug_button;
+
+	Mix_Chunk* button_click;
 };

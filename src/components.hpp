@@ -51,7 +51,7 @@ struct CameraText {
 };
 
 
-struct Button {
+struct Button1 {
 	Entity text;
 };
 
@@ -102,6 +102,7 @@ struct Bullet
 	float speed = 500.f;
 	vec2 direction = { 0, 0 };
 
+	int ricochet_count = 0;
 };
 
 // FPS counter component
@@ -179,6 +180,7 @@ struct EnemyAI {
 	float path_finding_timer = 0;
 	int state = 0;
 	std::vector<vec2> path;
+	float speed = 0; // movement speed of enemy
 };
 
 struct Health {
@@ -440,7 +442,7 @@ struct InventorySlot {
 struct IconSprite {};
 
 // New component to tag entities as item count text
-struct ItemCount {
+struct InventoryItemCount {
 	Entity text_entity;
 };
 
@@ -462,7 +464,9 @@ struct TransMask {
 //-------------------- Power up system --------------------
 enum class PowerUpType {
 	Shield,
-	SpeedBoost, // For future power-ups
+	SpeedBoost,
+	LifeSteal,
+	RicochetPowerUp,
 	Soldier_init_powerup, 
 	Doctor_init_powerup,
 	Hacker_init_powerup,
@@ -482,6 +486,14 @@ struct Shield {
 // Component for SpeedBoost effect on the player
 struct SpeedBoost {
 	int count; // Number of times speed has been increased
+};
+
+struct LifeSteal {
+	int stacks; // Number of life steal stacks
+};
+
+struct RicochetPowerUp {
+	int stacks;
 };
 
 struct PowerUpSlot {
@@ -584,8 +596,11 @@ enum class TEXTURE_ASSET_ID {
 
 	POWER_UP_SHIELD = ITEM_MEDKIT + 1,
 	POWER_UP_SPEED_UP = POWER_UP_SHIELD + 1,
+	POWER_UP_LIFE_STEAL = POWER_UP_SPEED_UP + 1,
+	POWER_UP_RICOCHET = POWER_UP_LIFE_STEAL + 1,
+	POWER_UP_ATTACK_SPEED = POWER_UP_RICOCHET + 1,
 
-	CHOOSE_PROFESSION_TITLE = POWER_UP_SPEED_UP + 1,
+	CHOOSE_PROFESSION_TITLE = POWER_UP_ATTACK_SPEED + 1,
 	SOLDIER_PAGE = CHOOSE_PROFESSION_TITLE + 1,
 	SOLDIER_PAGE_CLICKED = SOLDIER_PAGE + 1,
 	DOCTOR_PAGE = SOLDIER_PAGE_CLICKED + 1,
@@ -601,7 +616,16 @@ enum class TEXTURE_ASSET_ID {
 	TAPE_3 = TAPE_2 + 1,
 	TAPE_4 = TAPE_3 + 1,
 	TAPE_5 = TAPE_4 + 1,
-	TEXTURE_COUNT = TAPE_5 + 1
+	
+	DOC_1 = TAPE_5 + 1,
+	DOC_2 = DOC_1 + 1,
+	DOC_3 = DOC_2 + 1,
+
+	HACK_1 = DOC_3 + 1,
+	HACK_2 = HACK_1 + 1,
+	HACK_3 = HACK_2 + 1,
+	
+	TEXTURE_COUNT = HACK_3 + 1
 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

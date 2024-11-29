@@ -64,7 +64,7 @@ public:
 	ComponentContainer<UI> UIs;
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
-	ComponentContainer<Button> buttons;
+	ComponentContainer<Button1> buttons;
 	ComponentContainer<PressedButton> pressedButtons;
 	ComponentContainer<Message> messages;
 
@@ -92,13 +92,16 @@ public:
 	ComponentContainer<InventorySlot> inventorySlots;
 	ComponentContainer<InventoryItem> inventoryItems;
 	ComponentContainer<IconSprite> iconSprites;
-	ComponentContainer<ItemCount> itemCounts;
+	ComponentContainer<InventoryItemCount> itemCounts;
 	ComponentContainer<Inventory> inventories;
 
 	// Power-Up related components
 	ComponentContainer<PowerUp> powerUps;
 	ComponentContainer<Shield> shields;
 	ComponentContainer<SpeedBoost> speedBoosts;
+	ComponentContainer<LifeSteal> lifeSteals;
+	ComponentContainer<RicochetPowerUp> ricochetPowerUps;
+
 	ComponentContainer<PowerUpSlot> powerUpSlots;
 	ComponentContainer<Refreshable> refreshables;
 
@@ -195,7 +198,9 @@ public:
 		registry_list.push_back(&powerUps);
 		registry_list.push_back(&shields);
 		registry_list.push_back(&speedBoosts);
-  
+		registry_list.push_back(&lifeSteals);
+		registry_list.push_back(&ricochetPowerUps);
+
 		registry_list.push_back(&powerUpSlots);
 		registry_list.push_back(&soldier_init_powerups);
 		registry_list.push_back(&doctor_init_powerups);

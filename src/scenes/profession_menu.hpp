@@ -2,6 +2,7 @@
 
 #include "base_scene.hpp"
 #include "render_system.hpp"
+#include <SDL_mixer.h>
 
 struct Profession {
 	std::string name;
@@ -41,4 +42,6 @@ private:
 
 	void create_profession();
 	void on_profession_selected(const std::string& profession);
+
+	Mix_Chunk* button_click;
 };

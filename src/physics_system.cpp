@@ -305,7 +305,7 @@ bool check_box_in_the_wall(Motion motion) {
 
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.is_blocked(state.map[y][x])) {
+            if (state.is_blocked(state.map.collision_layer[y][x])) {
                 return true;
             }
         }
@@ -351,7 +351,7 @@ void handle_mesh_wall_collision(Entity entity) {
     // For each tile that the entity overlaps with
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.is_blocked(state.map[y][x])) {
+            if (state.is_blocked(state.map.collision_layer[y][x])) {
                 vec2 wall_pos = vec2((x + 0.5f) * TILE_SIZE, (y + 0.5f) * TILE_SIZE);
 
                 vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
@@ -385,8 +385,47 @@ void handle_mesh_wall_collision(Entity entity) {
                 if (collision_detected) {
 					// if the entity is a bullet, remove it
                     if (registry.bullets.has(entity)) {
-                        registry.remove_all_components_of(entity);
+                        if (registry.ricochetPowerUps.has(entity)) {
+                            RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(entity);
+
+                            if (ricochet.stacks > 0) {
+                                // Ricochet logic
+                                ricochet.stacks--;
+
+                                // Calculate the wall normal based on collision axis
+                                vec2 wall_normal = { 0.0f, 0.0f };
+                                float overlap_x = abs(motion.position.x - wall_pos.x);
+                                float overlap_y = abs(motion.position.y - wall_pos.y);
+
+                                if (overlap_x > overlap_y) {
+                                    wall_normal = { 1.0f, 0.0f }; // Vertical wall normal
+                                }
+                                else {
+                                    wall_normal = { 0.0f, 1.0f }; // Horizontal wall normal
+                                }
+
+                                // Reflect the velocity vector based on the wall normal
+                                motion.velocity = motion.velocity - 2 * dot(motion.velocity, wall_normal) * wall_normal;
+
+                                // Debug: Print the new velocity
+                                std::cout << "[DEBUG] Bullet ricocheted! New velocity: ("
+                                    << motion.velocity.x << ", "
+                                    << motion.velocity.y << "), Remaining stacks: "
+                                    << ricochet.stacks << std::endl;
+                            }
+                            else {
+                                // Remove bullet if no ricochet stacks remain
+                                registry.remove_all_components_of(entity);
+                                std::cout << "[DEBUG] Bullet removed after last ricochet." << std::endl;
+                            }
+                        }
+                        else {
+                            // Remove bullet if no RicochetPowerUp
+                            registry.remove_all_components_of(entity);
+                            std::cout << "[DEBUG] Bullet has no ricochet power-up, removing it." << std::endl;
+                        }
                     }
+
                     float overlap_x = 0.0f;
                     float overlap_y = 0.0f;
 

@@ -14,6 +14,7 @@ void UpgradeMenu::initialize(RenderSystem* renderer) {
 
 	renderer->text_renderer.createText("*Upgrade will be applied on new games", { window_width_px - 450.f, window_height_px - 50.f }, 20.f, { 1.f, 1.f, 1.f });
 	refreshUI();
+	button_click = Mix_LoadWAV(audio_path("main-click.wav").c_str());
 }
 
 void UpgradeMenu::refreshUI() {
@@ -38,6 +39,7 @@ void UpgradeMenu::refreshUI() {
 void UpgradeMenu::step(float elapsed_ms) {
 	refreshUI();
 	for (Entity button_entity : registry.pressedButtons.entities) {
+		Mix_PlayChannel(-1, button_click, 0);
 		if (button_entity == health_button) {
 			if (state.exp > state.health_upgrade.upgrade_cost) {
 				state.health_upgrade.curVal += state.health_upgrade.upgrade_amount;

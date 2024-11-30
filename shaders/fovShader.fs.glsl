@@ -7,6 +7,7 @@ uniform vec2 playerPosition;
 uniform float circleRadius;
 uniform vec2 windowSize;
 uniform bool is_text;
+uniform float time;
 
 int[MAP_LEN*MAP_LEN] map = int[](
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -50,7 +51,7 @@ void main() {
     float dist = length(fragPos - playerPosition);
     
     float fadeWidth = 100.0;
-    float fadeStart = circleRadius - fadeWidth;
+    float fadeStart = circleRadius - fadeWidth*(0.5*sin(0.1*time)+2);
     
     if (dist > circleRadius) {
         FragColor = vec4(0.0, 0.0, 0.0, 0.98);

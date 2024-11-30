@@ -108,7 +108,38 @@ void GameScene::renderAnimatedText(RenderSystem* renderer) {
 	registry.subtitles.emplace(subtitle);
 }
 
+Entity GameScene::createTransitionMask(RenderSystem* renderer, float progress) {
+	Entity entity = Entity();
+	//Motion& playerMotion = registry.motions.get(player);
 
+	// Create motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = {0,0};
+	motion.scale = {window_width_px*10, window_height_px*10};
+
+	registry.transMasks.emplace(entity);
+	//transState = registry.transStates.emplace(entity);
+	//transState.is_fade_in = false;
+	//transState.is_fade_out = false;
+	//transState.timer = 0.f;
+	//transState.duration = 1000.f;
+
+	registry.colors.insert(entity, { 0, 0, 0 }); // Black color
+	// add opacity component
+	registry.opacities.emplace(entity, Opacity{progress});
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+
+	return entity;
+}
 
 // Debug Component
 Entity createRing(vec2 position, vec2 scale)
@@ -268,7 +299,7 @@ void GameScene::spawnEnemiesAndItems() {
 	for (int row = 0; row < state.map_height; ++row) {
 		for (int col = 0; col < state.map_width; ++col) {
 			vec2 pos = { (col + 0.5) * state.TILE_SIZE, (row + 0.5) * state.TILE_SIZE };
-			if (state.map[row][col] == 2) {
+			if (state.map.interactive_layer[row][col] == 2) {
 				Entity enemy = createEnemy(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
@@ -280,11 +311,11 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(enemy, hint);
 				}
 			}
-			else if (state.map[row][col] == 3) {
+			else if (state.map.interactive_layer[row][col] == 3) { // random loot: chest or power up
 				Entity chest = createChest(pos);
 				registry.randomChests.emplace(chest);
 			}
-			else if (state.map[row][col] == 4) {
+			else if (state.map.interactive_layer[row][col] == 4) {
 				Entity chest = createChest(pos);
 				registry.healthChests.emplace(chest);
 				if (state.map_index == 0) {
@@ -294,7 +325,7 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
-			else if (state.map[row][col] == 5) {
+			else if (state.map.interactive_layer[row][col] == 5) {
 				Entity chest = createChest(pos);
 				registry.ammoChests.emplace(chest);
 				if (state.map_index == 0) {
@@ -304,61 +335,31 @@ void GameScene::spawnEnemiesAndItems() {
 					registry.hints.emplace(chest, hint);
 				}
 			}
+			else if (state.map.interactive_layer[row][col] == 6) {
+				// add random power-up pickups
+			}
+			else if (state.map.interactive_layer[row][col] == 7) {
+				// faster enemy
+
+			}
 		}
 	}
 
-	// change the tape number and position in different maps or rooms
-	//Entity tape1 = createTape(vec2{ 300, 200 }, 1);
-	//Hint hint1;
-	//hint1.text = "Press E to pick up and play the tape";
-	//hint1.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape1, hint1);
-
-	//Entity tape2 = createTape(vec2{ 1000, 200 }, 2);
-	//Hint hint2;
-	//hint2.text = "Press E to pick up and play the tape";
-	//hint2.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape2, hint2);
-
-	//Entity tape3 = createTape(vec2{ 1800, 200 }, 3);
-	//Hint hint3;
-	//hint3.text = "Press E to pick up and play the tape";
-	//hint3.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape3, hint3);
-
-	//Entity tape4 = createTape(vec2{ 300, 400 }, 4);
-	//Hint hint4;
-	//hint4.text = "Press E to pick up and play the tape";
-	//hint4.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape4, hint4);
-
-	//Entity tape5 = createTape(vec2{ 1000, 400 }, 5);
-	//Hint hint5;
-	//hint5.text = "Press E to pick up and play the tape";
-	//hint5.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape5, hint5);
-
-	//Entity tape6 = createTape(vec2{ 1800, 400 }, 6);
-	//Hint hint6;
-	//hint6.text = "Press E to pick up and play the tape";
-	//hint6.radius = 200.0f;  // Set the radius for the hint display
-	//registry.hints.emplace(tape6, hint6);
-
 	// tutorial specific elements
 	if (state.map_index == 0) {
-		Entity marker = createInvisible({ 10, 10 });
+		Entity marker = createInvisible({ (13 + 0.5) * 48, (9 + 0.5) * 48 });
 		Hint hint1;
 		hint1.text = "WASD to move player";
 		hint1.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint1);
 
-		marker = createInvisible({ (15+0.5)*48, (16 + 0.5) * 48 });
+		marker = createInvisible({ (26+0.5)*48, (25 + 0.5) * 48 });
 		Hint hint2;
 		hint2.text = "Hold shift to sprint";
 		hint2.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint2);
 	}
-	else {
+	else if (state.map_index == 1) {
 		Entity marker = createInvisible({ 10, 10 });
 		Hint hint3;
 		hint3.text = "Look for the exit of the maze!";
@@ -524,11 +525,15 @@ void GameScene::initialize(RenderSystem* renderer) {
 	std::string map_name = state.map_lists[state.map_index];
 	MapState map_state = state.changeMap(map_name);
 	state.save();
-	createMaze(); 
+	createMaze();
 
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
+
+	if (state.map_index > 0) { // first level
+		selected_profession = state.saved_profession;
+	}
 
 	// initialize player's powerup by the profession
 	if (selected_profession == "Soldier") {
@@ -544,25 +549,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 		// Ability to craft ammo, collect materials by killing enemy, increase 3 ammo per enemy killed
 		PowerUpSystem::applyPowerUp(player, PowerUpType::Hacker_init_powerup, 0);
 	}
-	
-	// apply upgrade effect
-	if (state.map_index == 0) { // first level
-		Player& player_component = registry.players.get(player);
-		player_component.max_health += state.health_upgrade.curVal;
-		player_component.health = player_component.max_health;
-		player_component.ammo += state.ammo_upgrade.curVal;
-	}
-
-	state.map_index++;
-	if (state.map_index >= state.map_lists.size()) {
-		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
-	}
-	else {
-		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
-	}
-
-	//enemy = createEnemy({ 700, 300 });
-	//registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 
 	//------- Inventory -------//
 
@@ -572,14 +558,47 @@ void GameScene::initialize(RenderSystem* renderer) {
 	InventorySystem::initializeSounds();
 
 	// Add some items to the player's inventory for testing
-	InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 5);
-	InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 2);
+	//InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 5);
+	//InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 2);
 
 	// Attempt to remove an item
-	InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
+	//InventorySystem::removeItem(player, InventoryItem::Type::AmmoPack, 1);
 
 	//createInventorySlots(player);
 	//------- Inventory -------//
+
+	Player& player_component = registry.players.get(player);
+	// apply upgrade effect
+	if (state.map_index == 0) { // first level
+		player_component.max_health += state.health_upgrade.curVal;
+		player_component.health = player_component.max_health;
+		player_component.ammo += state.ammo_upgrade.curVal;
+	}
+	else { // continue game
+		player_component.max_health = state.saved_max_health;
+		player_component.health = state.saved_health;
+		player_component.ammo = state.saved_ammo;
+		if (state.saved_ammo_pack > 0) {
+			InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, state.saved_ammo_pack);
+		}
+		if (state.saved_health_potion > 0) {
+			InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, state.saved_health_potion);
+		}
+		if (state.saved_shield > 0) {
+			PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, state.saved_shield);
+		}
+		if (state.saved_speed_boost > 0) {
+			PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, state.saved_speed_boost);
+		}
+	}
+
+	state.map_index++;
+	if (state.map_index >= state.map_lists.size()) {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
+	}
+	else {
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+	}
   
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
 	player_dead_sound = Mix_LoadWAV(audio_path("death_sound.wav").c_str());
@@ -599,6 +618,11 @@ void GameScene::initialize(RenderSystem* renderer) {
 	tape4_recording = Mix_LoadWAV(audio_path("Engineer_Xu_tape4.wav").c_str());
 	tape5_recording = Mix_LoadWAV(audio_path("Commander_Blake_tape5.wav").c_str());
 	tape6_recording = Mix_LoadWAV(audio_path("We_failed_tape6.wav").c_str());
+
+	player_footstep = Mix_LoadWAV(audio_path("player_footstep(1).wav").c_str());
+	// enemy_footstep = Mix_LoadWAV(audio_path("enemy-footstep.wav").c_str());
+	enemy_get_hit = Mix_LoadWAV(audio_path("enemy-get-hit(1).wav").c_str());
+	tape_pickup = Mix_LoadWAV(audio_path("tape-pickup.wav").c_str());
 
 
 	if (background_music == nullptr) {
@@ -622,6 +646,9 @@ void GameScene::initialize(RenderSystem* renderer) {
 	// Draw inventory slots
 	createInventorySlots(player);
 	refreshUI(player);
+	transState.is_fade_in = true;
+	transState.timer = 0.f;        
+	transState.duration = 1000.f;
 }
 
 void GameScene::step(float elapsed_ms) {
@@ -634,6 +661,65 @@ void GameScene::step(float elapsed_ms) {
 	// remove all text component
 	while (registry.subtitles.entities.size() > 0)
 		registry.remove_all_components_of(registry.subtitles.entities.back());
+
+	while (registry.transMasks.entities.size() > 0)
+		registry.remove_all_components_of(registry.transMasks.entities.back());
+
+	
+	//transState.is_fade_in = true;
+	if (transState.is_fade_in) {
+		// print out
+		printf("fading in\n");
+	}
+	else {
+		printf("not fading in\n");
+
+	}
+
+	if (transState.is_fade_out) {
+		printf("fading out\n");
+	}
+
+	if (transState.is_fade_out) {
+		printf("fading out\n");
+		transState.timer += elapsed_ms;
+		printf("Timer: %f\n", transState.timer);
+		printf("Duration: %f\n", transState.duration);
+
+		// Increase opacity over time
+		float progress = transState.timer / transState.duration;
+		// print out
+		printf("progress: %f\n", progress);
+		if (progress > 1.f) progress = 1.f;
+		createTransitionMask(renderer, progress);
+		//registry.opacities.get(transMaskEntity).opacity = progress;
+
+		if (transState.timer >= transState.duration) {
+			// Finish fade-out, change map
+			transState.is_fade_out = false;
+			changeMap(next_map_name, elapsed_ms);
+
+			// Start fade-in
+			transState.is_fade_in = true;
+			transState.timer = 0.f;
+		}
+	}
+	else if (transState.is_fade_in) {
+		transState.timer += elapsed_ms;
+
+		// Decrease opacity over time
+		float progress = transState.timer / transState.duration;
+		if (progress > 1.f) progress = 1.f;
+		createTransitionMask(renderer, (1.f - progress));
+
+		if (transState.timer >= transState.duration) {
+			// Finish fade-in
+			transState.is_fade_in = false;
+			transState.timer = 0.f;
+		}
+		//registry.remove_all_components_of(registry.transMasks.entities.back());
+	}
+
 
 	updateHints(player);
 
@@ -740,6 +826,20 @@ void GameScene::step(float elapsed_ms) {
 
 	}
 
+	// Dash cool down timer drop 
+	for (Entity entity : registry.dashCoolDowns.entities) {
+		// progress timer
+		DashCoolDown& counter = registry.dashCoolDowns.get(entity);
+		counter.counter_ms -= elapsed_ms;
+
+		/*std::cout << "Damage timer: " << counter.counter_ms << " ms" << std::endl;*/
+
+		if (counter.counter_ms < 0) {
+			registry.dashCoolDowns.remove(entity);
+		}
+
+	}
+
 	if (selected_profession == "Doctor") {
 		Player& player_component = registry.players.get(player);
 		if (player_component.health < player_component.max_health) {
@@ -772,58 +872,56 @@ void GameScene::step(float elapsed_ms) {
 
 	(RenderSystem*)renderer;
 
-	//if (registry.enemies.size() > 0) {
-	//	// Enemy walking frames and animations
-	//	for (int i = 0; i < registry.enemies.size(); i++) {
-	//		static int enemy_frame = 0;
-	//		static float frame_delay = 150.f;
-	//		static float frame_timer = 0.f;
+	if (registry.enemies.size() > 0) {
+		// Enemy walking frames and animations
+		for (int i = 0; i < registry.enemies.size(); i++) {
+			static int enemy_frame = 0;
+			static float frame_delay = 2000.f;
+			static float frame_timer = 0.f;
 
-	//		auto& enemy = registry.enemies.entities[i];
-	//		auto& motion = registry.motions.get(enemy);
+			auto& enemy = registry.enemies.entities[i];
+			auto& motion = registry.motions.get(enemy);
 
-	//		TEXTURE_ASSET_ID enemy_walking_frames[4] = {
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_1,
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_2,
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_3,
-	//			TEXTURE_ASSET_ID::WOMAN_WALK_4
-	//		};
+			TEXTURE_ASSET_ID enemy_walking_frames[4] = {
+				TEXTURE_ASSET_ID::WOMAN_WALK_1,
+				TEXTURE_ASSET_ID::WOMAN_WALK_2,
+				TEXTURE_ASSET_ID::WOMAN_WALK_3,
+				TEXTURE_ASSET_ID::WOMAN_WALK_4
+			};
 
-	//		frame_timer += elapsed_ms;
-	//		if (frame_timer >= frame_delay) {
-	//			frame_timer = 0.f;
-	//			enemy_frame = (enemy_frame + 1) % 4;
-	//		}
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f;
+				enemy_frame = (enemy_frame + 1) % 4;
+			}
 
-	//		auto& texture = registry.renderRequests.get(enemy);
-	//		texture.used_texture = enemy_walking_frames[enemy_frame];
+			auto& texture = registry.renderRequests.get(enemy);
+			texture.used_texture = enemy_walking_frames[enemy_frame];
 
-	//		static float last_direction_x = motion.velocity.x;
-	//		static float flip_cooldown = 1000.f;
-	//		static float flip_timer = 0.f;
+			static float last_direction_x = motion.velocity.x;
+			static float flip_cooldown = 1000.f;
+			static float flip_timer = 0.f;
 
-	//		flip_timer += elapsed_ms;
+			flip_timer += elapsed_ms;
 
-	//		if (flip_timer >= flip_cooldown) {
-	//			if (motion.velocity.x < 0 && last_direction_x >= 0) {
-	//				motion.scale.x = -abs(motion.scale.x);
-	//				last_direction_x = motion.velocity.x;
-	//				flip_timer = 0.f; 
-	//			}
-	//			else if (motion.velocity.x > 0 && last_direction_x <= 0) {
-	//				motion.scale.x = abs(motion.scale.x);
-	//				last_direction_x = motion.velocity.x;
-	//				flip_timer = 0.f;
-	//			}
-	//		}
+			if (flip_timer >= flip_cooldown) {
+				if (motion.velocity.x < 0 && last_direction_x >= 0) {
+					motion.scale.x = -abs(motion.scale.x);
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f; 
+				}
+				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+					motion.scale.x = abs(motion.scale.x);
+					last_direction_x = motion.velocity.x;
+					flip_timer = 0.f;
+				}
+			}
 
-	//		if (motion.velocity.x == 0) {
-	//			texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
-	//		}
-
-	//		// printf("enemy velocity: %f, last_direction: %f\n", motion.velocity.x, last_direction_x);
-	//	}
-	//}
+			if (motion.velocity.x == 0) {
+				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
+			}
+		}
+	}
 	// deal with enemy death animation
 	if (registry.enemyDeathTimers.size() > 0) {
 		auto& enemyDeathTimers = registry.enemyDeathTimers;
@@ -840,6 +938,7 @@ void GameScene::step(float elapsed_ms) {
 			EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
 			auto& motion = registry.motions.get(entity);
 			motion.scale = abs(motion.scale);
+			motion.velocity = { 0, 0 };
 
 			// Remove the enemy entity from the ai
 			registry.enemyAIs.remove(entity);
@@ -870,7 +969,7 @@ void GameScene::step(float elapsed_ms) {
 				//printf("before scale: %f, %f\n", motion.scale.x, motion.scale.y);
 				if (frame == 0) {
 					motion.scale = { 1.547f * 64.f * 1.3, 1.547f * 10.f * 1.3 };
-					motion.position.y += 3;
+					//motion.position.y += 3;
 					//printf("after scale: %f, %f\n", motion.scale.x, motion.scale.y);
 				}
 				texture.used_texture = monster_dead[frame];
@@ -882,6 +981,7 @@ void GameScene::step(float elapsed_ms) {
 	// deal with player death animation
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
+	int player_footstep_channel = 2;
 
 	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
@@ -901,8 +1001,15 @@ void GameScene::step(float elapsed_ms) {
 		}
 	}
 
+	static bool isPlayingFootstep = false;
+
 	// deal with player walking animation
 	if (player_velocity.x != 0 || player_velocity.y != 0) {
+		if (!isPlayingFootstep) {
+			Mix_PlayChannel(player_footstep_channel, player_footstep, -1);
+			isPlayingFootstep = true;
+		}
+
 		static int player_frame = 0;
 		static float frame_delay = 150.f;
 		static float frame_timer = 0.f;
@@ -911,6 +1018,18 @@ void GameScene::step(float elapsed_ms) {
 			TEXTURE_ASSET_ID::PLAYER_1,
 			TEXTURE_ASSET_ID::PLAYER_2,
 			TEXTURE_ASSET_ID::PLAYER_3
+		};
+
+		TEXTURE_ASSET_ID doc_sideways[3] = {
+			TEXTURE_ASSET_ID::DOC_1,
+			TEXTURE_ASSET_ID::DOC_2,
+			TEXTURE_ASSET_ID::DOC_3
+		};
+
+		TEXTURE_ASSET_ID hack_sideways[3] = {
+			TEXTURE_ASSET_ID::HACK_1,
+			TEXTURE_ASSET_ID::HACK_2,
+			TEXTURE_ASSET_ID::HACK_3
 		};
 
 		// Update the frame timer
@@ -926,8 +1045,36 @@ void GameScene::step(float elapsed_ms) {
 	}
 	// when player is not moving, set the texture to idle
 	else {
+		if (isPlayingFootstep) {
+			Mix_HaltChannel(player_footstep_channel); // Stop the sound
+			isPlayingFootstep = false;
+		}
+
 		auto& texture = registry.renderRequests.get(player);
 		texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
+	}
+
+	// Update fire timer
+	fire_timer -= elapsed_ms / 1000.f;  // Convert to seconds
+
+	// Full-auto shooting logic
+	if (is_left_mouse_pressed && fire_timer <= 0.f) {
+		// Get the gun entity and its motion
+		if (!registry.guns.entities.empty()) {
+			Entity gun = registry.guns.entities[0];
+			Motion& gun_motion = registry.motions.get(gun);
+
+			// Get the direction the gun is facing
+			vec2 direction = { cos(gun_motion.angle), sin(gun_motion.angle) };
+			direction = normalize(direction);  // Ensure consistent bullet speed
+
+			// Shoot bullet
+			shoot_bullet(gun_motion.position, direction);
+
+			// Reset fire timer based on gun's fire rate
+			Gun& gun_component = registry.guns.get(gun);
+			fire_timer = 1.f / gun_component.fire_rate;  // Fire rate is bullets per second
+		}
 	}
 
 
@@ -935,7 +1082,6 @@ void GameScene::step(float elapsed_ms) {
 	updateTextAnimation(elapsed_ms);
 	
 	renderAnimatedText(renderer);
-
 	// update fov
 	//for (Entity entity : registry.fovs.entities) {
 	//	// progress timer
@@ -954,11 +1100,14 @@ void GameScene::restart_game() {
 	next_scene = "death_scene";
 }
 
+int tape_channel = 1;
+
 void GameScene::destroy() {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 	while (registry.fps.entities.size() > 0)
 		registry.remove_all_components_of(registry.fps.entities.back());
+	Mix_HaltChannel(tape_channel);
 	Mix_FreeMusic(background_music);
 	Mix_FreeChunk(player_dead_sound);
 	Mix_FreeChunk(player_hurt_sound);
@@ -970,31 +1119,52 @@ void GameScene::destroy() {
 	Mix_FreeChunk(item_pickup_sound);
 	Mix_FreeChunk(reload_sound);
 	Mix_FreeChunk(stab_sound);
+	Mix_FreeChunk(tape1_recording);
+	Mix_FreeChunk(tape2_recording);
+	Mix_FreeChunk(tape3_recording);
+	Mix_FreeChunk(tape4_recording);
+	Mix_FreeChunk(tape5_recording);
+	Mix_FreeChunk(tape6_recording);
+	Mix_FreeChunk(player_footstep);
+	Mix_FreeChunk(enemy_get_hit);
+	Mix_FreeChunk(tape_pickup);
+	//Mix_FreeChunk(enemy_footstep);
 
 	// Clean up inventory sounds
 	InventorySystem::cleanupSounds();
+	animatedText.is_done = true;
 }
 
 std::string GameScene::get_next_scene() {
 	return this->next_scene;
 }
 
-int tape_channel = 1;
-
 void GameScene::on_key(int key, int action, int mod) {
+	/*if (transState.is_fade_in || transState.is_fade_out)
+		return;*/
+
+
 	static int frame = 0;
 	static int frame_counter = 0;
 	static int first_round_frame_counter = 0;
 	const int frame_delay = 2;
-	TEXTURE_ASSET_ID walking_sideways[3] = {
+	/*TEXTURE_ASSET_ID walking_sideways[3] = {
 	TEXTURE_ASSET_ID::PLAYER_1,
 	TEXTURE_ASSET_ID::PLAYER_2,
 	TEXTURE_ASSET_ID::PLAYER_3
-	};
+	};*/
 
 	Motion& motion = registry.motions.get(player);
+	Player& player_component = registry.players.get(player);
 	auto& texture = registry.renderRequests.get(player);
 	static bool isSprinting = false;
+	int player_footstep_channel = 2;
+
+	// display the current cell player is at
+	float grid_x = floor(motion.position.x / state.TILE_SIZE);
+	float grid_y = floor(motion.position.y / state.TILE_SIZE);
+	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
+
 
 	// Handle movement keys (W, A, S, D)
 	if (!registry.deathTimers.has(player)) {
@@ -1009,53 +1179,54 @@ void GameScene::on_key(int key, int action, int mod) {
 			case GLFW_KEY_W:
 				//player_velocity.y += -PLAYER_SPEED;
 				player_movement_state.x = 1;
-				texture.used_texture = walking_sideways[frame];
+				//texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_S:
 				//player_velocity.y += PLAYER_SPEED;
 				player_movement_state.y = 1;
-				texture.used_texture = walking_sideways[frame];
+				//texture.used_texture = walking_sideways[frame];
 				break;
 			case GLFW_KEY_A:
 				//player_velocity.x += -PLAYER_SPEED;
 				player_movement_state.z = 1;
-				texture.used_texture = walking_sideways[frame];
+				//texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x > 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
 					updateCamera_smoothing(motion.position, target_position);
-					Entity& gun = registry.guns.entities[0];
-					registry.motions.get(gun);
-					/*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
-					printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
+					//Entity& gun = registry.guns.entities[0];
+					//registry.motions.get(gun);
+					///*printf("gun position before: %f, %f\n", gun_motion.position.x, gun_motion.position.y);
+					//printf("player position before: %f, %f\n", motion.position.x, motion.position.y);*/
 
-					Gun& gun_component = registry.guns.get(gun);
-					gun_component.offset.x = -abs(gun_component.offset.x);
+					//Gun& gun_component = registry.guns.get(gun);
+					//gun_component.offset.x = -abs(gun_component.offset.x);
 				}
-				motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
+				//motion.scale.x = -abs(motion.scale.x); // Flip sprite to face left
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
 				break;
 			case GLFW_KEY_D:
 				//player_velocity.x += PLAYER_SPEED;
 				player_movement_state.w = 1;
-				texture.used_texture = walking_sideways[frame];
+				// texture.used_texture = walking_sideways[frame];
 				if (motion.scale.x < 0) {
 					vec2 target_position = motion.position - motion.scale / 2.0f;
 					updateCamera_smoothing(motion.position, target_position);
 
-					Entity& gun = registry.guns.entities[0];
+					/*Entity& gun = registry.guns.entities[0];
 					registry.motions.get(gun);
 					Gun& gun_component = registry.guns.get(gun);
-					gun_component.offset.x = abs(gun_component.offset.x);
+					gun_component.offset.x = abs(gun_component.offset.x);*/
 				}
 				// printf("player velocity: %f, %f\n", player_velocity.x, player_velocity.y);
-				motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
+				//motion.scale.x = abs(motion.scale.x); // Ensure sprite faces right
 				break;
 			case GLFW_KEY_LEFT_SHIFT:
 				isSprinting = true;
 				break;
 			case GLFW_KEY_SPACE:
-				if (!registry.dashTimers.has(player) && !isSprinting) {
-					registry.dashTimers.emplace(player, DashTimer{ 200.f, 1200.f });
+				if (!registry.dashTimers.has(player) && !isSprinting && !registry.dashCoolDowns.has(player)) {
+					registry.dashTimers.emplace(player, DashTimer{ 200.f });
+					registry.dashCoolDowns.emplace(player, DashCoolDown{ 200.f + player_component.dash_cooldown });
 					motion.velocity *= 2.5f;
 				}
 				break;
@@ -1087,30 +1258,30 @@ void GameScene::on_key(int key, int action, int mod) {
 
 		}
 		vec2 dir = { player_movement_state.w - player_movement_state.z, player_movement_state.y - player_movement_state.x };
-		player_velocity = dir * PLAYER_SPEED;
+		player_velocity = dir * player_component.speed;
 		motion.velocity = player_velocity;
 
 		// Apply sprint effect if active
 		if (isSprinting) {
 			if (motion.velocity.x != 0) {
-				motion.velocity.x = (motion.velocity.x > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+				motion.velocity.x = (motion.velocity.x > 0) ? player_component.speed * 2 : -player_component.speed * 2;
 			}
 			if (motion.velocity.y != 0) {
-				motion.velocity.y = (motion.velocity.y > 0) ? PLAYER_SPEED * 2 : -PLAYER_SPEED * 2;
+				motion.velocity.y = (motion.velocity.y > 0) ? player_component.speed * 2 : -player_component.speed * 2;
 			}
 		}
 		else {
-			if (motion.velocity.x > PLAYER_SPEED) {
-				motion.velocity.x = PLAYER_SPEED;
+			if (motion.velocity.x > player_component.speed) {
+				motion.velocity.x = player_component.speed;
 			}
-			else if (motion.velocity.x < -PLAYER_SPEED) {
-				motion.velocity.x = -PLAYER_SPEED;
+			else if (motion.velocity.x < -player_component.speed) {
+				motion.velocity.x = -player_component.speed;
 			}
-			if (motion.velocity.y > PLAYER_SPEED) {
-				motion.velocity.y = PLAYER_SPEED;
+			if (motion.velocity.y > player_component.speed) {
+				motion.velocity.y = player_component.speed;
 			}
-			else if (motion.velocity.y < -PLAYER_SPEED) {
-				motion.velocity.y = -PLAYER_SPEED;
+			else if (motion.velocity.y < -player_component.speed) {
+				motion.velocity.y = -player_component.speed;
 			}
 		}
 
@@ -1136,10 +1307,10 @@ void GameScene::on_key(int key, int action, int mod) {
 
 				// Adjust sprite orientation for left or right movement
 				if (key == GLFW_KEY_A) {
-					motion.scale.x = -abs(motion.scale.x);  // Face left
+					//motion.scale.x = -abs(motion.scale.x);  // Face left
 				}
 				else if (key == GLFW_KEY_D) {
-					motion.scale.x = abs(motion.scale.x);  // Face right
+					//motion.scale.x = abs(motion.scale.x);  // Face right
 				}
 			}
 		}
@@ -1205,12 +1376,18 @@ void GameScene::on_key(int key, int action, int mod) {
 			if (distance(motion.position, player_motion.position) < 200.f && !random_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
 
-				int choice = floor(uniform_dist(rng)*2);
+				int choice = floor(uniform_dist(rng)*4);
 				if (choice == 0) {
 					InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 1);
 				}
 				else if(choice == 1) {
 					InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 1);
+				}
+				else if (choice == 2) {
+					PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, 1);
+				}
+				else if (choice == 3) {
+					PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, 1);
 				}
 
 				random_chest.isOpen = true;
@@ -1237,6 +1414,7 @@ void GameScene::on_key(int key, int action, int mod) {
 
 			if (distance(motion.position, player_motion.position) < 100.f && !tape.is_played) {
 				// stop the audio on the tape channel
+				Mix_PlayChannel(-1, tape_pickup, 0);
 				Mix_HaltChannel(tape_channel);
 				std::vector<std::string> subtitles;
 				// Play the recording based on the tape number
@@ -1351,7 +1529,7 @@ void GameScene::on_key(int key, int action, int mod) {
         }
     }
 
-	// Remove later, this is shield powerup testing
+	// Remove later, this is power-up testing
 	if (action == GLFW_PRESS) {
 		switch (key) {
 		case GLFW_KEY_5:
@@ -1367,7 +1545,61 @@ void GameScene::on_key(int key, int action, int mod) {
 			}
 			break;
 
-			// Handle other keys here...
+		case GLFW_KEY_6:
+			// Give the player a speed boost when the '6' key is pressed
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
+
+				// Apply a speed boost power-up to the player
+				PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, 1);
+
+				// Debug: Print confirmation of speed boost granted
+				std::cout << "[DEBUG] Speed Boost power-up applied using key '6'!" << std::endl;
+			}
+			break;
+		case GLFW_KEY_7: // Add a life steal stack
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
+				PowerUpSystem::applyPowerUp(player, PowerUpType::LifeSteal, 1);
+				std::cout << "[DEBUG] Life Steal stack added! Total stacks: "
+					<< registry.lifeSteals.get(player).stacks << std::endl;
+			}
+			break;
+		case GLFW_KEY_8: // Add a ricochet power-up stack
+			if (registry.players.entities.size() > 0) {
+				Entity player = registry.players.entities[0];
+
+				// Check if the player already has a RicochetPowerUp component
+				if (registry.ricochetPowerUps.has(player)) {
+					RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
+					ricochet.stacks += 1; // Increment the stack count
+
+					// Debug: Print confirmation of ricochet stack added
+					std::cout << "[DEBUG] Ricochet Power-Up stack added! Total stacks: "
+						<< ricochet.stacks << std::endl;
+				}
+				else {
+					// Add a new RicochetPowerUp component with an initial stack of 1
+					RicochetPowerUp& ricochet = registry.ricochetPowerUps.emplace(player);
+					ricochet.stacks = 1;
+
+					// Debug: Print confirmation of the first stack added
+					std::cout << "[DEBUG] First Ricochet Power-Up stack added!" << std::endl;
+				}
+			}
+			break;
+		
+		case GLFW_KEY_9:
+        // Add an attack speed power-up stack when '9' is pressed
+        if (!registry.players.entities.empty()) {
+            Entity player = registry.players.entities[0];
+            PowerUpSystem::applyPowerUp(player, PowerUpType::AttackSpeedPowerUp, 1);
+
+            // Debug: Print confirmation of attack speed power-up applied
+            std::cout << "[DEBUG] Attack Speed Power-Up stack added!" << std::endl;
+        }
+        break;
+
 		default:
 			break;
 		}
@@ -1522,45 +1754,98 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	// 		  GEOMETRY_BUFFER_ID::SPRITE });
 	// }
 
-	if (debugging.in_debug_mode) { 		
+	if (debugging.in_debug_mode && profession == "Soldier") {
 		registry.renderRequests.insert( 			
 			entity, 			
 			{ TEXTURE_ASSET_ID::PLAYER_1, 			  
 			  EFFECT_ASSET_ID::MESHED, 			  
 			  GEOMETRY_BUFFER_ID::PLAYER }
 		); 	
-	} else { 		
-    // Player entity gets the textured effect
-    registry.renderRequests.insert( 			
-        entity, 			
-        { TEXTURE_ASSET_ID::PLAYER_1, 			  
-          EFFECT_ASSET_ID::TEXTURED, 			  
-          GEOMETRY_BUFFER_ID::SPRITE }
-    );
-    
-    Entity fov_entity = Entity();
-    Motion& fov_motion = registry.motions.emplace(fov_entity);
-	registry.fovs.emplace(fov_entity);
-	fov_motion.position = { window_width_px / 2.f, window_height_px / 2.f };
-	fov_motion.angle = 0;
-	fov_motion.velocity = { 0.f, 0.f };
-	fov_motion.scale = vec2({ window_width_px, window_height_px });
-
-    // Add the FOV render request to the new entity
-    //registry.renderRequests.insert( 			
-    //    fov_entity, 			
-    //    { TEXTURE_ASSET_ID::PLAYER_1, 			  
-    //      EFFECT_ASSET_ID::FOV2, 			  
-    //      GEOMETRY_BUFFER_ID::SPRITE }
-    //); 	
-	registry.renderRequests.insert(
-		fov_entity,
-		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			EFFECT_ASSET_ID::FOV_NEW,
-			GEOMETRY_BUFFER_ID::DEBUG_LINE }
-	);
-	registry.colors.insert(fov_entity, { 0.f, 0.f, 0.f });
 	}
+	else if (!debugging.in_debug_mode && profession == "Soldier") {
+		// Player entity gets the textured effect
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::PLAYER_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
+
+		Entity fov_entity = Entity();
+    Motion& fov_motion = registry.motions.emplace(fov_entity);
+    registry.fovs.emplace(fov_entity);
+    fov_motion.position = { window_width_px / 2.f, window_height_px / 2.f };
+    fov_motion.angle = 0;
+    fov_motion.velocity = { 0.f, 0.f };
+    fov_motion.scale = vec2({ window_width_px, window_height_px });
+
+		// Add the FOV render request to the new entity
+		registry.renderRequests.insert(
+      fov_entity,
+      { TEXTURE_ASSET_ID::TEXTURE_COUNT,
+        EFFECT_ASSET_ID::FOV_NEW,
+        GEOMETRY_BUFFER_ID::DEBUG_LINE }
+    );
+    registry.colors.insert(fov_entity, { 0.f, 0.f, 0.f });
+	}
+	//else if (debugging.in_debug_mode && profession == "Doctor") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::DOC_1,
+	//		  EFFECT_ASSET_ID::MESHED,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+	//}
+	//else if (!debugging.in_debug_mode && profession == "Doctor") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::DOC_1,
+	//		  EFFECT_ASSET_ID::TEXTURED,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+
+	//	Entity fov_entity = Entity();
+	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
+	//	registry.fovs.emplace(fov_entity);
+	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+
+	//	// Add the FOV render request to the new entity
+	//	registry.renderRequests.insert(
+	//		fov_entity,
+	//		{ TEXTURE_ASSET_ID::DOC_1,
+	//		  EFFECT_ASSET_ID::FOV2,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+	//}
+	//else if (debugging.in_debug_mode && profession == "Hacker") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::HACK_1,
+	//		  EFFECT_ASSET_ID::MESHED,
+	//		  GEOMETRY_BUFFER_ID::PLAYER }
+	//	);
+	//}
+	//else if (!debugging.in_debug_mode && profession == "Hacker") {
+	//	registry.renderRequests.insert(
+	//		entity,
+	//		{ TEXTURE_ASSET_ID::HACK_1,
+	//		  EFFECT_ASSET_ID::TEXTURED,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+
+	//	Entity fov_entity = Entity();
+	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
+	//	registry.fovs.emplace(fov_entity);
+	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+
+	//	// Add the FOV render request to the new entity
+	//	registry.renderRequests.insert(
+	//		fov_entity,
+	//		{ TEXTURE_ASSET_ID::HACK_1,
+	//		  EFFECT_ASSET_ID::FOV2,
+	//		  GEOMETRY_BUFFER_ID::SPRITE }
+	//	);
+	//}
 
 	// Attach a gun to the player entity
 	createGun(entity);
@@ -1692,13 +1977,13 @@ Entity GameScene::createGun(Entity player) {
 	gun_motion.scale = {35, 30};
 	
 	// gun's states
-	gun.ammo_capacity = 30;
-	gun.current_ammo = gun.ammo_capacity;
-	gun.bullet_damage = 1;
-	gun.bullet_speed = 100.f;
-	gun.reload_time = 0.5f;
-	gun.fire_rate = 0.5f;
-	gun.direction = { 0.f, 0.f };
+	//gun.ammo_capacity = 30;
+	//gun.current_ammo = gun.ammo_capacity;
+	//gun.bullet_damage = 1;
+	//gun.bullet_speed = 100.f;
+	//gun.reload_time = 0.5f;
+	//gun.fire_rate = 0.5f;
+	//gun.direction = { 0.f, 0.f };
 
 	// Add the parent component to the gun entity, linking it to the player
 	registry.parents.emplace(entity, Parent{ player });
@@ -1833,12 +2118,6 @@ Entity GameScene::createEnemy(vec2 pos) {
 	Health& health = registry.healths.emplace(entity);
 	health.current_health = 10;
 	health.max_health = 10;
-
-
-	// health bar for enemy
-	//vec2 offset = {0.f, -50.f};  // Position the health bar above the enemy
- //   vec2 size = {100.f, 10.f};   // Initial size of the health bar
- //   enemy.health_bar_entity = createHealthBar(renderer, entity, offset, size);
 	
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
@@ -1880,8 +2159,74 @@ Entity GameScene::createEnemy(vec2 pos) {
 	return entity;
 }
 
+Entity GameScene::createEnemyAgile(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 80.f ,80.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	registry.enemyAIs.emplace(entity);
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE });
+	}
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
 // Compute collisions between entities
-void GameScene::handle_collisions() {
+void GameScene::handle_collisions(float elapsed_ms_since_last_update) {
 	// Loop over all collisions detected by the physics system
 	auto& collisionsRegistry = registry.collisions;
 
@@ -1971,6 +2316,7 @@ void GameScene::handle_collisions() {
 		// Bullet & Enemy collision
 		if (registry.bullets.has(entity)) {
 			if (registry.enemies.has(entity_other)) {
+				
 				// Bullet and enemy components
 				Bullet& bullet = registry.bullets.get(entity);
 
@@ -1982,65 +2328,17 @@ void GameScene::handle_collisions() {
 			}
 		}
 
-		//// Bullet & Wall collision check for each bullet in the registry
-		//for (Entity bullet_entity : registry.bullets.entities) {
-		//	Motion& bullet_motion = registry.motions.get(bullet_entity);
-		//	vec2 bullet_min = bullet_motion.position - (bullet_motion.scale / 2.0f);
-		//	vec2 bullet_max = bullet_motion.position + (bullet_motion.scale / 2.0f);
-
-		//	// Loop through all entities with bounding boxes (assuming walls are part of this)
-		//	for (uint i = 0; i < registry.boundingBoxes.components.size(); i++) {
-		//		BoundingBox& wall_box = registry.boundingBoxes.components[i];
-		//		vec2 wall_min = wall_box.min;
-		//		vec2 wall_max = wall_box.max;
-
-		//		// Check AABB collision between the bullet and wall
-		//		if (check_aabb_collision(bullet_min, bullet_max, wall_min, wall_max)) {
-		//			// Collision detected, remove the bullet
-		//			registry.remove_all_components_of(bullet_entity);
-		//			break;  // Exit inner loop once bullet is removed
-		//		}
-		//	}
-		//}
-
-		// Bullet & Enemy collision: Bullet hits the enemy, enemy loses 1 health, if health is 0, enemy dies
-		// if (registry.bullets.has(entity)) {
-		// if (registry.enemies.has(entity_other)) {
-		//		// Bullet and enemy components
-		//		Bullet& bullet = registry.bullets.get(entity);
-		//		Enemy& enemy = registry.enemies.get(entity_other);
-
-		//		// Reduce enemy health
-		//		enemy.health -= bullet.damage;
-
-		//		// Red tint light up effect on enemy
-		//		registry.lightUps.emplace(entity_other);
-		//		//registry.colors.get(entity_other) = { 1.f, 0.f, 0.f }; // Red tint
-
-		//		// Play the bullet hit sound
-		//		//Mix_PlayChannel(-1, bullet_hit_sound, 0);
-
-		//		// Check if the enemy is dead
-		//		if (enemy.health <= 0) {
-		//			// TODO: play the enemy dead animation
-
-		//			// Play the enemy dead sound
-		//			//Mix_PlayChannel(-1, enemy_dead_sound, 0);
-
-		//			// Remove the enemy
-		//			registry.remove_all_components_of(entity_other);
-		//		}
-
-		//		// Remove the bullet
-		//		registry.remove_all_components_of(entity);
-		//	}
-		//}
-
 		// Player & Portal Collision
 		if (registry.players.has(entity)) {
 			if (registry.portals.has(entity_other)) {
 				Portal& portal = registry.portals.get(entity_other);
-				changeMap(portal.next_map);
+				transState.is_fade_out = true;
+				next_map_name = portal.next_map;
+
+				printf("ms: %f\n", elapsed_ms_since_last_update);
+
+				//float elapsed_seconds = elapsed_ms_since_last_update / 1000.f;
+				//changeMap(portal.next_map, elapsed_ms_since_last_update);
 			}
 		}
 	}
@@ -2049,12 +2347,12 @@ void GameScene::handle_collisions() {
 	registry.collisions.clear();
 }
 
-void GameScene::changeMap(std::string map_name) {
+void GameScene::changeMap(std::string map_name, float elapsed_ms_since_last_update) {
 	if (state.map_index >= state.map_lists.size()) {
 		next_scene = "over_scene";
 		return;
 	}
-	state.save();
+
 	MapState map_state = state.changeMap(map_name);
 	// remove bullets and enemies
 	while (registry.hints.entities.size() > 0) {
@@ -2093,16 +2391,23 @@ void GameScene::changeMap(std::string map_name) {
 	// remove all tapes
 	while (registry.tapes.entities.size() > 0)
 		registry.remove_all_components_of(registry.tapes.entities.back());
-	
+
+	// remove the transition mask
+	//while (registry.transMasks.entities.size() > 0)
+	//	registry.remove_all_components_of(registry.transMasks.entities.back());
+
 	// spawn player
 	Entity& player_entity = registry.players.entities[0];
 	Motion& player_motion = registry.motions.get(player_entity);
 	Player& player_component = registry.players.get(player_entity);
-	player_component.health = player_component.max_health;
-	player_component.ammo = 50;
+	if (state.map_index == 1) { // first time leaving tutorial
+		player_component.health = player_component.max_health;
+		player_component.ammo = 50+state.ammo_upgrade.curVal;
+	}
 	player_motion.position = { (map_state.player_spawn.x + 0.5) * 48,(map_state.player_spawn.y + 0.5) * 48 };
 	// spawn enemies
 	spawnEnemiesAndItems();
+	state.save();
 	state.map_index++;
 	// spawn exit
 	if (state.map_index >= state.map_lists.size()) {
@@ -2130,7 +2435,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = position;
-	motion.velocity = direction * 500.f;
+	motion.velocity = direction * 1000.f;
 	motion.angle = atan2(direction.y, direction.x); // Calculate angle from direction, in radians for sprite rotation
 	motion.scale = vec2({ 15.f, 15.f });
 
@@ -2146,12 +2451,22 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 	//bullet.damage = gun_component.bullet_damage;
 
 	bullet.damage = 1;
-	bullet.speed = 100.f;
+	bullet.speed = 500.f;
 	bullet.direction = direction;
 
 	// Associate bullet to gun
 	Entity gun = registry.guns.entities[0];
 	registry.parents.emplace(entity, Parent{ gun });
+
+	// Transfer RicochetPowerUp stacks from player to bullet
+	if (registry.ricochetPowerUps.has(player)) {
+		RicochetPowerUp& player_ricochet = registry.ricochetPowerUps.get(player);
+		RicochetPowerUp& bullet_ricochet = registry.ricochetPowerUps.emplace(entity);
+		bullet_ricochet.stacks = player_ricochet.stacks;
+
+		// Debug: Print transfer of ricochet stacks
+		std::cout << "[DEBUG] Transferred " << bullet_ricochet.stacks << " ricochet stacks to bullet." << std::endl;
+	}
 
 	// Gun's ammo - 1
 	registry.guns.get(gun);
@@ -2184,9 +2499,10 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 }
 
 void GameScene::apply_damage(Entity& target, int damage) {
+	int monster_hurt_channel = 3;
 	// Check if the target has a Health component
 	if (registry.healths.has(target)) {
-		Mix_PlayChannel(-1, monster_dead_sound, 0);
+		Mix_PlayChannel(monster_hurt_channel, enemy_get_hit, 0);
 		Health& health = registry.healths.get(target);
 		health.current_health -= damage;  // Apply the damage
 		std::cout << "Enemy lost " << damage << " health. Current health: " << health.current_health << std::endl;
@@ -2194,41 +2510,46 @@ void GameScene::apply_damage(Entity& target, int damage) {
 		// Get the target position for the damage number display
 		vec2 position = registry.motions.get(target).position;
 
-		// Show the damage number at the target's position
-		// show_damage_number(renderer, position, damage);
-
 		// If health falls to 0 or below, remove the entity
 		if (health.current_health <= 0) {
+			// Life steal effect: Heal the player based on life steal stacks
+			if (registry.players.has(player)) {
+				Player& player_component = registry.players.get(player);
+				if (registry.lifeSteals.has(player)) {
+					LifeSteal& life_steal = registry.lifeSteals.get(player);
+					player_component.health += life_steal.stacks; // Gain health based on stacks
+					if (player_component.health > player_component.max_health) {
+						player_component.health = player_component.max_health; // Cap at max health
+					}
+					std::cout << "[DEBUG] Player life steal triggered! Current health: "
+						<< player_component.health << std::endl;
+				}
+			}
+
 			// Check if the enemy has a hint component
 			if (registry.hints.has(target)) {
 				Hint& hint = registry.hints.get(target);
 				if (hint.is_visible) {
-					// Remove the hint text entity if visible
 					renderer->text_renderer.removeText(hint.text_entity);
 				}
-				// Clear the hint component from the entity
 				registry.hints.remove(target);
 			}
 
 			// Insert death animation timer or other removal actions
-			// Remove the hp bar
 			auto& enemy = registry.enemies.get(target);
 			registry.remove_all_components_of(enemy.health_bar_entity);
 			registry.enemies.remove(target);
 			registry.enemyDeathTimers.insert(target, { 3000.0f, 3000.0f });
 			state.exp += 1;
-			Mix_PlayChannel(-1, monster_hurt_sound, 0);
+			Mix_PlayChannel(monster_hurt_channel, monster_hurt_sound, 0);
 
 			std::cout << "Enemy is dead!" << std::endl;
 
-			// increase the player's ammo when enemy is killed
+			// Increase player's ammo when enemy is killed (for Hacker profession)
 			if (selected_profession == "Hacker") {
 				Player& player = registry.players.get(registry.players.entities[0]);
-				std::cout << "Player ammo: " << player.ammo << std::endl;
 				player.ammo += player.ammo_per_kill;
-				std::cout << "Player ammo increased to: " << player.ammo << std::endl;
 			}
-			
 		}
 	}
 }
@@ -2259,9 +2580,12 @@ void GameScene::show_damage_number(vec2 position, int damage) {
 }
 
 void GameScene::on_mouse_move(vec2 mouse_position) {
-	/*if (registry.guns.entities.size() == 0) {
-		return;
-	}*/
+	/*TEXTURE_ASSET_ID walking_sideways[3] = {
+	TEXTURE_ASSET_ID::PLAYER_1,
+	TEXTURE_ASSET_ID::PLAYER_2,
+	TEXTURE_ASSET_ID::PLAYER_3
+	};*/
+
 	// Get the gun entity
 	Entity entity = registry.guns.entities[0];
 
@@ -2276,11 +2600,25 @@ void GameScene::on_mouse_move(vec2 mouse_position) {
 	if (gun_motion.angle > (M_PIl / 2) || gun_motion.angle < -(M_PIl / 2)) {
 		if (gun_motion.scale.y > 0) {
 			gun_motion.scale.y = -gun_motion.scale.y;
+			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
+			player_motion.scale.x = -abs(player_motion.scale.x);
+			Entity& gun = registry.guns.entities[0];
+			registry.motions.get(gun);
+			
+			Gun& gun_component = registry.guns.get(gun);
+			gun_component.offset.x = -abs(gun_component.offset.x);
 		}
 	}
 	else {
 		if (gun_motion.scale.y < 0) {
 			gun_motion.scale.y = -gun_motion.scale.y;
+			Motion& player_motion = registry.motions.get(registry.players.entities[0]);
+			player_motion.scale.x = abs(player_motion.scale.x);
+			Entity& gun = registry.guns.entities[0];
+			registry.motions.get(gun);
+
+			Gun& gun_component = registry.guns.get(gun);
+			gun_component.offset.x = abs(gun_component.offset.x);
 		}
 	}
 }
@@ -2299,17 +2637,13 @@ void GameScene::on_mouse_click(int button, int action, int mod) {
 		return;
 	}
 
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		Motion& gun_motion = registry.motions.get(gun);
-
-		// get the gun facing direction
-		vec2 direction = { cos(gun_motion.angle), sin(gun_motion.angle) };
-
-		// Normalize the direction vector, to ensure consistent bullet speed
-		direction = normalize(direction);
-
-		// Shoot a bullet
-		shoot_bullet(gun_motion.position, direction);
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (action == GLFW_PRESS) {
+			is_left_mouse_pressed = true;
+		}
+		else if (action == GLFW_RELEASE) {
+			is_left_mouse_pressed = false;
+		}
 	}
 
 	(int)button;
@@ -2464,33 +2798,75 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	float x_offset = window_width_px / 40.0f;
 	float y_offset = 110.f; // Position below the inventory
 
-	// Get the player's shield component
-	int shield_count = 0;
-	if (registry.shields.has(player)) {
-		Shield& shield = registry.shields.get(player);
-		shield_count = shield.charges;
+	// Create a vector to store power-ups dynamically
+	struct PowerUpInfo {
+		TEXTURE_ASSET_ID texture;
+		int count;
+	};
+	std::vector<PowerUpInfo> power_ups;
+
+	// Add the player's speed boost power-up (if any)
+	if (registry.speedBoosts.has(player)) {
+		SpeedBoost& speed_boost = registry.speedBoosts.get(player);
+		if (speed_boost.count > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_SPEED_UP, speed_boost.count });
+		}
 	}
 
-	// If the player has shields, render the shield icon
-	if (shield_count > 0) {
-		// Create a slot entity for the shield
+	// Add the player's shield power-up (if any)
+	if (registry.shields.has(player)) {
+		Shield& shield = registry.shields.get(player);
+		if (shield.charges > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_SHIELD, shield.charges });
+		}
+	}
+
+	// Add the player's life steal power-up (if any)
+	if (registry.lifeSteals.has(player)) {
+		LifeSteal& life_steal = registry.lifeSteals.get(player);
+		if (life_steal.stacks > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_LIFE_STEAL, life_steal.stacks });
+		}
+	}
+
+	// Add the player's ricochet bullet power-up (if any)
+	if (registry.ricochetPowerUps.has(player)) {
+		RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
+		if (ricochet.stacks > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_RICOCHET, ricochet.stacks });
+		}
+	}
+
+	// Add the player's attack speed power-up (if any)
+	if (registry.attackSpeedPowerUps.has(player)) {
+		AttackSpeedPowerUp& powerup = registry.attackSpeedPowerUps.get(player);
+		if (powerup.stacks > 0) {
+			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_ATTACK_SPEED, powerup.stacks });
+		}
+	}
+
+	// Loop through the collected power-ups and render them
+	for (size_t i = 0; i < power_ups.size(); ++i) {
+		float x_position = x_offset + i * (icon_size + spacing);
+
+		// Create a slot entity for the power-up
 		Entity slot = Entity();
 		Motion& slot_motion = registry.motions.emplace(slot);
-		slot_motion.position = { x_offset, y_offset };
+		slot_motion.position = { x_position, y_offset };
 		slot_motion.scale = { icon_size, icon_size };
 		registry.UIs.emplace(slot);
 		registry.refreshables.emplace(slot);
 
-		// Render the shield icon
+		// Render the power-up icon
 		registry.renderRequests.insert(slot, {
-			TEXTURE_ASSET_ID::POWER_UP_SHIELD,
+			power_ups[i].texture,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE
 			});
 
-		// Display the shield count as text if stackable
-		std::string count_text = std::to_string(shield_count);
-		Entity text_entity = renderer->text_renderer.createText(count_text, { x_offset + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
+		// Display the power-up count as text if stackable
+		std::string count_text = std::to_string(power_ups[i].count);
+		Entity text_entity = renderer->text_renderer.createText(count_text, { x_position + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
 		registry.UIs.emplace(text_entity);
 		registry.refreshables.emplace(text_entity);
 	}

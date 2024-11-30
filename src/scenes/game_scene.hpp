@@ -15,7 +15,7 @@ public:
 	void destroy();
 	void on_key(int key, int action, int mod);
 	std::string get_next_scene();
-	void handle_collisions();
+	void handle_collisions(float elapsed_ms_since_last_update);
 	void on_mouse_move(vec2 mouse_position);
 	void drawHealthBars();
 	void on_mouse_click(int button, int action, int mod);
@@ -26,6 +26,10 @@ private:
 	float current_speed;
 	Entity player;
 	Entity enemy;
+	//TransState transState;
+	//Entity transMaskEntity;
+	std::string next_map_name;
+
 	void createMaze();
 	//bool check_player_wall_collision(const Motion& player_motion);
 	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);
@@ -36,23 +40,25 @@ private:
 	Entity createGun(Entity player);
 	Entity createPortal(vec2 pos, std::string map_name);
 	Entity createEnemy(vec2 pos);
+	Entity createEnemyAgile(vec2 pos);
 	Entity createWall(vec2 position, vec2 size);
 	Entity createPlayerHPBar(vec2 position, float ratio);
 	Entity createDirectionMarker(vec2 position);
 	Entity createBackground();
-
 	Entity createChest(vec2 position);
 
 	Entity createTape(vec2 pos, int tape_num);
 	void startTextAnimation(std::vector<std::string> text, int tape_num);
 	void updateTextAnimation(float elapsed_ms);
 	void renderAnimatedText(RenderSystem* renderer);
+	Entity createTransitionMask(RenderSystem* renderer, float progress);
+
 	void refreshUI(Entity player);
 	void shoot_bullet(vec2 position, vec2 direction);
 
 	void spawnEnemiesAndItems();
 
-	void changeMap(std::string map_name);
+	void changeMap(std::string map_name, float elapsed_ms_since_last_update);
 
 	void apply_damage(Entity& target, int damage);
 	void show_damage_number(vec2 position, int damage);
@@ -60,7 +66,7 @@ private:
 	void restart_game();
 
 	// player movement
-	float PLAYER_SPEED = 200.0f;
+	/*float PLAYER_SPEED = 200.0f;*/
 	vec4 player_movement_state = { 0, 0, 0, 0 };
 
 	const int TILE_SIZE = 48;
@@ -81,7 +87,11 @@ private:
 	Mix_Chunk* tape4_recording;
 	Mix_Chunk* tape5_recording;
 	Mix_Chunk* tape6_recording;
-	
+	Mix_Chunk* player_footstep;
+	Mix_Chunk* enemy_footstep;
+	Mix_Chunk* enemy_get_hit;
+	Mix_Chunk* tape_pickup;
+
 	vec2 player_velocity;
 
 	std::string next_scene = "";
@@ -101,4 +111,7 @@ private:
 	// C++ random number generator
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	bool is_left_mouse_pressed = false;
+	float fire_timer = 0.f;  // Timer to control firing rate
 };

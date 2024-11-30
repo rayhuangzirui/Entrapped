@@ -22,6 +22,8 @@ public:
 	ComponentContainer<FPS> fps;	
 	ComponentContainer<Tape> tapes;
 	ComponentContainer<Subtitle> subtitles;
+	ComponentContainer<TransState> transStates;
+	ComponentContainer<TransMask> transMasks;
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -62,7 +64,7 @@ public:
 	ComponentContainer<UI> UIs;
 	ComponentContainer<PlayerHPBar> playerHPBars;
 	ComponentContainer<FPSText> fpsTexts;
-	ComponentContainer<Button> buttons;
+	ComponentContainer<Button1> buttons;
 	ComponentContainer<PressedButton> pressedButtons;
 	ComponentContainer<Message> messages;
 
@@ -90,18 +92,25 @@ public:
 	ComponentContainer<InventorySlot> inventorySlots;
 	ComponentContainer<InventoryItem> inventoryItems;
 	ComponentContainer<IconSprite> iconSprites;
-	ComponentContainer<ItemCount> itemCounts;
+	ComponentContainer<InventoryItemCount> itemCounts;
 	ComponentContainer<Inventory> inventories;
 
 	// Power-Up related components
 	ComponentContainer<PowerUp> powerUps;
 	ComponentContainer<Shield> shields;
+	ComponentContainer<SpeedBoost> speedBoosts;
+	ComponentContainer<LifeSteal> lifeSteals;
+	ComponentContainer<RicochetPowerUp> ricochetPowerUps;
+	ComponentContainer<AttackSpeedPowerUp> attackSpeedPowerUps;
+
 	ComponentContainer<PowerUpSlot> powerUpSlots;
 	ComponentContainer<Refreshable> refreshables;
 
 	ComponentContainer<Soldier_init_powerup> soldier_init_powerups;
 	ComponentContainer<Doctor_init_powerup> doctor_init_powerups;
 	ComponentContainer<Hacker_init_powerup> hacker_init_powerups;
+
+	ComponentContainer<DashCoolDown> dashCoolDowns;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -116,6 +125,8 @@ public:
 		registry_list.push_back(&parents);
 		registry_list.push_back(&tapes);
 		registry_list.push_back(&subtitles);
+		registry_list.push_back(&transStates);
+		registry_list.push_back(&transMasks);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
@@ -187,7 +198,11 @@ public:
 		// PowerUp
 		registry_list.push_back(&powerUps);
 		registry_list.push_back(&shields);
-  
+		registry_list.push_back(&speedBoosts);
+		registry_list.push_back(&lifeSteals);
+		registry_list.push_back(&ricochetPowerUps);
+		registry_list.push_back(&attackSpeedPowerUps);
+
 		registry_list.push_back(&powerUpSlots);
 		registry_list.push_back(&soldier_init_powerups);
 		registry_list.push_back(&doctor_init_powerups);
@@ -196,6 +211,8 @@ public:
 		registry_list.push_back(&tapes);
 		// Physics
 		registry_list.push_back(&collidables);
+
+		registry_list.push_back(&dashCoolDowns);
 	}
 
 	void clear_all_components() {

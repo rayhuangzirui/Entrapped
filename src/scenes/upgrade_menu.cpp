@@ -6,7 +6,6 @@
 
 void UpgradeMenu::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
-	renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), { 50.f, 50.f }, 20.f, { 1.f, 1.f, 1.f });
 
 	health_button = createButton(renderer, { 350.f, 100.f }, { 105.f, 30.f }, "Upgrade");
 	ammo_button = createButton(renderer, { 350.f, 150.f }, { 105.f, 30.f }, "Upgrade");
@@ -15,11 +14,15 @@ void UpgradeMenu::initialize(RenderSystem* renderer) {
 
 	renderer->text_renderer.createText("*Upgrade will be applied on new games", { window_width_px - 450.f, window_height_px - 50.f }, 20.f, { 1.f, 1.f, 1.f });
 	refreshUI();
+	button_click = Mix_LoadWAV(audio_path("main-click.wav").c_str());
 }
 
 void UpgradeMenu::refreshUI() {
 	while (registry.refreshables.entities.size() > 0)
 		registry.remove_all_components_of(registry.refreshables.entities.back());
+
+	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), { 50.f, 50.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.refreshables.emplace(exp_text);
 
 	Entity hp_text = renderer->text_renderer.createText("Extra Max HP: " + std::to_string(state.health_upgrade.curVal), { 50.f, 100.f }, 20.f, { 1.f, 1.f, 1.f });
 	registry.refreshables.emplace(hp_text);
@@ -36,6 +39,7 @@ void UpgradeMenu::refreshUI() {
 void UpgradeMenu::step(float elapsed_ms) {
 	refreshUI();
 	for (Entity button_entity : registry.pressedButtons.entities) {
+		Mix_PlayChannel(-1, button_click, 0);
 		if (button_entity == health_button) {
 			if (state.exp > state.health_upgrade.upgrade_cost) {
 				state.health_upgrade.curVal += state.health_upgrade.upgrade_amount;
@@ -72,8 +76,9 @@ std::string UpgradeMenu::get_next_scene() {
 }
 
 
-void UpgradeMenu::handle_collisions() {
+void UpgradeMenu::handle_collisions(float elapsed_ms_since_last_update) {
 	// dummy to avoid compiler warning
+	(float)elapsed_ms_since_last_update;
 }
 
 void UpgradeMenu::on_mouse_move(vec2 mouse_position) {

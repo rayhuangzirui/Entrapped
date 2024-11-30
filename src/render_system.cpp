@@ -134,6 +134,21 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
 			gl_has_errors();
 		}
+
+		if (render_request.used_effect == EFFECT_ASSET_ID::BOX) {
+			if (registry.opacities.has(entity)) {
+				// Set the opacity
+				GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+				assert(opacity_uloc >= 0);
+				glUniform1f(opacity_uloc, registry.opacities.get(entity).opacity);
+			}
+			else {
+				// Set the opacity
+				GLint opacity_uloc = glGetUniformLocation(program, "opacity");
+				assert(opacity_uloc >= 0);
+				glUniform1f(opacity_uloc, 1.0f);
+			}
+		}
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::FOV_NEW) {
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -244,9 +259,14 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
 
             GLint radiusLoc = glGetUniformLocation(program, "circleRadius");
             if (radiusLoc >= 0) {
-                float circle_radius = 700.0f;
+                float circle_radius = 500.0f;
                 glUniform1f(radiusLoc, circle_radius);
             }
+
+			GLuint time_uloc = glGetUniformLocation(program, "time");
+			if (radiusLoc >= 0) {
+				glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+			}
 
             GLint windowSizeLoc = glGetUniformLocation(program, "windowSize");
             if (windowSizeLoc >= 0) {
@@ -431,26 +451,26 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 }
 
 
-bool RenderSystem::checkWallNearby(vec2 position, float check_radius) {
-    
-    int col = static_cast<int>(position.x / 48.f);
-    int row = static_cast<int>(position.y / 48.f); 
-    int radius_tiles = static_cast<int>(check_radius / 48.f);
-    for (int r = row - radius_tiles; r <= row + radius_tiles; r++) {
-        for (int c = col - radius_tiles; c <= col + radius_tiles; c++) { 
-            if (r >= 0 && r < state.map_height && c >= 0 && c < state.map_width) { 
-                if (state.map[r][c] == 1) {
-                    vec2 wall_pos = vec2(c * 48.f + 24.f, r * 48.f + 24.f);
-                    float dist = length(position - wall_pos);
-                    if (dist < check_radius) {
-                        return true;
-                    }
-                }
-            }
-        }
-    }
-    return false;
-}
+//bool RenderSystem::checkWallNearby(vec2 position, float check_radius) {
+//    
+//    int col = static_cast<int>(position.x / 48.f);
+//    int row = static_cast<int>(position.y / 48.f); 
+//    int radius_tiles = static_cast<int>(check_radius / 48.f);
+//    for (int r = row - radius_tiles; r <= row + radius_tiles; r++) {
+//        for (int c = col - radius_tiles; c <= col + radius_tiles; c++) { 
+//            if (r >= 0 && r < state.map_height && c >= 0 && c < state.map_width) { 
+//                if (state.map[r][c] == 1) {
+//                    vec2 wall_pos = vec2(c * 48.f + 24.f, r * 48.f + 24.f);
+//                    float dist = length(position - wall_pos);
+//                    if (dist < check_radius) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    return false;
+//}
 
 void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 	Motion& motion = registry.motions.get(entity);
@@ -542,13 +562,21 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 			GLfloat xpos = x;
 			GLfloat ypos = y;
 			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			if (state.is_wall(state.map[row][col])) {
-				texture_id =
-					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			}
-			else if (state.is_floor(state.map[row][col])) {
-				texture_id =
-					texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
+			//if (state.is_wall(state.map[row][col])) {
+			//	//texture_id =
+			//	//	texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
+			//	texture_id = state.map_tile_textures[0];
+			//}
+			//else if (state.is_floor(state.map[row][col])) {
+			//	texture_id =
+			//		texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
+			//}
+			//else {
+			//	x += 48.f;
+			//	continue;
+			//}
+			if (state.map.decoration_layer[row][col] > -1) {
+				texture_id = state.map_tile_textures[state.map.decoration_layer[row][col]];
 			}
 			else {
 				x += 48.f;

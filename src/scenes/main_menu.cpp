@@ -17,22 +17,25 @@ void MainMenu::initialize(RenderSystem* renderer) {
 	//renderer->text_renderer.createText("Press any key to start the game", { 40.f, window_height_px - 140.f }, 20.f, { 1.f, 1.f, 1.f });
 	//renderer->text_renderer.createText("Press ; key to enter debug mode", { 40.f, window_height_px - 110.f }, 20.f, { 1.f, 1.f, 1.f });
 
-	state.map_index = 0;
 	new_game_button = createButton(renderer, { 50.f, window_height_px - 240.f }, { 200.f, 30.f }, "New Game");
 	upgrade_button = createButton(renderer, { 50.f, window_height_px - 160.f }, { 200.f, 30.f }, "Upgrades");
 	debug_button = createButton(renderer, { 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Debug: Off");
 	debugging.in_debug_mode = false;
 	state.load();
+	state.map_index = state.saved_map_index;
 	//exit_game_button = createButton({ 50.f, window_height_px - 120.f }, { 200.f, 30.f }, "Exit Game");
 	//(vec2)mouse_position; // dummy to avoid compiler warning
 	if (state.saved_map_index > 0) {
 		continue_game_button = createButton(renderer, { 50.f, window_height_px - 200.f }, { 200.f, 30.f }, "Continue Game");
 	}
+	button_click = Mix_LoadWAV(audio_path("main-click.wav").c_str());
 }
 
 void MainMenu::step(float elapsed_ms) {
 	for (Entity button_entity : registry.pressedButtons.entities) {
+		Mix_PlayChannel(-1, button_click, 0);
 		if (button_entity == new_game_button) {
+			state.map_index = 0;
 			next_scene = "profession_menu";
 			break;
 		}
@@ -47,7 +50,7 @@ void MainMenu::step(float elapsed_ms) {
 		}
 		else if (button_entity == debug_button) {
 			debugging.in_debug_mode = !debugging.in_debug_mode;
-			Button& btn = registry.buttons.get(debug_button);
+			Button1& btn = registry.buttons.get(debug_button);
 			Text& txt = registry.texts.get(btn.text);
 			if (debugging.in_debug_mode) {
 				txt.content = "Debug: On";
@@ -81,8 +84,9 @@ std::string MainMenu::get_next_scene() {
 }
 
 
-void MainMenu::handle_collisions() {
+void MainMenu::handle_collisions(float elapsed_ms_since_last_update) {
 	// dummy to avoid compiler warning
+	(float)elapsed_ms_since_last_update;
 }
 
 void MainMenu::on_mouse_move(vec2 mouse_position) {

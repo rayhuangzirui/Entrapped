@@ -31,3 +31,6 @@ Entity createConfirmButton(RenderSystem* renderer, vec2 pos, bool is_enabled, bo
 Entity createButton(RenderSystem* renderer, vec2 pos, vec2 scale, std::string text);
 
 Entity createMessage(RenderSystem* renderer, vec2 pos, std::string text);
+
+// create a grid box of the screen
+Entity createTransitionMask(RenderSystem* renderer, float progress);

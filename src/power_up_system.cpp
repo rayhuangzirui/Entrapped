@@ -2,6 +2,7 @@
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
 #include "render_system.hpp"
+#include "scenes/game_scene.hpp"
 #include <iostream>
 
 // Function to apply a power-up to a player
@@ -27,6 +28,107 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
                 << shield.charges << std::endl;
         }
     }
+    else if (type == PowerUpType::SpeedBoost) {
+        // Handle speed boost power-up
+        if (registry.players.has(player)) {
+            Player& player_component = registry.players.get(player);
+
+            // Increase the player's speed by 10%
+            float original_speed = player_component.speed;
+            player_component.speed *= 1.1f; // Increase speed by 10%
+
+            // Check if the player already has a SpeedBoost component
+            if (registry.speedBoosts.has(player)) {
+                SpeedBoost& speed_boost = registry.speedBoosts.get(player);
+                speed_boost.count += strength; // Increment the speed boost count
+            }
+            else {
+                // If not, add a new SpeedBoost component with a count of 1
+                SpeedBoost& speed_boost = registry.speedBoosts.emplace(player);
+                speed_boost.count = strength;
+            }
+
+            // Debug output showing the new speed and count
+            std::cout << "[DEBUG] Speed Boost collected! Original speed: "
+                << original_speed << ", New speed: "
+                << player_component.speed << ", Total speed boosts: "
+                << registry.speedBoosts.get(player).count << std::endl;
+        }
+    }
+    else if (type == PowerUpType::LifeSteal) {
+        if (registry.players.has(player)) {
+            // Check if the player already has a LifeSteal component
+            if (registry.lifeSteals.has(player)) {
+                LifeSteal& life_steal = registry.lifeSteals.get(player);
+                life_steal.stacks += strength; // Increment the stack count
+            }
+            else {
+                // Add a new LifeSteal component with the initial stack count
+                LifeSteal& life_steal = registry.lifeSteals.emplace(player);
+                life_steal.stacks = strength;
+            }
+
+            // Debug: Print the updated number of stacks
+            std::cout << "[DEBUG] Life Steal power-up applied! Total stacks: "
+                << registry.lifeSteals.get(player).stacks << std::endl;
+        }
+    }
+    else if (type == PowerUpType::RicochetPowerUp) {
+        // RicochetPowerUp logic
+        if (registry.players.has(player)) {
+            if (registry.ricochetPowerUps.has(player)) {
+                RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
+                ricochet.stacks += strength;
+
+                std::cout << "[DEBUG] Ricochet power-up collected! Total stacks: "
+                    << ricochet.stacks << std::endl;
+            }
+            else {
+                RicochetPowerUp& ricochet = registry.ricochetPowerUps.emplace(player);
+                ricochet.stacks = strength;
+
+                std::cout << "[DEBUG] First Ricochet power-up collected! Total stacks: "
+                    << ricochet.stacks << std::endl;
+            }
+        }
+    }
+
+    else if (type == PowerUpType::AttackSpeedPowerUp) {
+        if (registry.players.has(player)) {
+            // Add or update the AttackSpeedPowerUp component on the player
+            if (registry.attackSpeedPowerUps.has(player)) {
+                AttackSpeedPowerUp& attack_speed = registry.attackSpeedPowerUps.get(player);
+                attack_speed.stacks += strength; // Increment stack count
+            }
+            else {
+                AttackSpeedPowerUp& attack_speed = registry.attackSpeedPowerUps.emplace(player);
+                attack_speed.stacks = strength;
+            }
+
+            // Dynamically apply the effect to the first gun associated with the player
+            if (registry.guns.entities.size() > 0) {
+                Entity gun_entity = registry.guns.entities[0]; // Assume the first gun is associated with the player
+                Gun& gun = registry.guns.get(gun_entity);
+
+                // Update the gun's fire rate based on the total stacks
+                gun.fire_rate += 1.0f * strength;
+
+                // Debug message
+                std::cout << "[DEBUG] Attack Speed Power-Up applied to player! New fire rate: "
+                    << gun.fire_rate << ", Total stacks: "
+                    << registry.attackSpeedPowerUps.get(player).stacks << std::endl;
+            }
+            else {
+                // If no gun exists, store the power-up but don't apply its effect yet
+                std::cout << "[DEBUG] Player has no gun. Attack Speed Power-Up stored for later use." << std::endl;
+            }
+        }
+        else {
+            // If the player entity does not exist
+            std::cout << "[DEBUG] Player not found. Attack Speed Power-Up not applied." << std::endl;
+        }
+    }
+
     else if (type == PowerUpType::Soldier_init_powerup) {
 		// soldier init powerup:
         // soldier has an invincible frame when dashing towards enemy (in game_scene)
@@ -34,6 +136,8 @@ void PowerUpSystem::applyPowerUp(Entity player, PowerUpType type, int strength) 
 		
 		//DashCoolDown& dashCoolDown = registry.dashCoolDowns.get(player);
 		//dashCoolDown.cooldown = 5000; //ms
+        Player& player_component = registry.players.get(player);
+        player_component.dash_cooldown = 1000.f;
     }
     else if (type == PowerUpType::Doctor_init_powerup) {
 		// heal 1 health point every 5 seconds

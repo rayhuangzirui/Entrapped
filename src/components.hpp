@@ -146,6 +146,21 @@ struct EnemyAI {
 	float speed = 100.f; // movement speed of enemy
 };
 
+// Enemy Dash AI component
+struct EnemyDashAI {
+	float action_radius = 100;
+	float dash_timer = 1000;
+	float max_dash_timer = 1000;
+	vec2 dash_direction = { 0, 0 };
+};
+
+// Boss AI component
+struct BossAI {
+	float action_radius = 100;
+	float action_timer = 1000;
+	float max_action_timer = 1000;
+};
+
 struct Health {
 	int current_health;  // Health points of an entity
 	int max_health; 

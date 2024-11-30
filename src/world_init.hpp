@@ -16,9 +16,6 @@ const float BULLET_BB_HEIGHT = 10.f;
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 
-//a wall
-Entity createWall(RenderSystem* renderer, vec2 position, vec2 size);
-
 // background
 Entity createBackground(RenderSystem* renderer);
 

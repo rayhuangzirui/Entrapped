@@ -2165,7 +2165,10 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 
 	// Enemy AI
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
-	enemyAI.speed = 100.f;
+	enemyAI.speed = 200.f;
+
+	// Enemy Dash AI
+	EnemyDashAI& enemyDashAI = registry.enemyDashAIs.emplace(entity);
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2286,6 +2289,9 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
 	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
 	enemyAI.speed = 50.f;
+
+	// Boss AI
+	BossAI& bossAI = registry.bossAIs.emplace(entity);
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);

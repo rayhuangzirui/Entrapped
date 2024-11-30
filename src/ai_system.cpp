@@ -66,7 +66,6 @@ std::vector<vec2> AISystem::findPath(vec2 start, vec2 end) {
 	open_set.push_back(start);
 
 	while (open_set.size() > 0) {
-		// TODO: fix dead loop
 		int idx = 0;
 		vec2 current_coords = open_set[idx];
 		int current_idx = 0;
@@ -145,6 +144,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 		// wandering state: 0
 		// chasing state: 1
 		// fleeing state: 2
+		// action state: 3
 		if (enemyAI.state == 0) {
 			// if the player is within a certain distance, switch to chasing
 			if (distance(player_motion.position, motion.position) <= enemyAI.detection_radius) {
@@ -232,6 +232,30 @@ void AISystem::step(float elapsed_ms_since_last_update)
 				enemyAI.chase_timer = 3000.f;
 			}
 
+			// for specific enemies, check for conditions to enter action state
+			if (registry.enemyDashAIs.has(entity)) {
+				EnemyDashAI& enemyDashAI = registry.enemyDashAIs.get(entity);
+				if (distance(player_motion.position, motion.position) <= enemyDashAI.action_radius) {
+					enemyAI.state = 3;
+					enemyDashAI.dash_timer = enemyDashAI.max_dash_timer;
+					enemyDashAI.dash_direction = normalize(motion.velocity);
+					motion.velocity = { 0, 0 };
+					enemyAI.chase_timer = 3000.f;
+					enemyAI.path.clear();
+				}
+			}
+
+			if (registry.bossAIs.has(entity)) {
+				BossAI& bossAI = registry.bossAIs.get(entity);
+				if (distance(player_motion.position, motion.position) <= bossAI.action_radius) {
+					enemyAI.state = 3;
+					bossAI.action_timer = bossAI.max_action_timer;
+					motion.velocity = { 0, 0 };
+					enemyAI.chase_timer = 3000.f;
+					enemyAI.path.clear();
+				}
+			}
+
 		}
 		else if (enemyAI.state == 2) {
 			// move away from the last position where the player is seen.
@@ -250,6 +274,47 @@ void AISystem::step(float elapsed_ms_since_last_update)
 			else { // else, update the position of the player for the AI
 				enemyAI.last_player_position = player_motion.position;
 				enemyAI.flee_timer = 3000.f;
+			}
+		}
+		else if (enemyAI.state == 3) {
+
+			// update dash
+			if (registry.enemyDashAIs.has(entity)) {
+				EnemyDashAI& enemyDashAI = registry.enemyDashAIs.get(entity);
+				// preparation
+				if (enemyDashAI.dash_timer > enemyDashAI.max_dash_timer / 2.f) {
+					vec3& color = registry.colors.get(entity);
+
+					float ratio = (enemyDashAI.dash_timer - enemyDashAI.max_dash_timer / 2.f) / (enemyDashAI.max_dash_timer / 2.f);
+					color = vec3(0.0, 1.0, 1.0) * ratio;
+					color.r = 1.0;
+				}
+				// dash!
+				else { 
+					// probably a bad idea to restore the color here
+					vec3& color = registry.colors.get(entity);
+					color = vec3(1.0, 0.8, 0.8);
+					float ratio = (enemyDashAI.dash_timer) / (enemyDashAI.max_dash_timer / 2.f);
+					motion.velocity = enemyDashAI.dash_direction * enemyAI.speed * 3.f * ratio;
+				}
+				if (enemyDashAI.dash_timer <= 0) {
+					enemyAI.state = 0;
+				}
+				enemyDashAI.dash_timer -= elapsed_ms_since_last_update;
+			}
+
+			// update boss sprite
+			if (registry.bossAIs.has(entity)) {
+				// TODO: add boss attack animation here
+				BossAI& bossAI = registry.bossAIs.get(entity);
+				auto& texture = registry.renderRequests.get(entity);
+				texture.used_texture = TEXTURE_ASSET_ID::BOSS_ATTACK_1;
+				if (bossAI.action_timer <= 0) {
+					enemyAI.state = 0;
+					texture.used_texture = TEXTURE_ASSET_ID::BOSS_WALK_1;
+				}
+				bossAI.action_timer -= elapsed_ms_since_last_update;
+
 			}
 		}
 	}

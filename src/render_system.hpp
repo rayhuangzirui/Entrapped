@@ -132,6 +132,7 @@ class RenderSystem {
 		//shader_path("textured")
 		shader_path("map"),
 		shader_path("fovShader"),
+		shader_path("fov")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;

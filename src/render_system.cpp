@@ -150,6 +150,37 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			}
 		}
 	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::FOV_NEW) {
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_color_loc = glGetAttribLocation(program, "in_color");
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_color_loc);
+		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)sizeof(vec3));
+		gl_has_errors();
+
+		int map[16 * 16];
+		int start_x = floor((motion.position.x - motion.scale.x/2.f)/48.f);
+		int start_y = floor((motion.position.y - motion.scale.y / 2.f) / 48.f);
+		for (int i = start_y; i < 16; i++) {
+			for (int j = start_x; j < 16; j++) {
+				map[j+16*i] = (state.map[i][j]>0);
+			}
+		}
+
+		GLint mapLoc = glGetUniformLocation(program, "map");
+		if (mapLoc >= 0) {
+			glUniform1iv(mapLoc, 16 * 16, map);
+		}
+		gl_has_errors();
+
+	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::COLOURED)
 {
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -723,6 +754,7 @@ for (Entity entity : registry.renderRequests.entities) {
 for (Entity entity : registry.renderRequests.entities) {
     if (registry.fovs.has(entity)) {
         drawTexturedMesh(entity, camera_matrix);
+		//drawTexturedMesh(entity, projection_2D);
     }
 }
 

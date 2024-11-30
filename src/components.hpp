@@ -647,7 +647,8 @@ enum class EFFECT_ASSET_ID {
 	GLOBAL = BOX+1,
 	MAP = GLOBAL + 1,
 	FOV2 = MAP + 1,
-	EFFECT_COUNT = FOV2 + 1,
+	FOV_NEW = FOV2+1,
+	EFFECT_COUNT = FOV_NEW + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

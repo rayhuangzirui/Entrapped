@@ -41,6 +41,10 @@ private:
 	Entity createPortal(vec2 pos, std::string map_name);
 	Entity createEnemy(vec2 pos);
 	Entity createEnemyAgile(vec2 pos);
+	Entity createEnemyTank(vec2 pos);
+	Entity createEnemyBoss(vec2 pos);
+
+
 	Entity createWall(vec2 position, vec2 size);
 	Entity createPlayerHPBar(vec2 position, float ratio);
 	Entity createDirectionMarker(vec2 position);

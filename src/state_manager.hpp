@@ -49,7 +49,7 @@ public:
 	{
 		map_index = 0;
 		saved_map_index = 0;
-		map_lists = { "tutorial", "map1"};
+		map_lists = { "test" };
 		changeMap("test");
 
 		exp = 0;

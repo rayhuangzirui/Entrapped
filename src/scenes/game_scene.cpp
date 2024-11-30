@@ -339,8 +339,18 @@ void GameScene::spawnEnemiesAndItems() {
 				// add random power-up pickups
 			}
 			else if (state.map.interactive_layer[row][col] == 7) {
-				// faster enemy
+				// agile enemy
 				Entity enemy = createEnemyAgile(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+			else if (state.map.interactive_layer[row][col] == 8) {
+				// tank enemy
+				Entity enemy = createEnemyTank(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+			else if (state.map.interactive_layer[row][col] == 9) {
+				// boss enemy
+				Entity enemy = createEnemyBoss(pos);
 				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 			}
 		}
@@ -2155,7 +2165,7 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 
 	// Enemy AI
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
-	enemyAI.speed = 150.f;
+	enemyAI.speed = 100.f;
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2180,7 +2190,125 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 	return entity;
 }
 
+Entity GameScene::createEnemyTank(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
 
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 120.f ,120.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 2;
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
+	enemyAI.speed = 50.f;
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::MAN_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
+Entity GameScene::createEnemyBoss(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 150.f ,150.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 2;
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
+	enemyAI.speed = 50.f;
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BOSS_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
 
 // Compute collisions between entities
 void GameScene::handle_collisions(float elapsed_ms_since_last_update) {

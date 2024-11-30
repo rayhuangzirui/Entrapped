@@ -64,6 +64,11 @@ class RenderSystem {
 			textures_path("woman_walk_3.png"),
 			textures_path("woman_walk_4.png"),
 
+			textures_path("man_walk_1.png"),
+			textures_path("man_walk_2.png"),
+			textures_path("man_walk_3.png"),
+			textures_path("man_walk_4.png"),
+
 			textures_path("bullet_1.png"),
 			textures_path("bullet_2.png"),
 			textures_path("bullet_3.png"),
@@ -75,6 +80,10 @@ class RenderSystem {
 			textures_path("woman_hurt_dead_1.png"),
 			textures_path("woman_hurt_dead_2.png"),
 			textures_path("woman_hurt_dead_3.png"),
+
+			textures_path("man_hurt_dead_1.png"),
+			textures_path("man_hurt_dead_2.png"),
+			textures_path("man_hurt_dead_3.png"),
 
 			textures_path("chest_closed.png"),
 			textures_path("chest_opened.png"),
@@ -124,7 +133,21 @@ class RenderSystem {
 			textures_path("spider_dead_1.png"),
 			textures_path("spider_dead_2.png"),
 			textures_path("spider_dead_3.png"),
-			textures_path("spider_dead_4.png")
+			textures_path("spider_dead_4.png"),
+
+			textures_path("boss_walk_1.png"),
+			textures_path("boss_walk_2.png"),
+			textures_path("boss_walk_3.png"),
+			textures_path("boss_walk_4.png"),
+
+			textures_path("boss_hurt_dead_1.png"),
+			textures_path("boss_hurt_dead_2.png"),
+			textures_path("boss_hurt_dead_3.png"),
+
+			textures_path("boss_attack_1.png"),
+			textures_path("boss_attack_2.png"),
+			textures_path("boss_attack_3.png"),
+			textures_path("boss_attack_4.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -23,3 +23,5 @@ MapState CreateMap1();
 
 MapState CreateMap2();
 
+MapState CreateMap4();
+

@@ -238,7 +238,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 				if (distance(player_motion.position, motion.position) <= enemyDashAI.action_radius) {
 					enemyAI.state = 3;
 					enemyDashAI.dash_timer = enemyDashAI.max_dash_timer;
-					enemyDashAI.dash_direction = normalize(motion.velocity);
+					enemyDashAI.dash_direction = normalize(player_motion.position - motion.position);
 					motion.velocity = { 0, 0 };
 					enemyAI.chase_timer = 3000.f;
 					enemyAI.path.clear();
@@ -295,6 +295,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 					vec3& color = registry.colors.get(entity);
 					color = vec3(1.0, 0.8, 0.8);
 					float ratio = (enemyDashAI.dash_timer) / (enemyDashAI.max_dash_timer / 2.f);
+					std::cout << enemyDashAI.dash_direction.x << " " << enemyDashAI.dash_direction.y << std::endl;
 					motion.velocity = enemyDashAI.dash_direction * enemyAI.speed * 3.f * ratio;
 				}
 				if (enemyDashAI.dash_timer <= 0) {

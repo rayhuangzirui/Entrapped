@@ -123,6 +123,10 @@ struct Enemy
 	// Enemy's damage
 	int damage = 1;
 
+	// Enemy type
+	// 0 for normal, 1 for agile
+	int type = 0;
+
 	Entity health_bar_entity;
 };
 
@@ -629,8 +633,18 @@ enum class TEXTURE_ASSET_ID {
 	HACK_1 = DOC_3 + 1,
 	HACK_2 = HACK_1 + 1,
 	HACK_3 = HACK_2 + 1,
-	
-	TEXTURE_COUNT = HACK_3 + 1
+
+	SPIDER_WALK_1 = HACK_3+1,
+	SPIDER_WALK_2 = SPIDER_WALK_1+1,
+	SPIDER_WALK_3 = SPIDER_WALK_2+1,
+	SPIDER_WALK_4 = SPIDER_WALK_3+1,
+
+	SPIDER_DEAD_1 = SPIDER_WALK_4 + 1,
+	SPIDER_DEAD_2 = SPIDER_DEAD_1 + 1,
+	SPIDER_DEAD_3 = SPIDER_DEAD_2 + 1,
+	SPIDER_DEAD_4 = SPIDER_DEAD_3 + 1,
+
+	TEXTURE_COUNT = SPIDER_DEAD_4 + 1
 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;

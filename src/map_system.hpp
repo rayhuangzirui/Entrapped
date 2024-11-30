@@ -15,9 +15,9 @@ struct MapState {
 
 MapState CreateTestMap();
 
-MapState CreateTutorialMap();
+MapState CreateTutorialMap_old();
 
-MapState CreateTutorialMap_new();
+MapState CreateTutorialMap();
 
 MapState CreateMap1();
 

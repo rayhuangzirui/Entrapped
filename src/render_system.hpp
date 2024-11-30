@@ -114,7 +114,17 @@ class RenderSystem {
 
 			textures_path("hacker_1.png"),
 			textures_path("hacker_2.png"),
-			textures_path("hacker_3.png")
+			textures_path("hacker_3.png"),
+
+			textures_path("spider_walk_1.png"),
+			textures_path("spider_walk_2.png"),
+			textures_path("spider_walk_3.png"),
+			textures_path("spider_walk_4.png"),
+
+			textures_path("spider_dead_1.png"),
+			textures_path("spider_dead_2.png"),
+			textures_path("spider_dead_3.png"),
+			textures_path("spider_dead_4.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

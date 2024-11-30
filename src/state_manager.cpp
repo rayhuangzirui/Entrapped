@@ -1,6 +1,5 @@
 #include "state_manager.hpp"
 #include "common.hpp"
-#include <maze.hpp>
 #include <tiny_ecs_registry.hpp>
 
 StateManager state;

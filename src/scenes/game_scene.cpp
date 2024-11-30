@@ -1,6 +1,5 @@
 ﻿#include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
-#include "maze.hpp" // Access box_testing_environment
 #include "state_manager.hpp"
 #include "physics_system.hpp" // to check_player_wall_collision
 #include "render_system.hpp"

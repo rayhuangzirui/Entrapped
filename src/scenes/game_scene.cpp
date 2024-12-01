@@ -2488,13 +2488,13 @@ void GameScene::createInventorySlots(Entity player) {
 }
 
 void GameScene::refreshInventorySlots(Entity player) {
-
+	// Retrieve the player's inventory
 	Inventory& inventory = registry.inventories.get(player);
 
 	// Configuration for slot positions
 	float slot_size = 48.f;
 	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size)) / 2.0f + 8.0f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * slot_size) / 2.0f + 8.0f;
 	float y_offset = 30.f; // Position at the top of the screen
 
 	// Loop through each inventory slot and recreate it
@@ -2515,8 +2515,20 @@ void GameScene::refreshInventorySlots(Entity player) {
 			registry.refreshables.emplace(icon);
 
 			// Select the texture based on the item type
-			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
-				TEXTURE_ASSET_ID::ITEM_AMMOPACK : TEXTURE_ASSET_ID::ITEM_MEDKIT;
+			TEXTURE_ASSET_ID item_texture;
+			std::string item_description;
+			if (item.type == InventoryItem::Type::AmmoPack) {
+				item_texture = TEXTURE_ASSET_ID::ITEM_AMMOPACK;
+				item_description = "Ammo Pack: Restores ammunition. Count: " + std::to_string(item.count) + ".";
+			}
+			else if (item.type == InventoryItem::Type::HealthPotion) {
+				item_texture = TEXTURE_ASSET_ID::ITEM_MEDKIT;
+				item_description = "MedKit: Restores health. Count: " + std::to_string(item.count) + ".";
+			}
+			//else if (item.type == InventoryItem::Type::Battery) {
+			//	item_texture = TEXTURE_ASSET_ID::ITEM_BATTERY;
+			//	item_description = "Battery: Powers equipment. Count: " + std::to_string(item.count) + ".";
+			//}
 
 			registry.renderRequests.insert(icon, {
 				item_texture,
@@ -2529,27 +2541,11 @@ void GameScene::refreshInventorySlots(Entity player) {
 			Entity text_entity = renderer->text_renderer.createText(count_text, position + vec2(10, -15), 20.f, { 1.f, 1.f, 1.f });
 			registry.UIs.emplace(text_entity);
 			registry.refreshables.emplace(text_entity);
-			//std::string count_text = std::to_string(inventory.items[i].count);
-			//renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
 
 			// Attach HoverInfo component to the icon
 			HoverInfo& hover_info = registry.hoverInfos.emplace(icon);
-			/*hover_info.description = "Item: " + (item.type == InventoryItem::Type::AmmoPack ? "Ammo Pack" : "Health Potion");*/
-			std::string item_name;
-			switch (item.type) {
-			case InventoryItem::Type::AmmoPack:
-				item_name = "Ammo Pack";
-				break;
-			case InventoryItem::Type::HealthPotion:
-				item_name = "Health Potion";
-				break;
-			default:
-				item_name = "Unknown Item";
-				break;
-			}
-
-			hover_info.description = "Item: " + item_name;
-			hover_info.offset = { 0.f, -40.f }; // Adjust text offset
+			hover_info.description = item_description; // Detailed description
+			hover_info.offset = { 0.f, 40.f }; // Adjust text offset above the icon
 		}
 	}
 }

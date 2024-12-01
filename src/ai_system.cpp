@@ -306,16 +306,40 @@ void AISystem::step(float elapsed_ms_since_last_update)
 
 			// update boss sprite
 			if (registry.bossAIs.has(entity)) {
-				// TODO: add boss attack animation here
+				// Boss attack textures
+				TEXTURE_ASSET_ID boss_attack_texture[4] = {
+					TEXTURE_ASSET_ID::BOSS_ATTACK_1,
+					TEXTURE_ASSET_ID::BOSS_ATTACK_2,
+					TEXTURE_ASSET_ID::BOSS_ATTACK_3,
+					TEXTURE_ASSET_ID::BOSS_ATTACK_4
+				};
+
 				BossAI& bossAI = registry.bossAIs.get(entity);
 				auto& texture = registry.renderRequests.get(entity);
-				texture.used_texture = TEXTURE_ASSET_ID::BOSS_ATTACK_1;
-				if (bossAI.action_timer <= 0) {
-					enemyAI.state = 0;
-					texture.used_texture = TEXTURE_ASSET_ID::BOSS_WALK_1;
-				}
+
+				static int attack_frame = 0;
+				static float frame_delay = 250.f;
+				static float frame_timer = 0.f;
+
 				bossAI.action_timer -= elapsed_ms_since_last_update;
 
+				if (bossAI.action_timer > 0) {
+					frame_timer += elapsed_ms_since_last_update;
+					while (frame_timer >= frame_delay) {
+						frame_timer -= frame_delay;
+						attack_frame = (attack_frame + 1) % 4;
+					}
+
+
+					texture.used_texture = boss_attack_texture[attack_frame];
+				}
+				else {
+					attack_frame = 0;
+					frame_timer = 0.f;
+					texture.used_texture = TEXTURE_ASSET_ID::BOSS_WALK_1;
+					bossAI.action_timer = 0;
+					enemyAI.state = 0;
+				}
 			}
 		}
 	}

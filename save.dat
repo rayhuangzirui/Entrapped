@@ -9,4 +9,4 @@ ammo_pack=1
 health_potion=0
 speed_boost=0
 shield=0
-profession=0
+profession=1

@@ -10,7 +10,7 @@ struct UpgradeState {
 	int upgrade_cost = 0;
 };
 
-const int TILE_NUMBER = 18;
+const int TILE_NUMBER = 19;
 
 class StateManager
 {
@@ -49,7 +49,7 @@ public:
 	{
 		map_index = 0;
 		saved_map_index = 0;
-		map_lists = { "tutorial", "map1"};
+		map_lists = { "tutorial" };
 		changeMap("test");
 
 		exp = 0;

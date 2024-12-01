@@ -127,52 +127,15 @@ struct Enemy
 	// Enemy's damage
 	int damage = 1;
 
-	Entity health_bar_entity;
-};
-
-// A fast enemy with high damage and low health
-struct EnemyFast
-{
-	// Enemy's health
-	int health = 2;
-
-	// Enemy's damage
-	int damage = 5;
-    
-	float speed = 200.f;
-
+	// Enemy type
+	// 0 for normal enemy
+	// 1 for agaile enemy
+	// 2 for tank enemy
+	// 3 for boss enemy
+	int type = 0;
 
 	Entity health_bar_entity;
 };
-
-// A tanky enemy with high health and low damage
-struct EnemyTank
-{
-	// Enemy's health
-	int health = 7;
-
-	// Enemy's damage
-	int damage = 2;
-
-	float speed = 50.f;
-
-	Entity health_bar_entity;
-};
-
-struct EnemyBoss
-{
-	// Enemy's health
-	int health = 25;
-
-	// Enemy's damage
-	int damage = 10;
-
-	float speed = 80.f;
-
-	Entity health_bar_entity;
-};
-
-
 
 // Enemy AI component
 struct EnemyAI {
@@ -185,6 +148,21 @@ struct EnemyAI {
 	int state = 0;
 	std::vector<vec2> path;
 	float speed = 100.f; // movement speed of enemy
+};
+
+// Enemy Dash AI component
+struct EnemyDashAI {
+	float action_radius = 150;
+	float dash_timer = 1000;
+	float max_dash_timer = 1000;
+	vec2 dash_direction = { 0, 0 };
+};
+
+// Boss AI component
+struct BossAI {
+	float action_radius = 100;
+	float action_timer = 1000;
+	float max_action_timer = 1000;
 };
 
 struct Health {
@@ -581,7 +559,12 @@ enum class TEXTURE_ASSET_ID {
 	WOMAN_WALK_3 = WOMAN_WALK_2 + 1,
 	WOMAN_WALK_4 = WOMAN_WALK_3 + 1,
 
-	BULLET_1 = WOMAN_WALK_4 + 1,
+	MAN_WALK_1 = WOMAN_WALK_4 + 1,
+	MAN_WALK_2 = MAN_WALK_1 + 1,
+	MAN_WALK_3 = MAN_WALK_2 + 1,
+	MAN_WALK_4 = MAN_WALK_3 + 1,
+
+	BULLET_1 = MAN_WALK_4 + 1,
 	BULLET_2 = BULLET_1 + 1,
 	BULLET_3 = BULLET_2 + 1,
 
@@ -593,7 +576,11 @@ enum class TEXTURE_ASSET_ID {
 	WOMAN_DEAD_2 = WOMAN_DEAD_1 + 1,
 	WOMAN_DEAD_3 = WOMAN_DEAD_2 + 1,
 
-	CHEST_CLOSED = WOMAN_DEAD_3 + 1,
+	MAN_DEAD_1 = WOMAN_DEAD_3+1,
+	MAN_DEAD_2 = MAN_DEAD_1 + 1,
+	MAN_DEAD_3 = MAN_DEAD_2 + 1,
+
+	CHEST_CLOSED = MAN_DEAD_3 + 1,
 	CHEST_OPENED = CHEST_CLOSED + 1,
 
 	SPACE_BACKGROUND = CHEST_OPENED + 1,
@@ -633,8 +620,32 @@ enum class TEXTURE_ASSET_ID {
 	HACK_1 = DOC_3 + 1,
 	HACK_2 = HACK_1 + 1,
 	HACK_3 = HACK_2 + 1,
-	
-	TEXTURE_COUNT = HACK_3 + 1
+
+	SPIDER_WALK_1 = HACK_3+1,
+	SPIDER_WALK_2 = SPIDER_WALK_1+1,
+	SPIDER_WALK_3 = SPIDER_WALK_2+1,
+	SPIDER_WALK_4 = SPIDER_WALK_3+1,
+
+	SPIDER_DEAD_1 = SPIDER_WALK_4 + 1,
+	SPIDER_DEAD_2 = SPIDER_DEAD_1 + 1,
+	SPIDER_DEAD_3 = SPIDER_DEAD_2 + 1,
+	SPIDER_DEAD_4 = SPIDER_DEAD_3 + 1,
+
+	BOSS_WALK_1 = SPIDER_DEAD_4 + 1,
+	BOSS_WALK_2 = BOSS_WALK_1 + 1,
+	BOSS_WALK_3 = BOSS_WALK_2 + 1,
+	BOSS_WALK_4 = BOSS_WALK_3 + 1,
+
+	BOSS_DEAD_1 = BOSS_WALK_4+1,
+	BOSS_DEAD_2 = BOSS_DEAD_1 + 1,
+	BOSS_DEAD_3 = BOSS_DEAD_2 + 1,
+
+	BOSS_ATTACK_1 = BOSS_DEAD_3 + 1,
+	BOSS_ATTACK_2 = BOSS_ATTACK_1+1,
+	BOSS_ATTACK_3 = BOSS_ATTACK_2 +1,
+	BOSS_ATTACK_4 = BOSS_ATTACK_3 + 1,
+
+	TEXTURE_COUNT = BOSS_ATTACK_4 + 1
 
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
@@ -668,8 +679,11 @@ enum class GEOMETRY_BUFFER_ID {
 	MAZE = ENEMY_WOMAN  + 1,
 	SQUARE = MAZE + 1,
 	FOV_QUAD = SQUARE + 1,
-	GEOMETRY_COUNT = FOV_QUAD + 1
-
+	TANK_ENEMY = FOV_QUAD + 1,
+	BOSS_ENEMY = TANK_ENEMY + 1,
+	PLAYER_DOC = BOSS_ENEMY + 1,
+	PLAYER_HACK = PLAYER_DOC + 1,
+	GEOMETRY_COUNT = PLAYER_HACK + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

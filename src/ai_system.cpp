@@ -66,7 +66,6 @@ std::vector<vec2> AISystem::findPath(vec2 start, vec2 end) {
 	open_set.push_back(start);
 
 	while (open_set.size() > 0) {
-		// TODO: fix dead loop
 		int idx = 0;
 		vec2 current_coords = open_set[idx];
 		int current_idx = 0;
@@ -145,6 +144,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 		// wandering state: 0
 		// chasing state: 1
 		// fleeing state: 2
+		// action state: 3
 		if (enemyAI.state == 0) {
 			// if the player is within a certain distance, switch to chasing
 			if (distance(player_motion.position, motion.position) <= enemyAI.detection_radius) {
@@ -190,7 +190,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 			if (enemyAI.path.size() > 0) {
 				vec2 last_path_position = ((enemyAI.path[enemyAI.path.size() - 1] + 0.5f)*48.f);
 				vec2 direction = normalize(last_path_position - motion.position);
-				motion.velocity = direction * 100.f;
+				motion.velocity = direction * enemyAI.speed;
 
 				while (isTouched(motion, last_path_position)) {
 					enemyAI.path.pop_back();
@@ -232,6 +232,30 @@ void AISystem::step(float elapsed_ms_since_last_update)
 				enemyAI.chase_timer = 3000.f;
 			}
 
+			// for specific enemies, check for conditions to enter action state
+			if (registry.enemyDashAIs.has(entity)) {
+				EnemyDashAI& enemyDashAI = registry.enemyDashAIs.get(entity);
+				if (distance(player_motion.position, motion.position) <= enemyDashAI.action_radius) {
+					enemyAI.state = 3;
+					enemyDashAI.dash_timer = enemyDashAI.max_dash_timer;
+					enemyDashAI.dash_direction = normalize(player_motion.position - motion.position);
+					motion.velocity = { 0, 0 };
+					enemyAI.chase_timer = 3000.f;
+					enemyAI.path.clear();
+				}
+			}
+
+			if (registry.bossAIs.has(entity)) {
+				BossAI& bossAI = registry.bossAIs.get(entity);
+				if (distance(player_motion.position, motion.position) <= bossAI.action_radius) {
+					enemyAI.state = 3;
+					bossAI.action_timer = bossAI.max_action_timer;
+					motion.velocity = { 0, 0 };
+					enemyAI.chase_timer = 3000.f;
+					enemyAI.path.clear();
+				}
+			}
+
 		}
 		else if (enemyAI.state == 2) {
 			// move away from the last position where the player is seen.
@@ -250,6 +274,78 @@ void AISystem::step(float elapsed_ms_since_last_update)
 			else { // else, update the position of the player for the AI
 				enemyAI.last_player_position = player_motion.position;
 				enemyAI.flee_timer = 3000.f;
+			}
+		}
+		else if (enemyAI.state == 3) {
+
+			// update dash
+			if (registry.enemyDashAIs.has(entity)) {
+				EnemyDashAI& enemyDashAI = registry.enemyDashAIs.get(entity);
+				// preparation
+				if (enemyDashAI.dash_timer > enemyDashAI.max_dash_timer / 2.f) {
+					vec3& color = registry.colors.get(entity);
+
+					float ratio = (enemyDashAI.dash_timer - enemyDashAI.max_dash_timer / 2.f) / (enemyDashAI.max_dash_timer / 2.f);
+					color = vec3(0.0, 1.0, 1.0) * ratio;
+					color.r = 1.0;
+				}
+				// dash!
+				else { 
+					// probably a bad idea to restore the color here
+					vec3& color = registry.colors.get(entity);
+					color = vec3(1.0, 0.8, 0.8);
+					float ratio = (enemyDashAI.dash_timer) / (enemyDashAI.max_dash_timer / 2.f);
+					std::cout << enemyDashAI.dash_direction.x << " " << enemyDashAI.dash_direction.y << std::endl;
+					motion.velocity = enemyDashAI.dash_direction * enemyAI.speed * 3.f * ratio;
+				}
+				if (enemyDashAI.dash_timer <= 0) {
+					vec2 start = worldToMapCoords(motion.position);
+					vec2 end = worldToMapCoords(player_motion.position);
+					enemyAI.path = findPath(start, end);
+
+					enemyAI.state = 1;
+					enemyAI.last_player_position = player_motion.position;
+					enemyAI.path_finding_timer = 0;
+				}
+				enemyDashAI.dash_timer -= elapsed_ms_since_last_update;
+			}
+
+			// update boss sprite
+			if (registry.bossAIs.has(entity)) {
+				// Boss attack textures
+				TEXTURE_ASSET_ID boss_attack_texture[4] = {
+					TEXTURE_ASSET_ID::BOSS_ATTACK_1,
+					TEXTURE_ASSET_ID::BOSS_ATTACK_2,
+					TEXTURE_ASSET_ID::BOSS_ATTACK_3,
+					TEXTURE_ASSET_ID::BOSS_ATTACK_4
+				};
+
+				BossAI& bossAI = registry.bossAIs.get(entity);
+				auto& texture = registry.renderRequests.get(entity);
+
+				static int attack_frame = 0;
+				static float frame_delay = 250.f;
+				static float frame_timer = 0.f;
+
+				bossAI.action_timer -= elapsed_ms_since_last_update;
+
+				if (bossAI.action_timer > 0) {
+					frame_timer += elapsed_ms_since_last_update;
+					while (frame_timer >= frame_delay) {
+						frame_timer -= frame_delay;
+						attack_frame = (attack_frame + 1) % 4;
+					}
+
+
+					texture.used_texture = boss_attack_texture[attack_frame];
+				}
+				else {
+					attack_frame = 0;
+					frame_timer = 0.f;
+					texture.used_texture = TEXTURE_ASSET_ID::BOSS_WALK_1;
+					bossAI.action_timer = 0;
+					enemyAI.state = 0;
+				}
 			}
 		}
 	}

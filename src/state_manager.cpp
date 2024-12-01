@@ -1,6 +1,5 @@
 #include "state_manager.hpp"
 #include "common.hpp"
-#include <maze.hpp>
 #include <tiny_ecs_registry.hpp>
 
 StateManager state;
@@ -17,6 +16,9 @@ MapState StateManager::changeMap(std::string map_name) {
 	}
 	else if (map_name.compare("map1") == 0) {
 		map_state = CreateMap1();
+	}
+	else if (map_name.compare("map4") == 0) {
+		map_state = CreateMap4();
 	}
 	map_height = map_state.height;
 	map_width = map_state.width;

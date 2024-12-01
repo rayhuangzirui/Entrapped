@@ -43,6 +43,8 @@ public:
 
 	// AI related
 	ComponentContainer<EnemyAI> enemyAIs;
+	ComponentContainer<EnemyDashAI> enemyDashAIs;
+	ComponentContainer<BossAI> bossAIs;
 
 
 	// Add bullet container and enemy container
@@ -148,6 +150,8 @@ public:
 		registry_list.push_back(&boundingBoxes);
 		// AI related
 		registry_list.push_back(&enemyAIs);
+		registry_list.push_back(&enemyDashAIs);
+		registry_list.push_back(&bossAIs);
 
 		registry_list.push_back(&damageTexts);
 

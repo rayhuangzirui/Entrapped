@@ -1,6 +1,5 @@
 ﻿#include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
-#include "maze.hpp" // Access box_testing_environment
 #include "state_manager.hpp"
 #include "physics_system.hpp" // to check_player_wall_collision
 #include "render_system.hpp"
@@ -339,8 +338,19 @@ void GameScene::spawnEnemiesAndItems() {
 				// add random power-up pickups
 			}
 			else if (state.map.interactive_layer[row][col] == 7) {
-				// faster enemy
-
+				// agile enemy
+				Entity enemy = createEnemyAgile(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+			else if (state.map.interactive_layer[row][col] == 8) {
+				// tank enemy
+				Entity enemy = createEnemyTank(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+			else if (state.map.interactive_layer[row][col] == 9) {
+				// boss enemy
+				Entity enemy = createEnemyBoss(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 			}
 		}
 	}
@@ -443,41 +453,6 @@ void GameScene::refreshUI(Entity player) {
 
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
-
-
-//void GameScene::updateHints(Entity player) {
-//	vec2 player_position = registry.motions.get(player).position;
-//
-//	// Iterate over all entities with Hint components
-//	for (Entity hint_entity : registry.hints.entities) {
-//		// Check if the hint entity still has a valid Hint component
-//		if (!registry.hints.has(hint_entity)) {
-//			continue; // Skip this entity if it has been removed (e.g., enemy is dead)
-//		}
-//
-//		Hint& hint = registry.hints.get(hint_entity);
-//		vec2 hint_position = registry.motions.get(hint_entity).position;
-//		/*std::cout << "Hint position: (" << hint_position.x << ", " << hint_position.y << ")" << std::endl;*/
-//
-//		// Check if player is within the hint radius
-//		float distance = glm::distance(player_position, hint_position);
-//		bool within_radius = distance <= hint.radius;
-//
-//		if (within_radius && !hint.is_visible) {
-//			// Display hint text above the entity if within radius
-//			hint.is_visible = true;
-//			vec2 text_position = hint_position + vec2(0, 50);  // Adjust as needed for position above entity
-//			/*vec2 text_position = { 1280 / 2.0f, 720 / 2.0f };*/
-//			hint.text_entity = renderer->text_renderer.createText(hint.text, text_position, 20.f, { 1.f, 1.f, 1.f });
-//		}
-//		else if (!within_radius && hint.is_visible) {
-//			// Hide hint text when outside radius
-//			hint.is_visible = false;
-//			renderer->text_renderer.removeText(hint.text_entity);  // Use the entity reference for removal
-//			hint.text_entity = Entity();  // Reset to indicate no active text entity
-//		}
-//	}
-//}
 
 void GameScene::updateHints(Entity player) {
 	vec2 player_position = registry.motions.get(player).position;
@@ -626,7 +601,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	tape6_recording = Mix_LoadWAV(audio_path("We_failed_tape6.wav").c_str());
 
 	player_footstep = Mix_LoadWAV(audio_path("player_footstep(1).wav").c_str());
-	// enemy_footstep = Mix_LoadWAV(audio_path("enemy-footstep.wav").c_str());
+	enemy_footstep = Mix_LoadWAV(audio_path("enemy_footstep.wav").c_str());
 	enemy_get_hit = Mix_LoadWAV(audio_path("enemy-get-hit(1).wav").c_str());
 	tape_pickup = Mix_LoadWAV(audio_path("tape-pickup.wav").c_str());
 
@@ -930,54 +905,222 @@ void GameScene::step(float elapsed_ms) {
 
 	(RenderSystem*)renderer;
 
+	static bool isEnemyFootstepPlaying = false;
+	int footstep_channel = 4;
+
+	bool shouldPlayFootstep = false;
+
+	for (int i = 0; i < registry.enemies.size(); i++) {
+		auto& enemy = registry.enemies.entities[i];
+		auto& motion = registry.motions.get(enemy);
+
+		Motion& player_motion = motion_container.get(player);
+
+		float dist = distance(player_motion.position, motion.position);
+		// player can only hear enemy footsteps if they are within 300 units
+		bool enemy_in_radius = (dist <= 300);
+		bool enemy_is_moving = (motion.velocity.x != 0 || motion.velocity.y != 0);
+
+
+		if (enemy_in_radius && enemy_is_moving) {
+			shouldPlayFootstep = true;
+			break;
+		}
+	}
+
+	if (shouldPlayFootstep) {
+		if (!isEnemyFootstepPlaying) {
+			if (Mix_PlayChannel(footstep_channel, enemy_footstep, -1) == -1) {
+				printf("Error playing sound: %s\n", Mix_GetError());
+			}
+			isEnemyFootstepPlaying = true;
+		}
+	}
+	else {
+		if (isEnemyFootstepPlaying) {
+			Mix_HaltChannel(footstep_channel);
+			isEnemyFootstepPlaying = false;
+		}
+	}
+
+
 	if (registry.enemies.size() > 0) {
 		// Enemy walking frames and animations
 		for (int i = 0; i < registry.enemies.size(); i++) {
 			static int enemy_frame = 0;
-			static float frame_delay = 2000.f;
+			static float frame_delay = 1000.f;
 			static float frame_timer = 0.f;
 
 			auto& enemy = registry.enemies.entities[i];
 			auto& motion = registry.motions.get(enemy);
+			auto& enemy_component = registry.enemies.get(enemy);
 
 			TEXTURE_ASSET_ID enemy_walking_frames[4] = {
-				TEXTURE_ASSET_ID::WOMAN_WALK_1,
-				TEXTURE_ASSET_ID::WOMAN_WALK_2,
-				TEXTURE_ASSET_ID::WOMAN_WALK_3,
-				TEXTURE_ASSET_ID::WOMAN_WALK_4
+					TEXTURE_ASSET_ID::WOMAN_WALK_1,
+					TEXTURE_ASSET_ID::WOMAN_WALK_2,
+					TEXTURE_ASSET_ID::WOMAN_WALK_3,
+					TEXTURE_ASSET_ID::WOMAN_WALK_4
 			};
 
-			frame_timer += elapsed_ms;
-			if (frame_timer >= frame_delay) {
-				frame_timer = 0.f;
-				enemy_frame = (enemy_frame + 1) % 4;
-			}
+			TEXTURE_ASSET_ID agile_walking_frames[4] = {
+					TEXTURE_ASSET_ID::SPIDER_WALK_1,
+					TEXTURE_ASSET_ID::SPIDER_WALK_2,
+					TEXTURE_ASSET_ID::SPIDER_WALK_3,
+					TEXTURE_ASSET_ID::SPIDER_WALK_4
+			};
 
-			auto& texture = registry.renderRequests.get(enemy);
-			texture.used_texture = enemy_walking_frames[enemy_frame];
+			TEXTURE_ASSET_ID tank_walking_frames[4] = {
+					TEXTURE_ASSET_ID::MAN_WALK_1,
+					TEXTURE_ASSET_ID::MAN_WALK_2,
+					TEXTURE_ASSET_ID::MAN_WALK_3,
+					TEXTURE_ASSET_ID::MAN_WALK_4,
+			};	
 
-			static float last_direction_x = motion.velocity.x;
-			static float flip_cooldown = 1000.f;
-			static float flip_timer = 0.f;
+			TEXTURE_ASSET_ID boss_walking_frames[4] = {
+					TEXTURE_ASSET_ID::BOSS_WALK_1,
+					TEXTURE_ASSET_ID::BOSS_WALK_2,
+					TEXTURE_ASSET_ID::BOSS_WALK_3,
+					TEXTURE_ASSET_ID::BOSS_WALK_4,
+			};
 
-			flip_timer += elapsed_ms;
+			// normal enemy walking animation
+			if (enemy_component.type == 0) {
 
-			if (flip_timer >= flip_cooldown) {
-				if (motion.velocity.x < 0 && last_direction_x >= 0) {
-					motion.scale.x = -abs(motion.scale.x);
-					last_direction_x = motion.velocity.x;
-					flip_timer = 0.f; 
+				frame_timer += elapsed_ms;
+				if (frame_timer >= frame_delay) {
+					frame_timer = 0.f;
+					enemy_frame = (enemy_frame + 1) % 4;
 				}
-				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
-					motion.scale.x = abs(motion.scale.x);
-					last_direction_x = motion.velocity.x;
-					flip_timer = 0.f;
+
+				auto& texture = registry.renderRequests.get(enemy);
+				texture.used_texture = enemy_walking_frames[enemy_frame];
+
+				static float last_direction_x = motion.velocity.x;
+				static float flip_cooldown = 1000.f;
+				static float flip_timer = 0.f;
+
+				flip_timer += elapsed_ms;
+
+				if (flip_timer >= flip_cooldown) {
+					if (motion.velocity.x < 0 && last_direction_x >= 0) {
+						motion.scale.x = -abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+					else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+						motion.scale.x = abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+				}
+
+				if (motion.velocity.x == 0) {
+					texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
+				}
+			} 
+			else if (enemy_component.type == 1) {
+
+				frame_timer += elapsed_ms;
+				if (frame_timer >= frame_delay) {
+					frame_timer = 0.f;
+					enemy_frame = (enemy_frame + 1) % 4;
+				}
+
+				auto& texture = registry.renderRequests.get(enemy);
+				texture.used_texture = agile_walking_frames[enemy_frame];
+
+				static float last_direction_x = motion.velocity.x;
+				static float flip_cooldown = 1000.f;
+				static float flip_timer = 0.f;
+
+				flip_timer += elapsed_ms;
+
+				if (flip_timer >= flip_cooldown) {
+					if (motion.velocity.x < 0 && last_direction_x >= 0) {
+						motion.scale.x = -abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+					else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+						motion.scale.x = abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+				}
+
+				if (motion.velocity.x == 0) {
+					texture.used_texture = TEXTURE_ASSET_ID::SPIDER_WALK_1;  // idle frame
+				}
+			}
+			else if (enemy_component.type == 2) {
+
+				frame_timer += elapsed_ms;
+				if (frame_timer >= frame_delay) {
+					frame_timer = 0.f;
+					enemy_frame = (enemy_frame + 1) % 4;
+				}
+
+				auto& texture = registry.renderRequests.get(enemy);
+				texture.used_texture = tank_walking_frames[enemy_frame];
+
+				static float last_direction_x = motion.velocity.x;
+				static float flip_cooldown = 1000.f;
+				static float flip_timer = 0.f;
+				flip_timer += elapsed_ms;
+
+				if (flip_timer >= flip_cooldown) {
+					if (motion.velocity.x < 0 && last_direction_x >= 0) {
+						motion.scale.x = -abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+					else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+						motion.scale.x = abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+				}
+
+				if (motion.velocity.x == 0) {
+					texture.used_texture = TEXTURE_ASSET_ID::MAN_WALK_1;  // idle frame
 				}
 			}
 
-			if (motion.velocity.x == 0) {
-				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
+			else if (enemy_component.type == 3) {
+
+				frame_timer += elapsed_ms;
+				if (frame_timer >= frame_delay) {
+					frame_timer = 0.f;
+					enemy_frame = (enemy_frame + 1) % 4;
+				}
+
+				auto& texture = registry.renderRequests.get(enemy);
+				texture.used_texture = boss_walking_frames[enemy_frame];
+
+				static float last_direction_x = motion.velocity.x;
+				static float flip_cooldown = 1000.f;
+				static float flip_timer = 0.f;
+
+				flip_timer += elapsed_ms;
+
+				if (flip_timer >= flip_cooldown) {
+					if (motion.velocity.x < 0 && last_direction_x >= 0) {
+						motion.scale.x = abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+					else if (motion.velocity.x > 0 && last_direction_x <= 0) {
+						motion.scale.x = -abs(motion.scale.x);
+						last_direction_x = motion.velocity.x;
+						flip_timer = 0.f;
+					}
+				}
+
+				if (motion.velocity.x == 0) {
+					texture.used_texture = TEXTURE_ASSET_ID::BOSS_WALK_1;  // idle frame
+				}
 			}
+
 		}
 	}
 	// deal with enemy death animation
@@ -989,49 +1132,156 @@ void GameScene::step(float elapsed_ms) {
 			TEXTURE_ASSET_ID::WOMAN_DEAD_1
 		};
 
-		const float frame_delay = 1000.0f;
+		TEXTURE_ASSET_ID agile_dead[3] = {
+			TEXTURE_ASSET_ID::SPIDER_DEAD_3,
+			TEXTURE_ASSET_ID::SPIDER_DEAD_2,
+			TEXTURE_ASSET_ID::SPIDER_DEAD_1
+		};
+
+		TEXTURE_ASSET_ID tank_dead[3] = {
+			TEXTURE_ASSET_ID::MAN_DEAD_3,
+			TEXTURE_ASSET_ID::MAN_DEAD_2,
+			TEXTURE_ASSET_ID::MAN_DEAD_1
+		};
+
+		TEXTURE_ASSET_ID boss_dead[3] = {
+			TEXTURE_ASSET_ID::BOSS_DEAD_3,
+			TEXTURE_ASSET_ID::BOSS_DEAD_2,
+			TEXTURE_ASSET_ID::BOSS_DEAD_1
+		};
+
+		const float frame_delay = 500.0f;
 
 		for (Entity entity: enemyDeathTimers.entities) {
-			// Entity entity = enemyDeathTimers.entities[i];
-			EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
-			auto& motion = registry.motions.get(entity);
-			motion.scale = abs(motion.scale);
-			motion.velocity = { 0, 0 };
+			// normal enemy death animation
+			Enemy& enemy = registry.enemies.get(entity);
+			printf("enemy type: %d\n", enemy.type);
+			if (enemy.type == 0) {
+				EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
+				auto& motion = registry.motions.get(entity);
+				motion.scale = abs(motion.scale);
+				motion.velocity = { 0, 0 };
 
-			// Remove the enemy entity from the ai
-			registry.enemyAIs.remove(entity);
+				// Remove the enemy entity from the ai
+				registry.enemyAIs.remove(entity);
 
-			//printf("enemy position before: %f, %f\n", motion.position.x, motion.position.y);
+				const float pos_x = motion.position.x;
+				const float pos_y = motion.position.y;
+				motion.position = { pos_x, pos_y };
 
-			const float pos_x = motion.position.x;
-			const float pos_y = motion.position.y;
+				// Reduce timer for entity's lifespan
+				enemyDeathTimer.counter_ms -= 20.0f;
 
-			motion.position = { pos_x, pos_y };
-			//printf("enemy position after: %f, %f\n", motion.position.x, motion.position.y);
+				// Calculate current frame based on elapsed time
+				int frame = static_cast<int>((enemyDeathTimer.counter_ms) / frame_delay);
 
-			// Reduce timer for entity's lifespan
-			enemyDeathTimer.counter_ms -= 20.0f;
-			//printf("death timer: %f\n", enemyDeathTimer.counter_ms);
-
-			// Calculate current frame based on elapsed time
-			int frame = static_cast<int>((enemyDeathTimer.counter_ms) / frame_delay);
-			//printf("current frame: %d\n", frame);
-
-			// Check if entity's death animation has finished
-			if (enemyDeathTimer.counter_ms < 0.f) {
-				registry.remove_all_components_of(entity);
-				//printf("Enemy is dead and removed!\n");
-			}
-			else {
-				auto& texture = registry.renderRequests.get(entity);
-				//printf("before scale: %f, %f\n", motion.scale.x, motion.scale.y);
-				if (frame == 0) {
-					motion.scale = { 1.547f * 64.f * 1.3, 1.547f * 10.f * 1.3 };
-					//motion.position.y += 3;
-					//printf("after scale: %f, %f\n", motion.scale.x, motion.scale.y);
+				// Check if entity's death animation has finished
+				if (enemyDeathTimer.counter_ms < 0.f) {
+					registry.remove_all_components_of(entity);
 				}
-				texture.used_texture = monster_dead[frame];
-				//printf("current texture: %d\n", texture.used_texture);
+				else {
+					auto& texture = registry.renderRequests.get(entity);
+					if (frame == 0) {
+						motion.scale = { 1.547f * 64.f * 1.3, 1.547f * 10.f * 1.3 };
+					}
+					texture.used_texture = monster_dead[frame];
+				}
+			}
+			// agile enemy death animation
+			else if (enemy.type == 1) {
+				EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
+				auto& motion = registry.motions.get(entity);
+				motion.scale = abs(motion.scale);
+				motion.velocity = { 0, 0 };
+
+				// Remove the enemy entity from the ai
+				registry.enemyAIs.remove(entity);
+
+				const float pos_x = motion.position.x;
+				const float pos_y = motion.position.y;
+				motion.position = { pos_x, pos_y };
+
+				// Reduce timer for entity's lifespan
+				enemyDeathTimer.counter_ms -= 20.0f;
+
+				// Calculate current frame based on elapsed time
+				int frame = static_cast<int>((enemyDeathTimer.counter_ms) / frame_delay);
+
+				// Check if entity's death animation has finished
+				if (enemyDeathTimer.counter_ms < 0.f) {
+					registry.remove_all_components_of(entity);
+				}
+				else {
+					auto& texture = registry.renderRequests.get(entity);
+					/*if (frame == 0) {
+						motion.scale = { 1.547f * 64.f * 1.3 * 0.65, 1.547f * 64.f * 1.3 * 0.65 };
+					}*/
+					texture.used_texture = agile_dead[frame];
+				}
+			}
+			// tank enemy death animation
+			else if (enemy.type == 2) {
+				EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
+				auto& motion = registry.motions.get(entity);
+				motion.scale = abs(motion.scale);
+				motion.velocity = { 0, 0 };
+
+				// Remove the enemy entity from the ai
+				registry.enemyAIs.remove(entity);
+
+				const float pos_x = motion.position.x;
+				const float pos_y = motion.position.y;
+				motion.position = { pos_x, pos_y };
+
+				// Reduce timer for entity's lifespan
+				enemyDeathTimer.counter_ms -= 20.0f;
+
+				// Calculate current frame based on elapsed time
+				int frame = static_cast<int>((enemyDeathTimer.counter_ms) / frame_delay);
+
+				// Check if entity's death animation has finished
+				if (enemyDeathTimer.counter_ms < 0.f) {
+					registry.remove_all_components_of(entity);
+				}
+				else {
+					auto& texture = registry.renderRequests.get(entity);
+					if (frame == 0) {
+						motion.scale = { 1.547f * 64.f * 1.3, 1.547f * 10.f * 1.3};
+					}
+					texture.used_texture = tank_dead[frame];
+				}
+			} 
+			// boss enemy death animation
+			else if (enemy.type == 3) {
+				EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
+				auto& motion = registry.motions.get(entity);
+				motion.scale = abs(motion.scale);
+				motion.velocity = { 0, 0 };
+
+				// Remove the enemy entity from the ai
+				registry.enemyAIs.remove(entity);
+
+				const float pos_x = motion.position.x;
+				const float pos_y = motion.position.y;
+				motion.position = { pos_x, pos_y };
+
+				// Reduce timer for entity's lifespan
+				enemyDeathTimer.counter_ms -= 20.0f;
+
+				// Calculate current frame based on elapsed time
+				int frame = static_cast<int>((enemyDeathTimer.counter_ms) / frame_delay);
+
+				// Check if entity's death animation has finished
+				if (enemyDeathTimer.counter_ms < 0.f) {
+					registry.remove_all_components_of(entity);
+				}
+				else {
+					auto& texture = registry.renderRequests.get(entity);
+					/*if (frame == 0) {
+						motion.scale = { 1.547f * 64.f * 1.3 * 1.875, 1.547f * 10.f * 1.3 * 1.875 };
+					}*/
+					texture.used_texture = boss_dead[frame];
+				}
 			}
 		}
 	}
@@ -1090,16 +1340,42 @@ void GameScene::step(float elapsed_ms) {
 			TEXTURE_ASSET_ID::HACK_3
 		};
 
-		// Update the frame timer
-		frame_timer += elapsed_ms;
-		if (frame_timer >= frame_delay) {
-			frame_timer = 0.f; // Reset the timer
-			player_frame = (player_frame + 1) % 3; // Cycle through the frames
-		}
+		if (selected_profession == "Soldier") {
+			// Update the frame timer
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f; // Reset the timer
+				player_frame = (player_frame + 1) % 3; // Cycle through the frames
+			}
 
-		// Set the current walking frame texture
-		auto& texture = registry.renderRequests.get(player);
-		texture.used_texture = walking_sideways[player_frame];
+			// Set the current walking frame texture
+			auto& texture = registry.renderRequests.get(player);
+			texture.used_texture = walking_sideways[player_frame];
+		}
+		else if (selected_profession == "Doctor") {
+			// Update the frame timer
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f; // Reset the timer
+				player_frame = (player_frame + 1) % 3; // Cycle through the frames
+			}
+
+			// Set the current walking frame texture
+			auto& texture = registry.renderRequests.get(player);
+			texture.used_texture = doc_sideways[player_frame];
+		}
+		else if (selected_profession == "Hacker") {
+			// Update the frame timer
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f; // Reset the timer
+				player_frame = (player_frame + 1) % 3; // Cycle through the frames
+			}
+
+			// Set the current walking frame texture
+			auto& texture = registry.renderRequests.get(player);
+			texture.used_texture = hack_sideways[player_frame];
+		}
 	}
 	// when player is not moving, set the texture to idle
 	else {
@@ -1109,7 +1385,15 @@ void GameScene::step(float elapsed_ms) {
 		}
 
 		auto& texture = registry.renderRequests.get(player);
-		texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
+		if (selected_profession == "Soldier") {
+			texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
+		}
+		else if (selected_profession == "Doctor") {
+			texture.used_texture = TEXTURE_ASSET_ID::DOC_1;
+		}
+		else if (selected_profession == "Hacker") {
+			texture.used_texture = TEXTURE_ASSET_ID::HACK_1;
+		}
 	}
 
 	// Update fire timer
@@ -1840,64 +2124,64 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
     );
     registry.colors.insert(fov_entity, { 0.f, 0.f, 0.f });
 	}
-	//else if (debugging.in_debug_mode && profession == "Doctor") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::DOC_1,
-	//		  EFFECT_ASSET_ID::MESHED,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
-	//}
-	//else if (!debugging.in_debug_mode && profession == "Doctor") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::DOC_1,
-	//		  EFFECT_ASSET_ID::TEXTURED,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
+	else if (debugging.in_debug_mode && profession == "Doctor") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::DOC_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::PLAYER_DOC }
+		);
+	}
+	else if (!debugging.in_debug_mode && profession == "Doctor") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::DOC_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
 
-	//	Entity fov_entity = Entity();
-	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
-	//	registry.fovs.emplace(fov_entity);
-	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+		Entity fov_entity = Entity();
+		Motion& fov_motion = registry.motions.emplace(fov_entity);
+		registry.fovs.emplace(fov_entity);
+		fov_motion = registry.motions.get(entity); // Copy player's motion
 
-	//	// Add the FOV render request to the new entity
-	//	registry.renderRequests.insert(
-	//		fov_entity,
-	//		{ TEXTURE_ASSET_ID::DOC_1,
-	//		  EFFECT_ASSET_ID::FOV2,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
-	//}
-	//else if (debugging.in_debug_mode && profession == "Hacker") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::HACK_1,
-	//		  EFFECT_ASSET_ID::MESHED,
-	//		  GEOMETRY_BUFFER_ID::PLAYER }
-	//	);
-	//}
-	//else if (!debugging.in_debug_mode && profession == "Hacker") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::HACK_1,
-	//		  EFFECT_ASSET_ID::TEXTURED,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
+		// Add the FOV render request to the new entity
+		registry.renderRequests.insert(
+			fov_entity,
+			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			  EFFECT_ASSET_ID::FOV2,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
+	}
+	else if (debugging.in_debug_mode && profession == "Hacker") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::HACK_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::PLAYER_HACK }
+		);
+	}
+	else if (!debugging.in_debug_mode && profession == "Hacker") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::HACK_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
 
-	//	Entity fov_entity = Entity();
-	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
-	//	registry.fovs.emplace(fov_entity);
-	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+		Entity fov_entity = Entity();
+		Motion& fov_motion = registry.motions.emplace(fov_entity);
+		registry.fovs.emplace(fov_entity);
+		fov_motion = registry.motions.get(entity); // Copy player's motion
 
-	//	// Add the FOV render request to the new entity
-	//	registry.renderRequests.insert(
-	//		fov_entity,
-	//		{ TEXTURE_ASSET_ID::HACK_1,
-	//		  EFFECT_ASSET_ID::FOV2,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
-	//}
+		// Add the FOV render request to the new entity
+		registry.renderRequests.insert(
+			fov_entity,
+			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			  EFFECT_ASSET_ID::FOV2,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
+	}
 
 	// Attach a gun to the player entity
 	createGun(entity);
@@ -2165,6 +2449,7 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 0;
 
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
@@ -2177,7 +2462,8 @@ Entity GameScene::createEnemy(vec2 pos) {
 	aiTimer.counter_ms = 0.f;
 
 	// Enemy AI
-	registry.enemyAIs.emplace(entity);
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.speed = 100.f;
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2227,10 +2513,11 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 80.f ,80.f });
+	motion.scale = vec2({ 54.f ,36.f });
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 1;
 
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
@@ -2243,7 +2530,11 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 	aiTimer.counter_ms = 0.f;
 
 	// Enemy AI
-	registry.enemyAIs.emplace(entity);
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.speed = 300.f;
+
+	// Enemy Dash AI
+	EnemyDashAI& enemyDashAI = registry.enemyDashAIs.emplace(entity);
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2252,20 +2543,134 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	if (debugging.in_debug_mode) {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
-			  EFFECT_ASSET_ID::MESHED,
-			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
-	}
-	else {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
-			  EFFECT_ASSET_ID::TEXTURED,
-			  GEOMETRY_BUFFER_ID::SPRITE });
-	}
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::SPIDER_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
+Entity GameScene::createEnemyTank(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 80.f ,80.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 2;
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
+	enemyAI.speed = 50.f;
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::MAN_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
+Entity GameScene::createEnemyBoss(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 150.f ,150.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 3;
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
+	enemyAI.speed = 50.f;
+
+	// Boss AI
+	BossAI& bossAI = registry.bossAIs.emplace(entity);
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BOSS_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	Entity hp_bar = createHealthBarNew(entity);
 
@@ -2590,13 +2995,14 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			// Insert death animation timer or other removal actions
 			auto& enemy = registry.enemies.get(target);
 			registry.remove_all_components_of(enemy.health_bar_entity);
-			registry.enemies.remove(target);
-			registry.enemyDeathTimers.insert(target, { 3000.0f, 3000.0f });
-			state.exp += 1;
+			// registry.enemies.remove(target);
+			if (!registry.enemyDeathTimers.has(target)) {
+				registry.enemyDeathTimers.insert(target, { 1500.0f, 1500.0f });
+				state.exp += 1;
+			}
+
 			Mix_PlayChannel(monster_hurt_channel, monster_hurt_sound, 0);
-
 			std::cout << "Enemy is dead!" << std::endl;
-
 			// Increase player's ammo when enemy is killed (for Hacker profession)
 			if (selected_profession == "Hacker") {
 				Player& player = registry.players.get(registry.players.entities[0]);

@@ -109,6 +109,7 @@ public:
 	ComponentContainer<Hacker_init_powerup> hacker_init_powerups;
 
 	ComponentContainer<DashCoolDown> dashCoolDowns;
+	ComponentContainer<HoverInfo> hoverInfos;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -209,6 +210,7 @@ public:
 		registry_list.push_back(&collidables);
 
 		registry_list.push_back(&dashCoolDowns);
+		registry_list.push_back(&hoverInfos);
 	}
 
 	void clear_all_components() {

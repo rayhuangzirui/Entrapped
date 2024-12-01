@@ -417,6 +417,15 @@ struct Subtitle {
 	
 };
 
+// Hover over icons for text description
+struct HoverInfo {
+	std::string description; // Text to display
+	Entity text_entity = Entity(); // Text entity for rendering
+	vec2 offset = { 0.f, -20.f }; // Offset for positioning the text
+	bool is_visible = false; // Whether the text is currently visible
+	bool text_created = false;   // Flag to track if text entity has been created
+};
+
 //-------------------- Inventory system --------------------
 // Inventory item definition
 struct InventoryItem {

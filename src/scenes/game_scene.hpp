@@ -19,6 +19,8 @@ public:
 	void on_mouse_move(vec2 mouse_position);
 	void drawHealthBars();
 	void on_mouse_click(int button, int action, int mod);
+	vec2 mouse_position = { 0.f, 0.f };
+	//vec2 fetchMousePosition();
 
 private:
 	RenderSystem* renderer;
@@ -56,6 +58,8 @@ private:
 
 	void apply_damage(Entity& target, int damage);
 	void show_damage_number(vec2 position, int damage);
+
+	void updateHoverInfo();
 
 	void restart_game();
 
@@ -104,4 +108,6 @@ private:
 
 	bool is_left_mouse_pressed = false;
 	float fire_timer = 0.f;  // Timer to control firing rate
+
+	Entity hover_text_entity = Entity(); // Single hover text entity
 };

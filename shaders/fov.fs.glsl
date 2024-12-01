@@ -80,7 +80,7 @@ void main()
         if(d >= total_distance - 0.1)
             col_factor = 0.0f;
         else
-            col_factor = 0.8f;
+            col_factor = 1.0f;
     }
     else // Wall
         col_factor = 0.8f;

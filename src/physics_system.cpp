@@ -598,7 +598,7 @@ void PhysicsSystem::step(float elapsed_ms)
     handle_mesh_box_collision();
 
 
-    // Update gun position
+    // Update gun position and fov position
     if (registry.players.size() > 0) {
         Entity player_entity = registry.players.entities[0];
         Motion& player_motion = motion_registry.get(player_entity);
@@ -608,6 +608,15 @@ void PhysicsSystem::step(float elapsed_ms)
             Gun& gun_component = registry.guns.get(gun);
             Motion& gun_motion = motion_registry.get(gun);
             gun_motion.position = player_motion.position + gun_component.offset;
+        }
+
+        // update fov
+        if (registry.fovs.size() > 0) {
+            for (Entity entity : registry.fovs.entities) {
+                // track player
+                Motion& fov_motion = registry.motions.get(entity);
+                fov_motion.position = player_motion.position;
+            }
         }
     }
 

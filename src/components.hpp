@@ -148,7 +148,7 @@ struct EnemyAI {
 
 // Enemy Dash AI component
 struct EnemyDashAI {
-	float action_radius = 100;
+	float action_radius = 150;
 	float dash_timer = 1000;
 	float max_dash_timer = 1000;
 	vec2 dash_direction = { 0, 0 };
@@ -676,8 +676,9 @@ enum class GEOMETRY_BUFFER_ID {
 	FOV_QUAD = SQUARE + 1,
 	TANK_ENEMY = FOV_QUAD + 1,
 	BOSS_ENEMY = TANK_ENEMY + 1,
-	GEOMETRY_COUNT = BOSS_ENEMY + 1
-
+	PLAYER_DOC = BOSS_ENEMY + 1,
+	PLAYER_HACK = PLAYER_DOC + 1,
+	GEOMETRY_COUNT = PLAYER_HACK + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

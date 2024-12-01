@@ -36,6 +36,8 @@ class RenderSystem {
 		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ENEMY_WOMAN, mesh_path("woman_min_v.obj")),
 		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::TANK_ENEMY, mesh_path("tank.obj")),
 		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::BOSS_ENEMY, mesh_path("boss.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER_DOC, mesh_path("doc.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::PLAYER_HACK, mesh_path("hacker.obj")),
 		// specify meshes of other assets here
 	};
 

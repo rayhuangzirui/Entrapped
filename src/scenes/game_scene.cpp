@@ -620,7 +620,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 	tape6_recording = Mix_LoadWAV(audio_path("We_failed_tape6.wav").c_str());
 
 	player_footstep = Mix_LoadWAV(audio_path("player_footstep(1).wav").c_str());
-	// enemy_footstep = Mix_LoadWAV(audio_path("enemy-footstep.wav").c_str());
+	enemy_footstep = Mix_LoadWAV(audio_path("enemy_footstep.wav").c_str());
 	enemy_get_hit = Mix_LoadWAV(audio_path("enemy-get-hit(1).wav").c_str());
 	tape_pickup = Mix_LoadWAV(audio_path("tape-pickup.wav").c_str());
 
@@ -872,6 +872,45 @@ void GameScene::step(float elapsed_ms) {
 
 	(RenderSystem*)renderer;
 
+	static bool isEnemyFootstepPlaying = false;
+	int footstep_channel = 4;
+
+	bool shouldPlayFootstep = false;
+
+	for (int i = 0; i < registry.enemies.size(); i++) {
+		auto& enemy = registry.enemies.entities[i];
+		auto& motion = registry.motions.get(enemy);
+
+		Motion& player_motion = motion_container.get(player);
+
+		float dist = distance(player_motion.position, motion.position);
+		// player can only hear enemy footsteps if they are within 300 units
+		bool enemy_in_radius = (dist <= 300);
+		bool enemy_is_moving = (motion.velocity.x != 0 || motion.velocity.y != 0);
+
+
+		if (enemy_in_radius && enemy_is_moving) {
+			shouldPlayFootstep = true;
+			break;
+		}
+	}
+
+	if (shouldPlayFootstep) {
+		if (!isEnemyFootstepPlaying) {
+			if (Mix_PlayChannel(footstep_channel, enemy_footstep, -1) == -1) {
+				printf("Error playing sound: %s\n", Mix_GetError());
+			}
+			isEnemyFootstepPlaying = true;
+		}
+	}
+	else {
+		if (isEnemyFootstepPlaying) {
+			Mix_HaltChannel(footstep_channel);
+			isEnemyFootstepPlaying = false;
+		}
+	}
+
+
 	if (registry.enemies.size() > 0) {
 		// Enemy walking frames and animations
 		for (int i = 0; i < registry.enemies.size(); i++) {
@@ -909,17 +948,21 @@ void GameScene::step(float elapsed_ms) {
 					motion.scale.x = -abs(motion.scale.x);
 					last_direction_x = motion.velocity.x;
 					flip_timer = 0.f; 
+					//Mix_PlayChannel(footstep_channel, enemy_footstep, 1);
 				}
 				else if (motion.velocity.x > 0 && last_direction_x <= 0) {
 					motion.scale.x = abs(motion.scale.x);
 					last_direction_x = motion.velocity.x;
 					flip_timer = 0.f;
+					//Mix_PlayChannel(footstep_channel, enemy_footstep, 1);
 				}
 			}
 
-			if (motion.velocity.x == 0) {
+			if (motion.velocity.x == 0 && motion.velocity.y == 0) {
 				texture.used_texture = TEXTURE_ASSET_ID::WOMAN_WALK_1;  // idle frame
+				
 			}
+
 		}
 	}
 	// deal with enemy death animation
@@ -1032,16 +1075,42 @@ void GameScene::step(float elapsed_ms) {
 			TEXTURE_ASSET_ID::HACK_3
 		};
 
-		// Update the frame timer
-		frame_timer += elapsed_ms;
-		if (frame_timer >= frame_delay) {
-			frame_timer = 0.f; // Reset the timer
-			player_frame = (player_frame + 1) % 3; // Cycle through the frames
-		}
+		if (selected_profession == "Soldier") {
+			// Update the frame timer
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f; // Reset the timer
+				player_frame = (player_frame + 1) % 3; // Cycle through the frames
+			}
 
-		// Set the current walking frame texture
-		auto& texture = registry.renderRequests.get(player);
-		texture.used_texture = walking_sideways[player_frame];
+			// Set the current walking frame texture
+			auto& texture = registry.renderRequests.get(player);
+			texture.used_texture = walking_sideways[player_frame];
+		}
+		else if (selected_profession == "Doctor") {
+			// Update the frame timer
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f; // Reset the timer
+				player_frame = (player_frame + 1) % 3; // Cycle through the frames
+			}
+
+			// Set the current walking frame texture
+			auto& texture = registry.renderRequests.get(player);
+			texture.used_texture = doc_sideways[player_frame];
+		}
+		else if (selected_profession == "Hacker") {
+			// Update the frame timer
+			frame_timer += elapsed_ms;
+			if (frame_timer >= frame_delay) {
+				frame_timer = 0.f; // Reset the timer
+				player_frame = (player_frame + 1) % 3; // Cycle through the frames
+			}
+
+			// Set the current walking frame texture
+			auto& texture = registry.renderRequests.get(player);
+			texture.used_texture = hack_sideways[player_frame];
+		}
 	}
 	// when player is not moving, set the texture to idle
 	else {
@@ -1051,7 +1120,15 @@ void GameScene::step(float elapsed_ms) {
 		}
 
 		auto& texture = registry.renderRequests.get(player);
-		texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
+		if (selected_profession == "Soldier") {
+			texture.used_texture = TEXTURE_ASSET_ID::PLAYER_1;
+		}
+		else if (selected_profession == "Doctor") {
+			texture.used_texture = TEXTURE_ASSET_ID::DOC_1;
+		}
+		else if (selected_profession == "Hacker") {
+			texture.used_texture = TEXTURE_ASSET_ID::HACK_1;
+		}
 	}
 
 	// Update fire timer
@@ -1777,64 +1854,64 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 			  GEOMETRY_BUFFER_ID::SPRITE }
 		);
 	}
-	//else if (debugging.in_debug_mode && profession == "Doctor") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::DOC_1,
-	//		  EFFECT_ASSET_ID::MESHED,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
-	//}
-	//else if (!debugging.in_debug_mode && profession == "Doctor") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::DOC_1,
-	//		  EFFECT_ASSET_ID::TEXTURED,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
+	else if (debugging.in_debug_mode && profession == "Doctor") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::DOC_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::PLAYER_DOC }
+		);
+	}
+	else if (!debugging.in_debug_mode && profession == "Doctor") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::DOC_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
 
-	//	Entity fov_entity = Entity();
-	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
-	//	registry.fovs.emplace(fov_entity);
-	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+		Entity fov_entity = Entity();
+		Motion& fov_motion = registry.motions.emplace(fov_entity);
+		registry.fovs.emplace(fov_entity);
+		fov_motion = registry.motions.get(entity); // Copy player's motion
 
-	//	// Add the FOV render request to the new entity
-	//	registry.renderRequests.insert(
-	//		fov_entity,
-	//		{ TEXTURE_ASSET_ID::DOC_1,
-	//		  EFFECT_ASSET_ID::FOV2,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
-	//}
-	//else if (debugging.in_debug_mode && profession == "Hacker") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::HACK_1,
-	//		  EFFECT_ASSET_ID::MESHED,
-	//		  GEOMETRY_BUFFER_ID::PLAYER }
-	//	);
-	//}
-	//else if (!debugging.in_debug_mode && profession == "Hacker") {
-	//	registry.renderRequests.insert(
-	//		entity,
-	//		{ TEXTURE_ASSET_ID::HACK_1,
-	//		  EFFECT_ASSET_ID::TEXTURED,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
+		// Add the FOV render request to the new entity
+		registry.renderRequests.insert(
+			fov_entity,
+			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			  EFFECT_ASSET_ID::FOV2,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
+	}
+	else if (debugging.in_debug_mode && profession == "Hacker") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::HACK_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::PLAYER_HACK }
+		);
+	}
+	else if (!debugging.in_debug_mode && profession == "Hacker") {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::HACK_1,
+			  EFFECT_ASSET_ID::TEXTURED,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
 
-	//	Entity fov_entity = Entity();
-	//	Motion& fov_motion = registry.motions.emplace(fov_entity);
-	//	registry.fovs.emplace(fov_entity);
-	//	fov_motion = registry.motions.get(entity); // Copy player's motion
+		Entity fov_entity = Entity();
+		Motion& fov_motion = registry.motions.emplace(fov_entity);
+		registry.fovs.emplace(fov_entity);
+		fov_motion = registry.motions.get(entity); // Copy player's motion
 
-	//	// Add the FOV render request to the new entity
-	//	registry.renderRequests.insert(
-	//		fov_entity,
-	//		{ TEXTURE_ASSET_ID::HACK_1,
-	//		  EFFECT_ASSET_ID::FOV2,
-	//		  GEOMETRY_BUFFER_ID::SPRITE }
-	//	);
-	//}
+		// Add the FOV render request to the new entity
+		registry.renderRequests.insert(
+			fov_entity,
+			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			  EFFECT_ASSET_ID::FOV2,
+			  GEOMETRY_BUFFER_ID::SPRITE }
+		);
+	}
 
 	// Attach a gun to the player entity
 	createGun(entity);

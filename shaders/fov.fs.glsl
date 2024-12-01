@@ -1,5 +1,5 @@
 #version 330
-#define MAP_LEN 16
+#define MAP_LEN 30
 
 // From Vertex Shader
 in vec3 vcolor;
@@ -12,7 +12,10 @@ uniform vec3 fcolor;
 // Output color
 layout(location = 0) out vec4 color;
 
+// Map Computation
 uniform int[MAP_LEN*MAP_LEN] map;
+uniform vec2 world_offset;
+uniform vec2 world_position;
 
 // Get wall type (only 0 or 1 for now)
 int getMap(int x, int y)
@@ -22,20 +25,20 @@ int getMap(int x, int y)
         return 1;
     }
         
-    int index = x + y * 16;
+    int index = x + y * MAP_LEN;
     return map[index];
 }
 
 // From normalized uvs to "world space"
-vec2 translateCoordsToWorld(vec2 coords)
+vec2 translateCoordsToMap(vec2 coords)
 {
-    // coords.y = 1.0 - coords.y;
-    // coords.x -= 0.25;
-    // coords.x *= (1296.0) / (720.0);
-    // coords *= float(MAP_LEN);
-    // coords.x -= 100.0;
-    coords.x = floor(coords.x/48.0);
-    coords.y = floor(coords.y/48.0);
+    // float cell_size = 2.0/MAP_LEN;
+    // coords.x = floor((coords.x+1.0)/cell_size);
+    // coords.y = floor((coords.y+1.0)/cell_size);
+
+    float cell_size = 48.0;
+    coords.x = floor((coords.x)/cell_size);
+    coords.y = floor((coords.y)/cell_size);
     return coords;
 }
 
@@ -45,9 +48,9 @@ void main()
 	color.r = fcolor.r;
 	color.g = fcolor.g;
 	color.b = color.b + fcolor.b;
-    vec2 tpos = screen_position;
-    vec2 twpos = translateCoordsToWorld(tpos);
-	vec2 center_pos = vec2(1296/2.0, 720/2.0);
+    vec2 tpos = screen_position-world_offset;
+    vec2 twpos = translateCoordsToMap(tpos);
+    vec2 center_pos = world_position-world_offset;
 
     vec2 rayDir = tpos - center_pos;
     float directionAngle = atan(rayDir.y, rayDir.x);
@@ -66,7 +69,7 @@ void main()
         vec2 p = center_pos;
         for (int step = 0; step < sub_steps; ++step) {
             p = p + movement_per_substep;
-            vec2 ip = translateCoordsToWorld(p);
+            vec2 ip = translateCoordsToMap(p);
             if(getMap(int(ip.x), int(ip.y)) == 1){
                 break;
             }
@@ -77,10 +80,11 @@ void main()
         if(d >= total_distance - 0.1)
             col_factor = 0.0f;
         else
-            col_factor = 0.5f;
+            col_factor = 0.8f;
     }
     else // Wall
-        col_factor = 1.0f;
+        col_factor = 0.8f;
 
     color = color * col_factor;
+
 }

@@ -165,19 +165,37 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			sizeof(ColoredVertex), (void*)sizeof(vec3));
 		gl_has_errors();
 
-		int map[16 * 16];
+		int map_len = 30;
+		int map[30 * 30];
 		int start_x = floor((motion.position.x - motion.scale.x/2.f)/48.f);
 		int start_y = floor((motion.position.y - motion.scale.y / 2.f) / 48.f);
-		for (int i = start_y; i < 16; i++) {
-			for (int j = start_x; j < 16; j++) {
-				map[j+16*i] = (state.map[i][j]>0);
+		for (int i = 0; i < map_len; i++) {
+			for (int j = 0; j < map_len; j++) {
+				float ci = start_y + i;
+				float cj = start_x + j;
+				if (ci < 0 || ci >= state.map_height || cj < 0 || cj >= state.map_width) {
+					map[j + map_len * i] = 1;
+				}
+				else {
+					map[j + map_len * i] = state.map.collision_layer[ci][cj] == 0 ? 0 : 1;
+				}
 			}
 		}
-
+		//std::cout << "fov position x: " << motion.position.x << std::endl;
+		//std::cout << "fov position y: " << motion.position.y << std::endl;
 		GLint mapLoc = glGetUniformLocation(program, "map");
 		if (mapLoc >= 0) {
-			glUniform1iv(mapLoc, 16 * 16, map);
+			glUniform1iv(mapLoc, map_len * map_len, map);
 		}
+		gl_has_errors();
+
+		// pass in world offset
+		vec2 world_offset = { start_x *48.f, start_y*48.f};
+		glUniform2fv(glGetUniformLocation(program, "world_offset"), 1, (float*)&world_offset);
+		gl_has_errors();
+
+		// pass in the center position
+		glUniform2fv(glGetUniformLocation(program, "world_position"), 1, (float*)&motion.position);
 		gl_has_errors();
 
 	}

@@ -669,15 +669,15 @@ void GameScene::step(float elapsed_ms) {
 	//transState.is_fade_in = true;
 	if (transState.is_fade_in) {
 		// print out
-		printf("fading in\n");
+		//printf("fading in\n");
 	}
 	else {
-		printf("not fading in\n");
+		//printf("not fading in\n");
 
 	}
 
 	if (transState.is_fade_out) {
-		printf("fading out\n");
+		//printf("fading out\n");
 	}
 
 	if (transState.is_fade_out) {
@@ -1082,13 +1082,6 @@ void GameScene::step(float elapsed_ms) {
 	updateTextAnimation(elapsed_ms);
 	
 	renderAnimatedText(renderer);
-	// update fov
-	//for (Entity entity : registry.fovs.entities) {
-	//	// progress timer
-	//	Motion& motion = registry.motions.get(entity);
-	//	Motion& player_motion = registry.motions.get(player);
-	//	motion.position = player_motion.position;
-	//}
 }
 
 void GameScene::restart_game() {
@@ -1163,7 +1156,7 @@ void GameScene::on_key(int key, int action, int mod) {
 	// display the current cell player is at
 	float grid_x = floor(motion.position.x / state.TILE_SIZE);
 	float grid_y = floor(motion.position.y / state.TILE_SIZE);
-	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
+	//std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
 
 
 	// Handle movement keys (W, A, S, D)

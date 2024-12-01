@@ -2241,7 +2241,7 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 
 	// Enemy AI
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
-	enemyAI.speed = 200.f;
+	enemyAI.speed = 300.f;
 
 	// Enemy Dash AI
 	EnemyDashAI& enemyDashAI = registry.enemyDashAIs.emplace(entity);

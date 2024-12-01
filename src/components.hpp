@@ -148,7 +148,7 @@ struct EnemyAI {
 
 // Enemy Dash AI component
 struct EnemyDashAI {
-	float action_radius = 100;
+	float action_radius = 150;
 	float dash_timer = 1000;
 	float max_dash_timer = 1000;
 	vec2 dash_direction = { 0, 0 };

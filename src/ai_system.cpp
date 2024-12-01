@@ -299,7 +299,13 @@ void AISystem::step(float elapsed_ms_since_last_update)
 					motion.velocity = enemyDashAI.dash_direction * enemyAI.speed * 3.f * ratio;
 				}
 				if (enemyDashAI.dash_timer <= 0) {
-					enemyAI.state = 0;
+					vec2 start = worldToMapCoords(motion.position);
+					vec2 end = worldToMapCoords(player_motion.position);
+					enemyAI.path = findPath(start, end);
+
+					enemyAI.state = 1;
+					enemyAI.last_player_position = player_motion.position;
+					enemyAI.path_finding_timer = 0;
 				}
 				enemyDashAI.dash_timer -= elapsed_ms_since_last_update;
 			}

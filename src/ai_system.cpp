@@ -236,7 +236,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 		else if (enemyAI.state == 2) {
 			// move away from the last position where the player is seen.
 			vec2 direction = normalize(motion.position - enemyAI.last_player_position);
-			motion.velocity = direction * 100.f;
+			motion.velocity = direction * enemyAI.speed;
 
 			// if the player is outside of the radius for 3 seconds
 			// return to the wander state

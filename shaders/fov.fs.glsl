@@ -17,6 +17,10 @@ uniform int[MAP_LEN*MAP_LEN] map;
 uniform vec2 world_offset;
 uniform vec2 world_position;
 
+// Field of View
+uniform float circle_radius;
+uniform float time;
+
 // Get wall type (only 0 or 1 for now)
 int getMap(int x, int y)
 {
@@ -82,8 +86,23 @@ void main()
         else
             col_factor = 1.0f;
     }
-    else // Wall
+    else{ // Wall
         col_factor = 0.8f;
+    }
+
+    float fade_width = 100.0;
+    float fade_start = circle_radius - fade_width*(0.5*sin(0.1*time)+2);
+
+    float dist = distance(tpos, center_pos);
+    if (dist > circle_radius) {
+        col_factor = 1.0f;
+    } else if (dist > fade_start) {
+        float fade = smoothstep(fade_start, circle_radius, dist);
+        col_factor = col_factor + 1.0f*fade;
+        if(col_factor > 1.0f){
+            col_factor = 1.0f;
+        }
+    }
 
     color = color * col_factor;
 

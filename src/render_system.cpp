@@ -177,7 +177,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 					map[j + map_len * i] = 1;
 				}
 				else {
-					map[j + map_len * i] = state.map.collision_layer[ci][cj] == 0 ? 0 : 1;
+					map[j + map_len * i] = state.map.collision_layer[ci][cj] == -1 ? 1 : 0;
 				}
 			}
 		}
@@ -189,13 +189,18 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		}
 		gl_has_errors();
 
-		// pass in world offset
 		vec2 world_offset = { start_x *48.f, start_y*48.f};
 		glUniform2fv(glGetUniformLocation(program, "world_offset"), 1, (float*)&world_offset);
 		gl_has_errors();
 
-		// pass in the center position
 		glUniform2fv(glGetUniformLocation(program, "world_position"), 1, (float*)&motion.position);
+		gl_has_errors();
+
+		float circle_radius = 500.0f;
+		glUniform1f(glGetUniformLocation(program, "circle_radius"), circle_radius);
+		gl_has_errors();
+
+		glUniform1f(glGetUniformLocation(program, "time"), (float)(glfwGetTime() * 10.0f));
 		gl_has_errors();
 
 	}
@@ -282,7 +287,7 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
             }
 
 			GLuint time_uloc = glGetUniformLocation(program, "time");
-			if (radiusLoc >= 0) {
+			if (time_uloc >= 0) {
 				glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 			}
 
@@ -467,28 +472,6 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 
 	gl_has_errors();
 }
-
-
-//bool RenderSystem::checkWallNearby(vec2 position, float check_radius) {
-//    
-//    int col = static_cast<int>(position.x / 48.f);
-//    int row = static_cast<int>(position.y / 48.f); 
-//    int radius_tiles = static_cast<int>(check_radius / 48.f);
-//    for (int r = row - radius_tiles; r <= row + radius_tiles; r++) {
-//        for (int c = col - radius_tiles; c <= col + radius_tiles; c++) { 
-//            if (r >= 0 && r < state.map_height && c >= 0 && c < state.map_width) { 
-//                if (state.map[r][c] == 1) {
-//                    vec2 wall_pos = vec2(c * 48.f + 24.f, r * 48.f + 24.f);
-//                    float dist = length(position - wall_pos);
-//                    if (dist < check_radius) {
-//                        return true;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    return false;
-//}
 
 void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 	Motion& motion = registry.motions.get(entity);

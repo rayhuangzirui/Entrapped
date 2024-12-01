@@ -180,7 +180,7 @@ struct EnemyAI {
 	float path_finding_timer = 0;
 	int state = 0;
 	std::vector<vec2> path;
-	float speed = 0; // movement speed of enemy
+	float speed = 100.f; // movement speed of enemy
 };
 
 struct Health {

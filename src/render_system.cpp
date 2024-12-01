@@ -179,7 +179,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 					map[j + map_len * i] = 1;
 				}
 				else {
-					map[j + map_len * i] = state.map.collision_layer[ci][cj] == -1 ? 1 : 0;
+					if (state.map.decoration_layer[ci][cj] == 1 || state.map.decoration_layer[ci][cj] == 2) {
+						map[j + map_len * i] = 2;
+					}
+					else if (state.map.collision_layer[ci][cj] == -1) {
+						map[j + map_len * i] = 1;
+					}
+					else {
+						map[j + map_len * i] = 0;
+					}
 				}
 			}
 		}
@@ -597,6 +605,10 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 			GLuint ypos_loc = glGetUniformLocation(currProgram, "ypos");
 			glUniform1f(ypos_loc, (float)ypos);
 			gl_has_errors();
+			float opacity = 1.0;
+			GLuint opacity_loc = glGetUniformLocation(currProgram, "opacity");
+			glUniform1f(opacity_loc, (float)opacity);
+			gl_has_errors;
 			glBindTexture(GL_TEXTURE_2D, texture_id);
 			gl_has_errors();
 			glBindBuffer(GL_ARRAY_BUFFER, 0);

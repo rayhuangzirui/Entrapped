@@ -17,8 +17,20 @@ MapState StateManager::changeMap(std::string map_name) {
 	else if (map_name.compare("map1") == 0) {
 		map_state = CreateMap1();
 	}
+	else if (map_name.compare("map2") == 0) {
+		map_state = CreateMap2();
+	}
+	else if (map_name.compare("map3") == 0) {
+		map_state = CreateMap3();
+	}
 	else if (map_name.compare("map4") == 0) {
 		map_state = CreateMap4();
+	}
+	else if (map_name.compare("map5") == 0) {
+		map_state = CreateMap5();
+	}
+	else if (map_name.compare("map6") == 0) {
+		map_state = CreateMap6();
 	}
 	map_height = map_state.height;
 	map_width = map_state.width;

@@ -10,7 +10,7 @@ struct UpgradeState {
 	int upgrade_cost = 0;
 };
 
-const int TILE_NUMBER = 19;
+const int TILE_NUMBER = 26;
 
 class StateManager
 {

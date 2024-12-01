@@ -506,7 +506,6 @@ void GameScene::initialize(RenderSystem* renderer) {
 	MapState map_state = state.changeMap(map_name);
 	state.save();
 	createMaze();
-
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
@@ -2074,21 +2073,24 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	printf("Player bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	//Debug mode: visualize meshes
-	// if (debugging.in_debug_mode) {
-	// 	registry.renderRequests.insert(
-	// 		entity,
-	// 		{ TEXTURE_ASSET_ID::PLAYER_1,
-	// 		  EFFECT_ASSET_ID::MESHED,
-	// 		  GEOMETRY_BUFFER_ID::PLAYER });
-	// }
-	// else {
-	// 	registry.renderRequests.insert(
-	// 		entity,
-	// 		{ TEXTURE_ASSET_ID::PLAYER_1,
-	// 		  EFFECT_ASSET_ID::FOV2,
-	// 		  GEOMETRY_BUFFER_ID::SPRITE });
-	// }
+	if (!debugging.in_debug_mode) {
+		Entity fov_entity = Entity();
+		Motion& fov_motion = registry.motions.emplace(fov_entity);
+		registry.fovs.emplace(fov_entity);
+		fov_motion.position = { window_width_px / 2.f, window_height_px / 2.f };
+		fov_motion.angle = 0;
+		fov_motion.velocity = { 0.f, 0.f };
+		fov_motion.scale = vec2({ window_width_px, window_height_px });
+
+		// Add the FOV render request to the new entity
+		registry.renderRequests.insert(
+			fov_entity,
+			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			  EFFECT_ASSET_ID::FOV_NEW,
+			  GEOMETRY_BUFFER_ID::DEBUG_LINE }
+		);
+		registry.colors.insert(fov_entity, { 0.f, 0.f, 0.f });
+	}
 
 	if (debugging.in_debug_mode && profession == "Soldier") {
 		registry.renderRequests.insert( 			
@@ -2106,23 +2108,6 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 			  EFFECT_ASSET_ID::TEXTURED,
 			  GEOMETRY_BUFFER_ID::SPRITE }
 		);
-
-		Entity fov_entity = Entity();
-    Motion& fov_motion = registry.motions.emplace(fov_entity);
-    registry.fovs.emplace(fov_entity);
-    fov_motion.position = { window_width_px / 2.f, window_height_px / 2.f };
-    fov_motion.angle = 0;
-    fov_motion.velocity = { 0.f, 0.f };
-    fov_motion.scale = vec2({ window_width_px, window_height_px });
-
-		// Add the FOV render request to the new entity
-		registry.renderRequests.insert(
-      fov_entity,
-      { TEXTURE_ASSET_ID::TEXTURE_COUNT,
-        EFFECT_ASSET_ID::FOV_NEW,
-        GEOMETRY_BUFFER_ID::DEBUG_LINE }
-    );
-    registry.colors.insert(fov_entity, { 0.f, 0.f, 0.f });
 	}
 	else if (debugging.in_debug_mode && profession == "Doctor") {
 		registry.renderRequests.insert(
@@ -2139,19 +2124,6 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 			  EFFECT_ASSET_ID::TEXTURED,
 			  GEOMETRY_BUFFER_ID::SPRITE }
 		);
-
-		Entity fov_entity = Entity();
-		Motion& fov_motion = registry.motions.emplace(fov_entity);
-		registry.fovs.emplace(fov_entity);
-		fov_motion = registry.motions.get(entity); // Copy player's motion
-
-		// Add the FOV render request to the new entity
-		registry.renderRequests.insert(
-			fov_entity,
-			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			  EFFECT_ASSET_ID::FOV2,
-			  GEOMETRY_BUFFER_ID::SPRITE }
-		);
 	}
 	else if (debugging.in_debug_mode && profession == "Hacker") {
 		registry.renderRequests.insert(
@@ -2166,19 +2138,6 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 			entity,
 			{ TEXTURE_ASSET_ID::HACK_1,
 			  EFFECT_ASSET_ID::TEXTURED,
-			  GEOMETRY_BUFFER_ID::SPRITE }
-		);
-
-		Entity fov_entity = Entity();
-		Motion& fov_motion = registry.motions.emplace(fov_entity);
-		registry.fovs.emplace(fov_entity);
-		fov_motion = registry.motions.get(entity); // Copy player's motion
-
-		// Add the FOV render request to the new entity
-		registry.renderRequests.insert(
-			fov_entity,
-			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			  EFFECT_ASSET_ID::FOV2,
 			  GEOMETRY_BUFFER_ID::SPRITE }
 		);
 	}

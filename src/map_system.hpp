@@ -23,5 +23,12 @@ MapState CreateMap1();
 
 MapState CreateMap2();
 
+MapState CreateMap3();
+
 MapState CreateMap4();
 
+MapState CreateMap5();
+
+MapState CreateMap6();
+
+std::vector<std::vector<int>> LoadMap(std::string map_name, std::string layer_name);

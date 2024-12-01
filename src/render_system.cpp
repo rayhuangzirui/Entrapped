@@ -196,7 +196,14 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glUniform2fv(glGetUniformLocation(program, "world_position"), 1, (float*)&motion.position);
 		gl_has_errors();
 
+		
 		float circle_radius = 500.0f;
+		if (registry.players.size() > 0) {
+			Entity& player = registry.players.entities[0];
+			Player& player_component = registry.players.get(player);
+
+			circle_radius = 200.0f + 300.0f * (player_component.battery_level / player_component.max_battery_level);
+		}
 		glUniform1f(glGetUniformLocation(program, "circle_radius"), circle_radius);
 		gl_has_errors();
 

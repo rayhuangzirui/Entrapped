@@ -20,6 +20,10 @@ struct Player
 
 	int max_health = 20;
 
+	float battery_level = 100.f;
+	float max_battery_level = 100.f;
+	float battery_timer = 3000.0f;
+
 	// Hit cooldown
 	float hit_cooldown = 0.f;
 

@@ -46,6 +46,31 @@ vec2 translateCoordsToMap(vec2 coords)
     return coords;
 }
 
+float rayTest(vec2 target, vec2 start){
+    float col_factor = 0.0f;
+    float max_substep_distance = 1.0f; 
+    vec2 total_movement = target - start;
+    float total_distance = length(total_movement);
+    int sub_steps = max(1, int(total_distance / max_substep_distance));
+    vec2 movement_per_substep = total_movement / float(sub_steps);
+    vec2 p = start;
+    for (int step = 0; step < sub_steps; ++step) {
+        p = p + movement_per_substep;
+        vec2 ip = translateCoordsToMap(p);
+        if(getMap(int(ip.x), int(ip.y)) == 1){
+            break;
+        }
+    }
+
+    float d = distance(p, start);
+    // Is the pixel in view of the light?
+    if(d >= total_distance - 0.1)
+        col_factor = 0.0f;
+    else
+        col_factor = 1.0f;
+    return col_factor;
+}
+
 void main()
 {
 	color = vec4(fcolor * vcolor, 1.0);
@@ -61,30 +86,13 @@ void main()
 
     float d = 100.0;
     float col_factor = 0.0f;
-
+    int window_size = 3;
 
     if(getMap(int(twpos.x), int(twpos.y)) == 0)
     {
-        float max_substep_distance = 1.0f; 
-        vec2 total_movement = tpos - center_pos;
-        float total_distance = length(total_movement);
-        int sub_steps = max(1, int(total_distance / max_substep_distance));
-        vec2 movement_per_substep = total_movement / float(sub_steps);
-        vec2 p = center_pos;
-        for (int step = 0; step < sub_steps; ++step) {
-            p = p + movement_per_substep;
-            vec2 ip = translateCoordsToMap(p);
-            if(getMap(int(ip.x), int(ip.y)) == 1){
-                break;
-            }
-        }
-
-        float d = distance(p, center_pos);
-        // Is the pixel in view of the light?
-        if(d >= total_distance - 0.1)
-            col_factor = 0.0f;
-        else
-            col_factor = 1.0f;
+        float total_factor = 0.0f;
+        total_factor += rayTest(vec2(tpos.x + 0.0, tpos.y+0.0), center_pos);
+        col_factor = total_factor/1.0f;
     }
     else{ // Wall
         col_factor = 0.8f;

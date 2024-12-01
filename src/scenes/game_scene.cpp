@@ -2608,7 +2608,7 @@ void GameScene::refreshPowerUpUI(Entity player) {
 			power_ups.push_back({
 				TEXTURE_ASSET_ID::POWER_UP_LIFE_STEAL,
 				life_steal.stacks,
-				"Life Steal: Regenerate health by dealing damage. Stacks: " + std::to_string(life_steal.stacks) + "."
+				"Life Steal: Regenerate health on enemy slay. Stacks: " + std::to_string(life_steal.stacks) + "."
 				});
 		}
 	}
@@ -2665,7 +2665,7 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		// Attach HoverInfo component to the slot
 		HoverInfo& hover_info = registry.hoverInfos.emplace(slot);
 		hover_info.description = power_ups[i].description; // Assign detailed description
-		hover_info.offset = { 0.f, -40.f }; // Adjust text offset above icon
+		hover_info.offset = { 0.f, 40.f }; // Adjust text offset above icon
 	}
 }
 

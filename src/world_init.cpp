@@ -29,41 +29,6 @@ Entity createLine(vec2 position, vec2 scale)
 }
 
 
-Entity createWall(RenderSystem* renderer, vec2 position, vec2 size)
-{
-    auto entity = Entity();
-
-    // Motion component
-    
-        Motion& motion = registry.motions.emplace(entity);
-        motion.position = position;
-        motion.angle = 0.f;
-        motion.velocity = { 0.f, 0.f }; 
-        motion.scale = size;
-    
-
-    // RenderRequest component
-    
-        registry.renderRequests.insert(
-            entity,
-            {
-                TEXTURE_ASSET_ID::TEXTURE_COUNT,
-                EFFECT_ASSET_ID::COLOURED,
-                GEOMETRY_BUFFER_ID::SQUARE
-            });
-    
-
-    // Color component
-   
-       // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));  // Black color (RGB)
-
-	   registry.colors.emplace(entity, vec3(1.f, 1.f, 1.f));  // White color (RGB)
-    
-
-    return entity;
-}
-
-
 Entity createBackground(RenderSystem* renderer) {
 	auto entity = Entity();
 

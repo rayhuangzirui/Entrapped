@@ -1,6 +1,5 @@
 ﻿#include "game_scene.hpp"
 #include "tiny_ecs_registry.hpp"
-#include "maze.hpp" // Access box_testing_environment
 #include "state_manager.hpp"
 #include "physics_system.hpp" // to check_player_wall_collision
 #include "render_system.hpp"
@@ -339,8 +338,19 @@ void GameScene::spawnEnemiesAndItems() {
 				// add random power-up pickups
 			}
 			else if (state.map.interactive_layer[row][col] == 7) {
-				// faster enemy
-
+				// agile enemy
+				Entity enemy = createEnemyAgile(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+			else if (state.map.interactive_layer[row][col] == 8) {
+				// tank enemy
+				Entity enemy = createEnemyTank(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
+			}
+			else if (state.map.interactive_layer[row][col] == 9) {
+				// boss enemy
+				Entity enemy = createEnemyBoss(pos);
+				registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 			}
 		}
 	}
@@ -438,41 +448,6 @@ void GameScene::refreshUI(Entity player) {
 
 	//createDirectionMarker(vec2((state.current_map_state.exit.x + 0.5)*48, (state.current_map_state.exit.y + 0.5) * 48));
 }
-
-
-//void GameScene::updateHints(Entity player) {
-//	vec2 player_position = registry.motions.get(player).position;
-//
-//	// Iterate over all entities with Hint components
-//	for (Entity hint_entity : registry.hints.entities) {
-//		// Check if the hint entity still has a valid Hint component
-//		if (!registry.hints.has(hint_entity)) {
-//			continue; // Skip this entity if it has been removed (e.g., enemy is dead)
-//		}
-//
-//		Hint& hint = registry.hints.get(hint_entity);
-//		vec2 hint_position = registry.motions.get(hint_entity).position;
-//		/*std::cout << "Hint position: (" << hint_position.x << ", " << hint_position.y << ")" << std::endl;*/
-//
-//		// Check if player is within the hint radius
-//		float distance = glm::distance(player_position, hint_position);
-//		bool within_radius = distance <= hint.radius;
-//
-//		if (within_radius && !hint.is_visible) {
-//			// Display hint text above the entity if within radius
-//			hint.is_visible = true;
-//			vec2 text_position = hint_position + vec2(0, 50);  // Adjust as needed for position above entity
-//			/*vec2 text_position = { 1280 / 2.0f, 720 / 2.0f };*/
-//			hint.text_entity = renderer->text_renderer.createText(hint.text, text_position, 20.f, { 1.f, 1.f, 1.f });
-//		}
-//		else if (!within_radius && hint.is_visible) {
-//			// Hide hint text when outside radius
-//			hint.is_visible = false;
-//			renderer->text_renderer.removeText(hint.text_entity);  // Use the entity reference for removal
-//			hint.text_entity = Entity();  // Reset to indicate no active text entity
-//		}
-//	}
-//}
 
 void GameScene::updateHints(Entity player) {
 	vec2 player_position = registry.motions.get(player).position;
@@ -920,6 +895,11 @@ void GameScene::step(float elapsed_ms) {
 
 			auto& enemy = registry.enemies.entities[i];
 			auto& motion = registry.motions.get(enemy);
+			auto& enemy_component = registry.enemies.get(enemy);
+			if (enemy_component.type != 0) {
+				continue;
+			}
+
 
 			TEXTURE_ASSET_ID enemy_walking_frames[4] = {
 				TEXTURE_ASSET_ID::WOMAN_WALK_1,
@@ -2179,6 +2159,7 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 0;
 
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
@@ -2191,7 +2172,8 @@ Entity GameScene::createEnemy(vec2 pos) {
 	aiTimer.counter_ms = 0.f;
 
 	// Enemy AI
-	registry.enemyAIs.emplace(entity);
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.speed = 100.f;
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2241,10 +2223,11 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 80.f ,80.f });
+	motion.scale = vec2({ 52.f ,36.f });
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 1;
 
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
@@ -2257,7 +2240,11 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 	aiTimer.counter_ms = 0.f;
 
 	// Enemy AI
-	registry.enemyAIs.emplace(entity);
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.speed = 200.f;
+
+	// Enemy Dash AI
+	EnemyDashAI& enemyDashAI = registry.enemyDashAIs.emplace(entity);
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2266,20 +2253,134 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	if (debugging.in_debug_mode) {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
-			  EFFECT_ASSET_ID::MESHED,
-			  GEOMETRY_BUFFER_ID::ENEMY_WOMAN });
-	}
-	else {
-		registry.renderRequests.insert(
-			entity,
-			{ TEXTURE_ASSET_ID::WOMAN_WALK_1,
-			  EFFECT_ASSET_ID::TEXTURED,
-			  GEOMETRY_BUFFER_ID::SPRITE });
-	}
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::SPIDER_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
+Entity GameScene::createEnemyTank(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 120.f ,120.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 2;
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
+	enemyAI.speed = 50.f;
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::MAN_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	Entity hp_bar = createHealthBarNew(entity);
+
+	enemy.health_bar_entity = hp_bar;
+
+	// Enable collision
+	registry.collidables.emplace(entity);
+
+	return entity;
+}
+
+Entity GameScene::createEnemyBoss(vec2 pos) {
+	RenderSystem* renderer = this->renderer;
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Mesh original size : 0.009997, 0.016473
+	printf("Enemy mesh original size: %f, %f\n", mesh.original_size.x, mesh.original_size.y);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ 150.f ,150.f });
+
+	// Create an empty Enemy component for the enemy character
+	Enemy& enemy = registry.enemies.emplace(entity);
+	enemy.type = 2;
+
+	// Add the Health component to the enemy entity with initial health of 50
+	Health& health = registry.healths.emplace(entity);
+	health.current_health = 10;
+	health.max_health = 10;
+
+	// Ai timer for enemy
+	AITimer& aiTimer = registry.aiTimers.emplace(entity);
+	aiTimer.interval = 1000.f;
+	aiTimer.counter_ms = 0.f;
+
+	// Enemy AI
+	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
+	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
+	enemyAI.speed = 50.f;
+
+	// Boss AI
+	BossAI& bossAI = registry.bossAIs.emplace(entity);
+
+	// Add a bounding box to the enemy entity
+	vec2 min = motion.position - (motion.scale / 2.0f);
+	vec2 max = motion.position + (motion.scale / 2.0f);
+	printf("Enemy bounding box min: (%f, %f)\n", min.x, min.y);
+	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
+	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BOSS_WALK_1,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
 
 	Entity hp_bar = createHealthBarNew(entity);
 

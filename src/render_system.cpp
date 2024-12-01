@@ -152,6 +152,67 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			}
 		}
 	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::FOV_NEW) {
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_color_loc = glGetAttribLocation(program, "in_color");
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_color_loc);
+		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)sizeof(vec3));
+		gl_has_errors();
+
+		int map_len = 30;
+		int map[30 * 30];
+		int start_x = floor((motion.position.x - motion.scale.x/2.f)/48.f);
+		int start_y = floor((motion.position.y - motion.scale.y / 2.f) / 48.f);
+		for (int i = 0; i < map_len; i++) {
+			for (int j = 0; j < map_len; j++) {
+				float ci = start_y + i;
+				float cj = start_x + j;
+				if (ci < 0 || ci >= state.map_height || cj < 0 || cj >= state.map_width) {
+					map[j + map_len * i] = 1;
+				}
+				else {
+					map[j + map_len * i] = state.map.collision_layer[ci][cj] == -1 ? 1 : 0;
+				}
+			}
+		}
+		//std::cout << "fov position x: " << motion.position.x << std::endl;
+		//std::cout << "fov position y: " << motion.position.y << std::endl;
+		GLint mapLoc = glGetUniformLocation(program, "map");
+		if (mapLoc >= 0) {
+			glUniform1iv(mapLoc, map_len * map_len, map);
+		}
+		gl_has_errors();
+
+		vec2 world_offset = { start_x *48.f, start_y*48.f};
+		glUniform2fv(glGetUniformLocation(program, "world_offset"), 1, (float*)&world_offset);
+		gl_has_errors();
+
+		glUniform2fv(glGetUniformLocation(program, "world_position"), 1, (float*)&motion.position);
+		gl_has_errors();
+
+		
+		float circle_radius = 500.0f;
+		if (registry.players.size() > 0) {
+			Entity& player = registry.players.entities[0];
+			Player& player_component = registry.players.get(player);
+
+			circle_radius = 200.0f + 300.0f * (player_component.battery_level / player_component.max_battery_level);
+		}
+		glUniform1f(glGetUniformLocation(program, "circle_radius"), circle_radius);
+		gl_has_errors();
+
+		glUniform1f(glGetUniformLocation(program, "time"), (float)(glfwGetTime() * 10.0f));
+		gl_has_errors();
+
+	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::COLOURED)
 {
     GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -235,7 +296,7 @@ else if (render_request.used_effect == EFFECT_ASSET_ID::FOV2)
             }
 
 			GLuint time_uloc = glGetUniformLocation(program, "time");
-			if (radiusLoc >= 0) {
+			if (time_uloc >= 0) {
 				glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 			}
 
@@ -420,28 +481,6 @@ void RenderSystem::drawText(Entity entity, const mat3& projection) {
 
 	gl_has_errors();
 }
-
-
-//bool RenderSystem::checkWallNearby(vec2 position, float check_radius) {
-//    
-//    int col = static_cast<int>(position.x / 48.f);
-//    int row = static_cast<int>(position.y / 48.f); 
-//    int radius_tiles = static_cast<int>(check_radius / 48.f);
-//    for (int r = row - radius_tiles; r <= row + radius_tiles; r++) {
-//        for (int c = col - radius_tiles; c <= col + radius_tiles; c++) { 
-//            if (r >= 0 && r < state.map_height && c >= 0 && c < state.map_width) { 
-//                if (state.map[r][c] == 1) {
-//                    vec2 wall_pos = vec2(c * 48.f + 24.f, r * 48.f + 24.f);
-//                    float dist = length(position - wall_pos);
-//                    if (dist < check_radius) {
-//                        return true;
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    return false;
-//}
 
 void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 	Motion& motion = registry.motions.get(entity);
@@ -725,6 +764,7 @@ for (Entity entity : registry.renderRequests.entities) {
 for (Entity entity : registry.renderRequests.entities) {
     if (registry.fovs.has(entity)) {
         drawTexturedMesh(entity, camera_matrix);
+		//drawTexturedMesh(entity, projection_2D);
     }
 }
 

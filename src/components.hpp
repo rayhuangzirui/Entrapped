@@ -20,6 +20,10 @@ struct Player
 
 	int max_health = 20;
 
+	float battery_level = 100.f;
+	float max_battery_level = 100.f;
+	float battery_timer = 3000.0f;
+
 	// Hit cooldown
 	float hit_cooldown = 0.f;
 
@@ -658,7 +662,8 @@ enum class EFFECT_ASSET_ID {
 	GLOBAL = BOX+1,
 	MAP = GLOBAL + 1,
 	FOV2 = MAP + 1,
-	EFFECT_COUNT = FOV2 + 1,
+	FOV_NEW = FOV2+1,
+	EFFECT_COUNT = FOV_NEW + 1,
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

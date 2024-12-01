@@ -1,4 +1,6 @@
 #version 330 core
+
+#define MAP_LEN 16
 out vec4 FragColor;
 
 uniform vec2 playerPosition;
@@ -6,6 +8,37 @@ uniform float circleRadius;
 uniform vec2 windowSize;
 uniform bool is_text;
 uniform float time;
+
+int[MAP_LEN*MAP_LEN] map = int[](
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,1,1,0,1,1,0,1,1,1,1,0,1,1,1,1,
+    1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+    1,1,0,0,0,0,0,0,0,0,1,0,0,0,1,1,
+    1,1,0,0,1,0,0,0,0,0,0,1,0,0,0,1,
+    1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,1,
+    1,1,0,0,0,0,1,0,0,0,0,0,0,0,1,1,
+    1,1,1,0,0,0,0,0,0,1,1,0,0,0,1,1,
+    1,1,1,1,0,0,0,0,0,1,0,0,0,0,1,1,
+    1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
+    1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,0,0,0,0,0,1,1,1,0,0,0,0,1,1,
+    1,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1,
+    1,1,0,0,0,0,0,1,1,0,0,0,0,0,1,1,
+    1,1,1,0,1,1,1,1,1,0,1,1,1,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+);
+
+// Get wall type (only 0 or 1 for now)
+int getMap(int x, int y)
+{
+    if(x < 0 || x >= MAP_LEN || y < 0 || y >= MAP_LEN)
+    {
+        return 1;
+    }
+        
+    int index = x + y * 16;
+    return map[index];
+}
 
 void main() {
     // Always make text visible by not applying darkness to it

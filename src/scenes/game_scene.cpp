@@ -434,6 +434,11 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(ammo_text);
 	registry.refreshables.emplace(ammo_text);
 
+	// create battery text
+	Entity battery_text = renderer->text_renderer.createText("Battery: " + print_to_precision(player_component.battery_level, 2) + "%", {35.f, 112.f}, 20.f, {1.f, 1.f, 1.f});
+	registry.UIs.emplace(battery_text);
+	registry.refreshables.emplace(battery_text);
+
 	// Refresh inventory display
 	refreshInventorySlots(player);
 	// Draw inventory slots
@@ -548,6 +553,7 @@ void GameScene::initialize(RenderSystem* renderer) {
 		player_component.max_health += state.health_upgrade.curVal;
 		player_component.health = player_component.max_health;
 		player_component.ammo += state.ammo_upgrade.curVal;
+		player_component.battery_level = player_component.max_battery_level;
 	}
 	else { // continue game
 		player_component.max_health = state.saved_max_health;
@@ -644,15 +650,15 @@ void GameScene::step(float elapsed_ms) {
 	//transState.is_fade_in = true;
 	if (transState.is_fade_in) {
 		// print out
-		printf("fading in\n");
+		//printf("fading in\n");
 	}
 	else {
-		printf("not fading in\n");
+		//printf("not fading in\n");
 
 	}
 
 	if (transState.is_fade_out) {
-		printf("fading out\n");
+		//printf("fading out\n");
 	}
 
 	if (transState.is_fade_out) {
@@ -694,6 +700,7 @@ void GameScene::step(float elapsed_ms) {
 		}
 		//registry.remove_all_components_of(registry.transMasks.entities.back());
 	}
+
 
 
 	updateHints(player);
@@ -823,6 +830,57 @@ void GameScene::step(float elapsed_ms) {
 				player_component.health += 1;
 				player_component.heal_timer = 5000;
 			}
+		}
+	}
+
+	// update battery
+	Player& player_component = registry.players.get(player);
+	if (!transState.is_fade_in && !transState.is_fade_out && player_component.battery_level > 0) {
+		player_component.battery_level -= 0.00005 * elapsed_ms;
+		//player_component.battery_level -= 0.01 * elapsed_ms;
+		if (player_component.battery_level < 0) {
+			player_component.battery_level = 0;
+		}
+	}
+
+	// randomly spawn enemy if battery level reaches 0
+
+
+	if (player_component.battery_level <= 0.0) {
+		player_component.battery_timer -= elapsed_ms;
+		if (player_component.battery_timer <= 0.0) {
+			int outer_window_size = 7;
+			float inner_radius = 150;
+			Motion& player_motion = registry.motions.get(player);
+			int p_x = floor(player_motion.position.x / 48.f);
+			int p_y = floor(player_motion.position.y / 48.f);
+			int extent = floor(outer_window_size / 2);
+			std::vector<vec2> avail_pos;
+			for (int i = p_y - extent; i <= p_y + extent; i++) {
+				for (int j = p_x - extent; j <= p_x + extent; j++) {
+					// outside of the map
+					if (i < 0 || i >= state.map_height || j < 0 || j >= state.map_width) {
+						continue;
+					}
+					int w_x = (j + 0.5) * 48.f;
+					int w_y = (i + 0.5) * 48.f;
+
+					// too close to player
+					if (distance(vec2(w_x, w_y), player_motion.position) < inner_radius) {
+						continue;
+					}
+
+					// blocked area
+					if (state.map.collision_layer[i][j] != 0) {
+						continue;
+					}
+					avail_pos.push_back(vec2(w_x, w_y));
+				}
+			}
+
+			int choice = floor(uniform_dist(rng) * avail_pos.size());
+			createEnemyAgile(avail_pos[choice]);
+			player_component.battery_timer = 3000.0;
 		}
 	}
 
@@ -1440,7 +1498,7 @@ void GameScene::on_key(int key, int action, int mod) {
 	// display the current cell player is at
 	float grid_x = floor(motion.position.x / state.TILE_SIZE);
 	float grid_y = floor(motion.position.y / state.TILE_SIZE);
-	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
+	//std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
 
 
 	// Handle movement keys (W, A, S, D)
@@ -1999,6 +2057,7 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	// Initialize health and ammo
 	player.health = 20;
 	player.ammo = 50;
+	player.battery_level = player.max_battery_level;
 	player.profession = profession;
 
 
@@ -2049,17 +2108,21 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 		);
 
 		Entity fov_entity = Entity();
-		Motion& fov_motion = registry.motions.emplace(fov_entity);
-		registry.fovs.emplace(fov_entity);
-		fov_motion = registry.motions.get(entity); // Copy player's motion
+    Motion& fov_motion = registry.motions.emplace(fov_entity);
+    registry.fovs.emplace(fov_entity);
+    fov_motion.position = { window_width_px / 2.f, window_height_px / 2.f };
+    fov_motion.angle = 0;
+    fov_motion.velocity = { 0.f, 0.f };
+    fov_motion.scale = vec2({ window_width_px, window_height_px });
 
 		// Add the FOV render request to the new entity
 		registry.renderRequests.insert(
-			fov_entity,
-			{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
-			  EFFECT_ASSET_ID::FOV2,
-			  GEOMETRY_BUFFER_ID::SPRITE }
-		);
+      fov_entity,
+      { TEXTURE_ASSET_ID::TEXTURE_COUNT,
+        EFFECT_ASSET_ID::FOV_NEW,
+        GEOMETRY_BUFFER_ID::DEBUG_LINE }
+    );
+    registry.colors.insert(fov_entity, { 0.f, 0.f, 0.f });
 	}
 	else if (debugging.in_debug_mode && profession == "Doctor") {
 		registry.renderRequests.insert(

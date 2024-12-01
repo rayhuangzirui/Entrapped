@@ -1,11 +1,11 @@
-map_index=0
-exp=54
+map_index=1
+exp=60
 heath_upgrades=20
 ammo_upgrades=40
 health=40
 max_health=40
 ammo=90
-ammo_pack=0
+ammo_pack=1
 health_potion=0
 speed_boost=0
 shield=0

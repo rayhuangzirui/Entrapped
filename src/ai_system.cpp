@@ -185,9 +185,13 @@ void AISystem::step(float elapsed_ms_since_last_update)
 			// move to the last position where the player is seen.
 			//vec2 direction = normalize(enemyAI.last_player_position - motion.position);
 			//motion.velocity = direction * 100.f;
-			
+			// go straight if the player is very close
+			if (distance(player_motion.position, motion.position) <= 100) {
+				vec2 direction = normalize(enemyAI.last_player_position - motion.position);
+				motion.velocity = direction * enemyAI.speed;
+			}
 			// move to the last path node
-			if (enemyAI.path.size() > 0) {
+			else if (enemyAI.path.size() > 0) {
 				vec2 last_path_position = ((enemyAI.path[enemyAI.path.size() - 1] + 0.5f)*48.f);
 				vec2 direction = normalize(last_path_position - motion.position);
 				motion.velocity = direction * enemyAI.speed;

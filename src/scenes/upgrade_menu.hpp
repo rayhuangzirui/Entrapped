@@ -24,6 +24,7 @@ private:
 	Entity health_button;
 	Entity ammo_button;
 	Entity exit_button;
+	Entity reset_button;
 
 	Mix_Chunk* button_click;
 };

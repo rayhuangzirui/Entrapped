@@ -11,6 +11,7 @@ void UpgradeMenu::initialize(RenderSystem* renderer) {
 	ammo_button = createButton(renderer, { 350.f, 150.f }, { 105.f, 30.f }, "Upgrade");
 
 	exit_button = createButton(renderer, { 50.f, window_height_px-50.f }, { 105.f, 30.f }, "Finish");
+	reset_button = createButton(renderer, { window_width_px - 150.f, 100.f }, { 105.f, 30.f }, "Reset");
 
 	renderer->text_renderer.createText("*Upgrade will be applied on new games", { window_width_px - 450.f, window_height_px - 50.f }, 20.f, { 1.f, 1.f, 1.f });
 	refreshUI();
@@ -54,6 +55,12 @@ void UpgradeMenu::step(float elapsed_ms) {
 		}else if (button_entity == exit_button) {
 			next_scene = "main_menu";
 			break;
+		}
+		else if (button_entity == reset_button) {
+			state.exp = 0;
+			state.ammo_upgrade.curVal = 0;
+			state.health_upgrade.curVal = 0;
+			state.save();
 		}
 	}
 }

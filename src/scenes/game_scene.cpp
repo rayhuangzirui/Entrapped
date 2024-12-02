@@ -117,7 +117,7 @@ Entity GameScene::createTransitionMask(RenderSystem* renderer, float progress) {
 	motion.angle = 0.f;
 	motion.velocity = { 0, 0 };
 	motion.position = player_motion.position;
-	motion.scale = {window_width_px, window_height_px};
+	motion.scale = {window_width_px*10, window_height_px*10};
 
 	registry.transMasks.emplace(entity);
 	//transState = registry.transStates.emplace(entity);
@@ -1487,7 +1487,9 @@ void GameScene::destroy() {
 		registry.remove_all_components_of(registry.motions.entities.back());
 	while (registry.fps.entities.size() > 0)
 		registry.remove_all_components_of(registry.fps.entities.back());
+	int footstep_channel = 4;
 	Mix_HaltChannel(tape_channel);
+	Mix_HaltChannel(footstep_channel);
 	Mix_FreeMusic(background_music);
 	Mix_FreeChunk(player_dead_sound);
 	Mix_FreeChunk(player_hurt_sound);
@@ -1547,8 +1549,7 @@ void GameScene::on_key(int key, int action, int mod) {
 
 
 	// Handle movement keys (W, A, S, D)
-	motion.velocity = vec2(0, 0);
-	if (!registry.deathTimers.has(player) && !transState.is_fade_out) {
+	if (!registry.deathTimers.has(player)) {
 		if (action == GLFW_PRESS) {
 			vec2 new_position = motion.position;
 			if (action == GLFW_PRESS) {
@@ -1639,7 +1640,12 @@ void GameScene::on_key(int key, int action, int mod) {
 
 		}
 		vec2 dir = { player_movement_state.w - player_movement_state.z, player_movement_state.y - player_movement_state.x };
-		player_velocity = dir * player_component.speed;
+		if (transState.is_fade_out) {
+			player_velocity = {0, 0};
+		}
+		else {
+			player_velocity = dir * player_component.speed;
+		}
 		motion.velocity = player_velocity;
 
 		// Apply sprint effect if active

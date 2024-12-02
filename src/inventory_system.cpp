@@ -150,13 +150,13 @@ void InventorySystem::consumeAmmoPack(Entity player) {
     if (!registry.players.has(player)) return;
 
     Player& player_component = registry.players.get(player);
-    player_component.ammo += 10;
+    player_component.ammo += 30;
 
     // Play the item pickup sound
     if (item_pickup_sound)
         Mix_PlayChannel(-1, item_pickup_sound, 0);
 
-    std::cout << "Added 10 ammo. Current ammo: " << player_component.ammo << std::endl;
+    std::cout << "Added 30 ammo. Current ammo: " << player_component.ammo << std::endl;
 }
 
 // Function to restore health to the player

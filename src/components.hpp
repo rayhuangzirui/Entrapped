@@ -16,9 +16,9 @@ struct Parent
 struct Player
 {
 	// Player's health
-	int health = 20;
+	int health = 10;
 
-	int max_health = 20;
+	int max_health = 10;
 
 	float battery_level = 100.f;
 	float max_battery_level = 100.f;
@@ -31,7 +31,7 @@ struct Player
 	float dash_cooldown = 500.f;
 
 	// Player's initial ammo, associated with a weapon but currently associated with the player
-	int ammo = 30;
+	int ammo = 50;
 
 	std::string profession;
 	// if the player is a doctor, heal 1 health point every 5 seconds. Other professions have this timer set to 0.
@@ -493,6 +493,7 @@ struct LifeSteal {
 
 struct RicochetPowerUp {
 	int stacks;
+	vec2 wall_normal;
 };
 
 struct AttackSpeedPowerUp {

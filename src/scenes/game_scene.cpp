@@ -398,7 +398,7 @@ void GameScene::spawnEnemiesAndItems() {
 
 		marker = createInvisible({ (20 + 0.5) * 48, (25 + 0.5) * 48 });
 		Hint hint3;
-		hint3.text = "Press space to dash";
+		hint3.text = "Press space to dash (not while sprinting!)";
 		hint3.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint3);
 
@@ -710,15 +710,15 @@ void GameScene::step(float elapsed_ms) {
 	}
 
 	if (transState.is_fade_out) {
-		printf("fading out\n");
+		//printf("fading out\n");
 		transState.timer += elapsed_ms;
-		printf("Timer: %f\n", transState.timer);
-		printf("Duration: %f\n", transState.duration);
+		//printf("Timer: %f\n", transState.timer);
+		//printf("Duration: %f\n", transState.duration);
 
 		// Increase opacity over time
 		float progress = transState.timer / transState.duration;
 		// print out
-		printf("progress: %f\n", progress);
+		//printf("progress: %f\n", progress);
 		if (progress > 1.f) progress = 1.f;
 		createTransitionMask(renderer, progress);
 		//registry.opacities.get(transMaskEntity).opacity = progress;
@@ -887,7 +887,8 @@ void GameScene::step(float elapsed_ms) {
 	// update battery
 	Player& player_component = registry.players.get(player);
 	if (!transState.is_fade_in && !transState.is_fade_out && player_component.battery_level > 0) {
-		player_component.battery_level -= 0.00005 * elapsed_ms;
+		//player_component.battery_level -= 0.00005 * elapsed_ms;
+		player_component.battery_level -= 0.0005 * elapsed_ms;
 		//player_component.battery_level -= 0.01 * elapsed_ms;
 		if (player_component.battery_level < 0) {
 			player_component.battery_level = 0;
@@ -1199,7 +1200,7 @@ void GameScene::step(float elapsed_ms) {
 		for (Entity entity: enemyDeathTimers.entities) {
 			// normal enemy death animation
 			Enemy& enemy = registry.enemies.get(entity);
-			printf("enemy type: %d\n", enemy.type);
+			//printf("enemy type: %d\n", enemy.type);
 			if (enemy.type == 0) {
 				EnemyDeathTime& enemyDeathTimer = enemyDeathTimers.get(entity);
 				auto& motion = registry.motions.get(entity);
@@ -1544,7 +1545,7 @@ void GameScene::on_key(int key, int action, int mod) {
 	// display the current cell player is at
 	float grid_x = floor(motion.position.x / state.TILE_SIZE);
 	float grid_y = floor(motion.position.y / state.TILE_SIZE);
-	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
+	//std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
 
 
 	// Handle movement keys (W, A, S, D)
@@ -1762,11 +1763,11 @@ void GameScene::on_key(int key, int action, int mod) {
 			if (distance(motion.position, player_motion.position) < 200.f && !random_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
 
-				int choice = floor(uniform_dist(rng)*2);
+				int choice = floor(uniform_dist(rng)*4);
 				if (choice == 0) {
 					InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 1);
 				}
-				else if(choice == 1) {
+				else if(choice == 1 || choice == 2 || choice == 3) {
 					InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 1);
 				}
 
@@ -2124,7 +2125,7 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	// Create an empty Player component for our character
 	Player& player = registry.players.emplace(entity);
 	// Initialize health and ammo
-	player.health = 20;
+	player.health = 10;
 	player.ammo = 50;
 	player.battery_level = player.max_battery_level;
 	player.profession = profession;
@@ -2491,8 +2492,8 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
-	health.current_health = 10;
-	health.max_health = 10;
+	health.current_health = 5;
+	health.max_health = 5;
 	
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
@@ -2559,8 +2560,8 @@ Entity GameScene::createEnemyAgile(vec2 pos) {
 
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
-	health.current_health = 10;
-	health.max_health = 10;
+	health.current_health = 3;
+	health.max_health = 3;
 
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
@@ -2602,7 +2603,7 @@ Entity GameScene::createEnemyTank(vec2 pos) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::TANK_ENEMY);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Mesh original size : 0.009997, 0.016473
@@ -2641,11 +2642,20 @@ Entity GameScene::createEnemyTank(vec2 pos) {
 	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::MAN_WALK_1,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::MAN_WALK_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::TANK_ENEMY });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::MAN_WALK_1,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	Entity hp_bar = createHealthBarNew(entity);
 
@@ -2662,7 +2672,7 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY_WOMAN);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::BOSS_ENEMY);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Mesh original size : 0.009997, 0.016473
@@ -2673,7 +2683,7 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 150.f ,150.f });
+	motion.scale = vec2({ 200.f ,200.f });
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
@@ -2681,8 +2691,8 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 
 	// Add the Health component to the enemy entity with initial health of 50
 	Health& health = registry.healths.emplace(entity);
-	health.current_health = 10;
-	health.max_health = 10;
+	health.current_health = 30;
+	health.max_health = 30;
 
 	// Ai timer for enemy
 	AITimer& aiTimer = registry.aiTimers.emplace(entity);
@@ -2691,8 +2701,8 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 
 	// Enemy AI
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
-	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
-	enemyAI.speed = 50.f;
+	enemyAI.detection_radius = enemyAI.detection_radius * 3.f;
+	enemyAI.speed = 300.f;
 
 	// Boss AI
 	BossAI& bossAI = registry.bossAIs.emplace(entity);
@@ -2704,11 +2714,21 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 	printf("Enemy bounding box max: (%f, %f)\n", max.x, max.y);
 	registry.boundingBoxes.emplace(entity, BoundingBox{ min, max });
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_ASSET_ID::BOSS_WALK_1,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+
+	if (debugging.in_debug_mode) {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::BOSS_WALK_1,
+			  EFFECT_ASSET_ID::MESHED,
+			  GEOMETRY_BUFFER_ID::BOSS_ENEMY });
+	}
+	else {
+		registry.renderRequests.insert(
+			entity,
+			{ TEXTURE_ASSET_ID::BOSS_WALK_1,
+				EFFECT_ASSET_ID::TEXTURED,
+				GEOMETRY_BUFFER_ID::SPRITE });
+	}
 
 	Entity hp_bar = createHealthBarNew(entity);
 
@@ -2740,7 +2760,7 @@ void GameScene::handle_collisions(float elapsed_ms_since_last_update) {
 				// Reduce player health
 				//printf("Player health: %d\n", player.health);
 
-				if (!registry.damageCoolDowns.has(entity) && !registry.deathTimers.has(entity)) {
+				if (!registry.damageCoolDowns.has(entity) && !registry.deathTimers.has(entity) && !registry.enemyDeathTimers.has(entity_other)) {
 					// soldier power up: invincible when dashing
 					if (selected_profession == "Soldier" && registry.dashTimers.has(entity)) {
 						// skip the damage
@@ -2810,7 +2830,7 @@ void GameScene::handle_collisions(float elapsed_ms_since_last_update) {
 
 		// Bullet & Enemy collision
 		if (registry.bullets.has(entity)) {
-			if (registry.enemies.has(entity_other)) {
+			if (registry.enemies.has(entity_other) && !registry.enemyDeathTimers.has(entity_other)) {
 				
 				// Bullet and enemy components
 				Bullet& bullet = registry.bullets.get(entity);
@@ -2958,7 +2978,7 @@ void GameScene::shoot_bullet(vec2 position, vec2 direction) {
 
 	// Transfer RicochetPowerUp stacks from player to bullet
 	if (registry.ricochetPowerUps.has(player)) {
-		RicochetPowerUp& player_ricochet = registry.ricochetPowerUps.get(player);
+		RicochetPowerUp player_ricochet = registry.ricochetPowerUps.get(player);
 		RicochetPowerUp& bullet_ricochet = registry.ricochetPowerUps.emplace(entity);
 		bullet_ricochet.stacks = player_ricochet.stacks;
 
@@ -3009,7 +3029,7 @@ void GameScene::apply_damage(Entity& target, int damage) {
 		vec2 position = registry.motions.get(target).position;
 
 		// If health falls to 0 or below, remove the entity
-		if (health.current_health <= 0) {
+		if (health.current_health <= 0 && !registry.enemyDeathTimers.has(target)) {
 			// Life steal effect: Heal the player based on life steal stacks
 			if (registry.players.has(player)) {
 				Player& player_component = registry.players.get(player);
@@ -3037,10 +3057,8 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			auto& enemy = registry.enemies.get(target);
 			registry.remove_all_components_of(enemy.health_bar_entity);
 			// registry.enemies.remove(target);
-			if (!registry.enemyDeathTimers.has(target)) {
-				registry.enemyDeathTimers.insert(target, { 1500.0f, 1500.0f });
-				state.exp += 1;
-			}
+			registry.enemyDeathTimers.insert(target, { 1500.0f, 1500.0f });
+			state.exp += 1;
 
 			// boss, create portal
 			if (enemy.type == 3) {

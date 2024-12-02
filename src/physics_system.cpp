@@ -315,7 +315,8 @@ bool check_box_in_the_wall(Motion motion) {
 }
 
 // Precise mesh-wall collision handling
-void handle_mesh_wall_collision(Entity entity) {
+// return: collision detected
+bool handle_mesh_wall_collision(Entity entity) {
     auto& motion_registry = registry.motions;
     auto& collidable_registry = registry.collidables;
     const int TILE_SIZE = state.TILE_SIZE;
@@ -324,7 +325,7 @@ void handle_mesh_wall_collision(Entity entity) {
     Motion& motion = motion_registry.get(entity);
 
     if (!registry.meshPtrs.has(entity)) {
-        return;
+        return false;
     }
 
     Mesh& mesh = *registry.meshPtrs.get(entity);
@@ -346,8 +347,9 @@ void handle_mesh_wall_collision(Entity entity) {
 
     bool is_box_in_wall = check_box_in_the_wall(motion);
     if (!is_box_in_wall) {
-        return;
+        return false;
     }
+    bool had_collision = false;
     // For each tile that the entity overlaps with
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
@@ -366,6 +368,7 @@ void handle_mesh_wall_collision(Entity entity) {
                     // Check if the vertex is inside the wall's bounding box
                     if (point_in_aabb(transformed_vertex, wall_pos, wall_size)) {
                         collision_detected = true;
+                        had_collision = true;
                         break;
                     }
                 }
@@ -390,7 +393,7 @@ void handle_mesh_wall_collision(Entity entity) {
 
                             if (ricochet.stacks > 0) {
                                 // Ricochet logic
-                                ricochet.stacks--;
+                                //ricochet.stacks--;
 
                                 // Calculate the wall normal based on collision axis
                                 vec2 wall_normal = { 0.0f, 0.0f };
@@ -404,14 +407,7 @@ void handle_mesh_wall_collision(Entity entity) {
                                     wall_normal = { 0.0f, 1.0f }; // Horizontal wall normal
                                 }
 
-                                // Reflect the velocity vector based on the wall normal
-                                motion.velocity = motion.velocity - 2 * dot(motion.velocity, wall_normal) * wall_normal;
-
-                                // Debug: Print the new velocity
-                                std::cout << "[DEBUG] Bullet ricocheted! New velocity: ("
-                                    << motion.velocity.x << ", "
-                                    << motion.velocity.y << "), Remaining stacks: "
-                                    << ricochet.stacks << std::endl;
+                                ricochet.wall_normal = wall_normal;
                             }
                             else {
                                 // Remove bullet if no ricochet stacks remain
@@ -462,9 +458,9 @@ void handle_mesh_wall_collision(Entity entity) {
                         motion.position.x += mtv_x;
 
                         // Adjust velocity along x-axis if moving towards the wall
-                        if ((mtv_x > 0 && motion.velocity.x < 0) || (mtv_x < 0 && motion.velocity.x > 0)) {
-                            motion.velocity.x = 0.0f;
-                        }
+                        //if ((mtv_x > 0 && motion.velocity.x < 0) || (mtv_x < 0 && motion.velocity.x > 0)) {
+                        //    motion.velocity.x = 0.0f;
+                        //}
                     }
                     else {
                         // Move entity out along y-axis
@@ -472,9 +468,9 @@ void handle_mesh_wall_collision(Entity entity) {
                         motion.position.y += mtv_y;
 
                         // Adjust velocity along y-axis if moving towards the wall
-                        if ((mtv_y > 0 && motion.velocity.y < 0) || (mtv_y < 0 && motion.velocity.y > 0)) {
-                            motion.velocity.y = 0.0f;
-                        }
+                        //if ((mtv_y > 0 && motion.velocity.y < 0) || (mtv_y < 0 && motion.velocity.y > 0)) {
+                        //    motion.velocity.y = 0.0f;
+                        //}
                     }
 
   
@@ -491,47 +487,8 @@ void handle_mesh_wall_collision(Entity entity) {
             break;
         }
     }
+    return had_collision;
 }
-
-//void handle_bullet_wall_collision(float step_seconds) {
-//    auto& motion_registry = registry.motions;
-//    auto& bbox_container = registry.boundingBoxes;
-//
-//    // Iterate over all bullet entities
-//    for (uint i = 0; i < registry.bullets.entities.size(); i++) {
-//        Entity bullet = registry.bullets.entities[i];
-//        Motion& bullet_motion = motion_registry.get(bullet);
-//
-//        // Move the bullet based on its current velocity
-//        bullet_motion.position += bullet_motion.velocity * step_seconds;
-//
-//        // Get the bullet's AABB
-//        vec2 bullet_aabb = get_aabb(bullet_motion);
-//
-//        // Flag to track collision
-//        bool collision_occurred = false;
-//
-//        // Check for collision with wall entities
-//        for (uint j = 0; j < bbox_container.components.size(); j++) {
-//            Entity wall_entity = bbox_container.entities[j];
-//            BoundingBox& wall_bbox = bbox_container.get(wall_entity);
-//
-//            // Skip non-wall entities by checking if they have the wall component (if applicable)
-//            if (registry.bullets.has(wall_entity)) continue;
-//
-//            // Get the wall's AABB
-//            vec2 wall_aabb = get_aabb(motion_registry.get(wall_entity));
-//
-//            // Check if the bullet intersects with the wall
-//            if (aabb_intersect(bullet_motion.position, bullet_aabb, motion_registry.get(wall_entity).position, wall_aabb)) {
-//                // Collision detected - stop the bullet by setting its velocity to zero
-//                bullet_motion.velocity = { 0.0f, 0.0f };
-//                collision_occurred = true;
-//                break;
-//            }
-//        }
-//    }
-//}
 
 const float DASH_MULTIPLIER = 5.0f;
 
@@ -577,19 +534,25 @@ void PhysicsSystem::step(float elapsed_ms)
         float substep_seconds = step_seconds / float(sub_steps);
 
 		// Continuous collision detection for wall collisions over multiple sub-steps
+        bool had_collision = false;
         for (int step = 0; step < sub_steps; ++step) {
             motion.position += movement_per_substep;
-            handle_mesh_wall_collision(entity);
+            had_collision = had_collision || handle_mesh_wall_collision(entity);
+        }
+        // reflect after MTV
+        if (had_collision && registry.bullets.has(entity) && registry.ricochetPowerUps.has(entity)) {
+            RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(entity);
+            ricochet.stacks--;
+            // Reflect the velocity vector based on the wall normal
+            motion.velocity = motion.velocity - 2 * dot(motion.velocity, ricochet.wall_normal) * ricochet.wall_normal;
+
+            // Debug: Print the new velocity
+            std::cout << "[DEBUG] Bullet ricocheted! New velocity: ("
+                << motion.velocity.x << ", "
+                << motion.velocity.y << "), Remaining stacks: "
+                << ricochet.stacks << std::endl;
         }
     }
-    // Mesh-wall collision
-    //if (registry.meshPtrs.has(entity)) {
-    //    Mesh& mesh = *registry.meshPtrs.get(entity);
-    //    BoundingBox& bb = bbox_container.get(entity);
-
-    //    //handle_wall_mesh_collision(entity, bb, motion, mesh);
-    //    handle_wall_mesh_collision(entity, bb, motion, mesh);
-    //}
 
     // Currently collisions are mesh-based: player-enemy, bullet-enemy
     handle_mesh_mesh_collision();

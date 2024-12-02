@@ -148,7 +148,7 @@ void RenderSystem::initializeMapTextures()
 			// crop the image
 			int x = j * ts;
 			int y = i * ts;
-			std::cout << "x: " << x  << " y: " << y << std::endl;
+			//std::cout << "x: " << x  << " y: " << y << std::endl;
 			subData = new unsigned char[ts * ts * nChannels];
 			for (int k = 0; k < ts; ++k) {
 				for (int h = 0; h < ts; ++h) {

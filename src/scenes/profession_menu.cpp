@@ -60,15 +60,15 @@ void ProfessionMenu::step(float elapsed_ms) {
 	}
 
 	if (transState.is_fade_out) {
-		printf("fading out\n");
+		//printf("fading out\n");
 		transState.timer += elapsed_ms;
-		printf("Timer: %f\n", transState.timer);
-		printf("Duration: %f\n", transState.duration);
+		//printf("Timer: %f\n", transState.timer);
+		//printf("Duration: %f\n", transState.duration);
 
 		// Increase opacity over time
 		float progress = transState.timer / transState.duration;
 		// print out
-		printf("progress: %f\n", progress);
+		//printf("progress: %f\n", progress);
 		if (progress > 1.f) progress = 1.f;
 		createTransitionMask(renderer, progress);
 
@@ -158,7 +158,7 @@ void ProfessionMenu::on_mouse_click(int button, int action, int mod) {
 		// Confirm button
 		if (mouse_position.x > window_width_px / 2 - 75.f && mouse_position.x < window_width_px / 2 + 58.f &&
 			mouse_position.y > window_height_px - 100 - 25.f && mouse_position.y < window_height_px - 100 + 33.f) {
-			if (selection_delay_complete) {
+			if (selection_delay_complete && !transState.is_fade_out) {
 				confirm_button_clicked = true;
 				printf("Confirm button clicked\n");
 				time_since_last_click = 0.f;

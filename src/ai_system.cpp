@@ -174,8 +174,10 @@ void AISystem::step(float elapsed_ms_since_last_update)
 			}
 		}
 		else if (enemyAI.state == 1) {
+			//enemyAI.state = 0;
+			//continue;
 			// if enemy's hp is lower than 30%, switch to fleeing
-			if ((float)health.current_health / (float)health.max_health < 0.30) {
+			if ((float)health.current_health / (float)health.max_health < 0.30 && !registry.bossAIs.has(entity)) {
 				enemyAI.state = 2;
 				enemyAI.flee_timer = 3000.f;
 				enemyAI.path.clear();
@@ -214,7 +216,7 @@ void AISystem::step(float elapsed_ms_since_last_update)
 			}
 
 			// find path to the last seen position
-			if (enemyAI.path_finding_timer <= 0) {
+			if (enemyAI.path_finding_timer <= 0 || registry.bossAIs.has(entity)) {
 				vec2 start = worldToMapCoords(motion.position);
 				vec2 end = worldToMapCoords(enemyAI.last_player_position);
 				enemyAI.path = findPath(start, end);

@@ -305,7 +305,7 @@ bool check_box_in_the_wall(Motion motion) {
 
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.is_blocked(state.map.collision_layer[y][x])) {
+            if (state.is_blocked(state.map.collision_layer[y][x]) || state.map.interactive_layer[y][x] == 3) {
                 return true;
             }
         }

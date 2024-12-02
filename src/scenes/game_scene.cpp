@@ -555,13 +555,12 @@ void GameScene::initialize(RenderSystem* renderer) {
 	MapState map_state = state.changeMap(map_name);
 	state.save();
 	createMaze();
+	if (state.map_index > 0) { // not first level
+		selected_profession = state.saved_profession;
+	}
 	player = createPlayer({(map_state.player_spawn.x+0.5) * state.TILE_SIZE, (map_state.player_spawn.y+0.5) * state.TILE_SIZE }, selected_profession);
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 	spawnEnemiesAndItems();
-
-	if (state.map_index > 0) { // first level
-		selected_profession = state.saved_profession;
-	}
 
 	// initialize player's powerup by the profession
 	if (selected_profession == "Soldier") {
@@ -2614,7 +2613,7 @@ Entity GameScene::createEnemyTank(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 80.f ,80.f });
+	motion.scale = vec2({ 70.f ,160.f });
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
@@ -2879,6 +2878,8 @@ void GameScene::changeMap(std::string map_name, float elapsed_ms_since_last_upda
 		registry.remove_all_components_of(registry.ammoChests.entities.back());
 	while (registry.randomChests.entities.size() > 0)
 		registry.remove_all_components_of(registry.randomChests.entities.back());
+	while (registry.pickups.entities.size() > 0)
+		registry.remove_all_components_of(registry.pickups.entities.back());
 
 	// also remove portals
 	while (registry.portals.entities.size() > 0)

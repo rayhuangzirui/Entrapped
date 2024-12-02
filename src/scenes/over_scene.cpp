@@ -5,7 +5,7 @@
 
 void OverScene::initialize(RenderSystem* renderer) {
 	this->renderer = renderer;
-	renderer->text_renderer.createText("Thank you for playing the demo!", { window_width_px / 2 - 300.f, window_height_px / 2 - 20.f }, 40.f, { 1.f, 1.f, 1.f });
+	renderer->text_renderer.createText("Thank you for playing!", { window_width_px / 2 - 200.f, window_height_px / 2 - 20.f }, 40.f, { 1.f, 1.f, 1.f });
 	renderer->text_renderer.createText("Press Q to return to the main menu", { window_width_px / 2 - 160.f, window_height_px / 2 + 40.f }, 20.f, { 1.f, 1.f, 1.f });
 	//renderer->text_renderer.createText("Main Menu", { window_width_px / 2 + 40.f, window_height_px/2+40.f }, 20.f, { 1.f, 1.f, 1.f });
 	//(vec2)mouse_position; // dummy to avoid compiler warning

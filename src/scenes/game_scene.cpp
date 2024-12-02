@@ -113,10 +113,11 @@ Entity GameScene::createTransitionMask(RenderSystem* renderer, float progress) {
 
 	// Create motion
 	Motion& motion = registry.motions.emplace(entity);
+	Motion& player_motion = registry.motions.get(player);
 	motion.angle = 0.f;
 	motion.velocity = { 0, 0 };
-	motion.position = {0,0};
-	motion.scale = {window_width_px*10, window_height_px*10};
+	motion.position = player_motion.position;
+	motion.scale = {window_width_px, window_height_px};
 
 	registry.transMasks.emplace(entity);
 	//transState = registry.transStates.emplace(entity);
@@ -997,10 +998,11 @@ void GameScene::step(float elapsed_ms) {
 
 	if (registry.enemies.size() > 0) {
 		// Enemy walking frames and animations
+		static float frame_timer = 0.f;
+		frame_timer += elapsed_ms;
 		for (int i = 0; i < registry.enemies.size(); i++) {
 			static int enemy_frame = 0;
 			static float frame_delay = 1000.f;
-			static float frame_timer = 0.f;
 
 			auto& enemy = registry.enemies.entities[i];
 			auto& motion = registry.motions.get(enemy);
@@ -1036,8 +1038,6 @@ void GameScene::step(float elapsed_ms) {
 
 			// normal enemy walking animation
 			if (enemy_component.type == 0) {
-
-				frame_timer += elapsed_ms;
 				if (frame_timer >= frame_delay) {
 					frame_timer = 0.f;
 					enemy_frame = (enemy_frame + 1) % 4;
@@ -1070,8 +1070,6 @@ void GameScene::step(float elapsed_ms) {
 				}
 			} 
 			else if (enemy_component.type == 1) {
-
-				frame_timer += elapsed_ms;
 				if (frame_timer >= frame_delay) {
 					frame_timer = 0.f;
 					enemy_frame = (enemy_frame + 1) % 4;
@@ -1104,8 +1102,6 @@ void GameScene::step(float elapsed_ms) {
 				}
 			}
 			else if (enemy_component.type == 2) {
-
-				frame_timer += elapsed_ms;
 				if (frame_timer >= frame_delay) {
 					frame_timer = 0.f;
 					enemy_frame = (enemy_frame + 1) % 4;
@@ -1138,8 +1134,6 @@ void GameScene::step(float elapsed_ms) {
 			}
 
 			else if (enemy_component.type == 3) {
-
-				frame_timer += elapsed_ms;
 				if (frame_timer >= frame_delay) {
 					frame_timer = 0.f;
 					enemy_frame = (enemy_frame + 1) % 4;
@@ -1553,7 +1547,8 @@ void GameScene::on_key(int key, int action, int mod) {
 
 
 	// Handle movement keys (W, A, S, D)
-	if (!registry.deathTimers.has(player)) {
+	motion.velocity = vec2(0, 0);
+	if (!registry.deathTimers.has(player) && !transState.is_fade_out) {
 		if (action == GLFW_PRESS) {
 			vec2 new_position = motion.position;
 			if (action == GLFW_PRESS) {
@@ -2904,14 +2899,14 @@ void GameScene::changeMap(std::string map_name, float elapsed_ms_since_last_upda
 	// spawn enemies
 	spawnEnemiesAndItems();
 	state.save();
-	state.map_index++;
 	// spawn exit
-	if (state.map_index >= state.map_lists.size()) {
+	if (state.map_index >= state.map_lists.size() -1) {
 		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
 	}
 	else {
-		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index+1]);
 	}
+	state.map_index++;
 }
 
 // Add bullet creation
@@ -3038,6 +3033,16 @@ void GameScene::apply_damage(Entity& target, int damage) {
 			if (!registry.enemyDeathTimers.has(target)) {
 				registry.enemyDeathTimers.insert(target, { 1500.0f, 1500.0f });
 				state.exp += 1;
+			}
+
+			// boss, create portal
+			if (enemy.type == 3) {
+				if (state.map_index >= state.map_lists.size() - 1) {
+					createPortal(position, "n/a");
+				}
+				else {
+					createPortal(position, state.map_lists[state.map_index + 1]);
+				}
 			}
 
 			Mix_PlayChannel(monster_hurt_channel, monster_hurt_sound, 0);

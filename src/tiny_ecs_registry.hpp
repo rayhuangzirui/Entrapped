@@ -22,6 +22,8 @@ public:
 	ComponentContainer<FPS> fps;	
 	ComponentContainer<Tape> tapes;
 	ComponentContainer<Subtitle> subtitles;
+	ComponentContainer<TransState> transStates;
+	ComponentContainer<TransMask> transMasks;
 
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
@@ -41,6 +43,8 @@ public:
 
 	// AI related
 	ComponentContainer<EnemyAI> enemyAIs;
+	ComponentContainer<EnemyDashAI> enemyDashAIs;
+	ComponentContainer<BossAI> bossAIs;
 
 
 	// Add bullet container and enemy container
@@ -124,6 +128,8 @@ public:
 		registry_list.push_back(&parents);
 		registry_list.push_back(&tapes);
 		registry_list.push_back(&subtitles);
+		registry_list.push_back(&transStates);
+		registry_list.push_back(&transMasks);
 
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
@@ -145,6 +151,8 @@ public:
 		registry_list.push_back(&boundingBoxes);
 		// AI related
 		registry_list.push_back(&enemyAIs);
+		registry_list.push_back(&enemyDashAIs);
+		registry_list.push_back(&bossAIs);
 
 		registry_list.push_back(&damageTexts);
 

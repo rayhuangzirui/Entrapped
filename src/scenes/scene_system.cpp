@@ -55,8 +55,8 @@ void SceneSystem::on_key(int key, int action, int mod) {
 	//}
 }
 
-void SceneSystem::handle_collisions() {
-	current_scene->handle_collisions();
+void SceneSystem::handle_collisions(float elapsed_ms_since_last_update) {
+	current_scene->handle_collisions(elapsed_ms_since_last_update);
 }
 
 void SceneSystem::on_mouse_move(vec2 mouse_position) {

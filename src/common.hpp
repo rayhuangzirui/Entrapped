@@ -53,3 +53,5 @@ bool gl_has_errors();
 float round_to_digits(float value, int digits);
 
 int clamp_m(int n, int min_v, int max_v);
+
+std::string print_to_precision(float value, int digits);

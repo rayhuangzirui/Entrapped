@@ -305,7 +305,7 @@ bool check_box_in_the_wall(Motion motion) {
 
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.is_blocked(state.map[y][x])) {
+            if (state.is_blocked(state.map.collision_layer[y][x])) {
                 return true;
             }
         }
@@ -351,7 +351,7 @@ void handle_mesh_wall_collision(Entity entity) {
     // For each tile that the entity overlaps with
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
-            if (state.is_blocked(state.map[y][x])) {
+            if (state.is_blocked(state.map.collision_layer[y][x])) {
                 vec2 wall_pos = vec2((x + 0.5f) * TILE_SIZE, (y + 0.5f) * TILE_SIZE);
 
                 vec2 wall_size = vec2(TILE_SIZE, TILE_SIZE);
@@ -598,7 +598,7 @@ void PhysicsSystem::step(float elapsed_ms)
     handle_mesh_box_collision();
 
 
-    // Update gun position
+    // Update gun position and fov position
     if (registry.players.size() > 0) {
         Entity player_entity = registry.players.entities[0];
         Motion& player_motion = motion_registry.get(player_entity);
@@ -608,6 +608,15 @@ void PhysicsSystem::step(float elapsed_ms)
             Gun& gun_component = registry.guns.get(gun);
             Motion& gun_motion = motion_registry.get(gun);
             gun_motion.position = player_motion.position + gun_component.offset;
+        }
+
+        // update fov
+        if (registry.fovs.size() > 0) {
+            for (Entity entity : registry.fovs.entities) {
+                // track player
+                Motion& fov_motion = registry.motions.get(entity);
+                fov_motion.position = player_motion.position;
+            }
         }
     }
 

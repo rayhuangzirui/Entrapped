@@ -29,41 +29,6 @@ Entity createLine(vec2 position, vec2 scale)
 }
 
 
-Entity createWall(RenderSystem* renderer, vec2 position, vec2 size)
-{
-    auto entity = Entity();
-
-    // Motion component
-    
-        Motion& motion = registry.motions.emplace(entity);
-        motion.position = position;
-        motion.angle = 0.f;
-        motion.velocity = { 0.f, 0.f }; 
-        motion.scale = size;
-    
-
-    // RenderRequest component
-    
-        registry.renderRequests.insert(
-            entity,
-            {
-                TEXTURE_ASSET_ID::TEXTURE_COUNT,
-                EFFECT_ASSET_ID::COLOURED,
-                GEOMETRY_BUFFER_ID::SQUARE
-            });
-    
-
-    // Color component
-   
-       // registry.colors.emplace(entity, vec3(0.f, 0.f, 0.f));  // Black color (RGB)
-
-	   registry.colors.emplace(entity, vec3(1.f, 1.f, 1.f));  // White color (RGB)
-    
-
-    return entity;
-}
-
-
 Entity createBackground(RenderSystem* renderer) {
 	auto entity = Entity();
 
@@ -248,4 +213,33 @@ Entity createMessage(RenderSystem* renderer, vec2 pos, std::string text) {
 	registry.messages.emplace(msg);
 
 	return msg;
+}
+
+Entity createTransitionMask(RenderSystem* renderer, float progress) {
+	Entity entity = Entity();
+	//Motion& playerMotion = registry.motions.get(player);
+
+	// Create motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = { 0,0 };
+	motion.scale = { window_width_px * 10, window_height_px * 10 };
+
+	registry.transMasks.emplace(entity);
+
+
+	registry.colors.insert(entity, { 0, 0, 0 }); // Black color
+	// add opacity component
+	registry.opacities.emplace(entity, Opacity{ progress });
+
+	registry.renderRequests.insert(
+		entity, {
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::BOX,
+			GEOMETRY_BUFFER_ID::DEBUG_LINE
+		});
+
+
+	return entity;
 }

@@ -1,12 +1,8 @@
 #pragma once
 #include <vector>
+#include <array>
 #include "common.hpp"
-
-struct MapState {
-	std::string map_name = "test";
-	vec2 player_spawn = { 5, 5 };
-	vec2 exit = { 2, 2 };
-};
+#include "map_system.hpp"
 
 struct UpgradeState {
 	int curVal = 0;
@@ -14,16 +10,19 @@ struct UpgradeState {
 	int upgrade_cost = 0;
 };
 
+const int TILE_NUMBER = 26;
+
 class StateManager
 {
 public:
+	// map
 	const int TILE_SIZE = 48;
 	int map_height;
 	int map_width;
-	std::vector<std::vector<int>> map;
+	MapState map;
 	uint map_index;
 	std::vector<std::string> map_lists;
-	MapState current_map_state;
+	std::array<GLuint, TILE_NUMBER> map_tile_textures;
 	
 	// save
 	uint saved_map_index;
@@ -44,19 +43,16 @@ public:
 	UpgradeState health_upgrade;
 	UpgradeState ammo_upgrade;
 
+	MapState changeMap(std::string map_name);
+
 	StateManager()
 	{
-		map_height = 3;
-		map_width = 3;
-		map = {
-			{1, 2, 3},
-			{4, 5, 6},
-			{7, 8, 9}
-		};
 		map_index = 0;
 		saved_map_index = 0;
+		map_lists = { "tutorial" };
+		changeMap("test");
+
 		exp = 0;
-		map_lists = { "tutorial", "map_1", "map_2" };
 		health_upgrade = { 0, 10, 1 };
 		ammo_upgrade = { 0, 10, 1 };
 
@@ -76,7 +72,6 @@ public:
 		std::cout << "state destroyed" << std::endl;
 	}
 
-	MapState changeMap(std::string map_name);
 	void save();
 	void load();
 	bool is_blocked(int id);

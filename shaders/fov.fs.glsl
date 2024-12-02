@@ -71,31 +71,6 @@ float rayTest(vec2 target, vec2 start){
     return col_factor;
 }
 
-float rayTestCeiling(vec2 target, vec2 start){
-    float col_factor = 0.0f;
-    float max_substep_distance = 1.0f; 
-    vec2 total_movement = target - start;
-    float total_distance = length(total_movement);
-    int sub_steps = max(1, int(total_distance / max_substep_distance));
-    vec2 movement_per_substep = total_movement / float(sub_steps);
-    vec2 p = start;
-    for (int step = 0; step < sub_steps; ++step) {
-        p = p + movement_per_substep;
-        vec2 ip = translateCoordsToMap(p);
-        if(getMap(int(ip.x), int(ip.y)) == 1){
-            break;
-        }
-    }
-
-    float d = distance(p, start);
-    // Is the pixel in view of the light?
-    if(d >= total_distance - 0.1)
-        col_factor = 0.0f;
-    else
-        col_factor = 1.0f;
-    return col_factor;
-}
-
 void main()
 {
 	color = vec4(fcolor * vcolor, 1.0);
@@ -105,7 +80,6 @@ void main()
     vec2 tpos = screen_position-world_offset;
     vec2 twpos = translateCoordsToMap(tpos);
     vec2 center_pos = world_position-world_offset;
-    center_pos.y += 20.0;
 
     vec2 rayDir = tpos - center_pos;
     float directionAngle = atan(rayDir.y, rayDir.x);

@@ -53,8 +53,8 @@ public:
 		changeMap("test");
 
 		exp = 0;
-		health_upgrade = { 0, 10, 1 };
-		ammo_upgrade = { 0, 10, 1 };
+		health_upgrade = { 0, 10, 10 };
+		ammo_upgrade = { 0, 10, 10 };
 
 		saved_max_health = 0;
 		saved_health = 0;

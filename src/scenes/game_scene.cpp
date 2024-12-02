@@ -832,6 +832,9 @@ void GameScene::step(float elapsed_ms) {
 		}
 	}
 
+	// **New Addition: Update hover information**
+	
+	updateHoverInfo();   // Call to dynamically update hover information
 	// update battery
 	Player& player_component = registry.players.get(player);
 	if (!transState.is_fade_in && !transState.is_fade_out && player_component.battery_level > 0) {
@@ -2997,11 +3000,8 @@ void GameScene::show_damage_number(vec2 position, int damage) {
 }
 
 void GameScene::on_mouse_move(vec2 mouse_position) {
-	/*TEXTURE_ASSET_ID walking_sideways[3] = {
-	TEXTURE_ASSET_ID::PLAYER_1,
-	TEXTURE_ASSET_ID::PLAYER_2,
-	TEXTURE_ASSET_ID::PLAYER_3
-	};*/
+	// Save mouse position
+	this->mouse_position = mouse_position;
 
 	// Get the gun entity
 	Entity entity = registry.guns.entities[0];
@@ -3153,13 +3153,13 @@ void GameScene::createInventorySlots(Entity player) {
 }
 
 void GameScene::refreshInventorySlots(Entity player) {
-
+	// Retrieve the player's inventory
 	Inventory& inventory = registry.inventories.get(player);
 
 	// Configuration for slot positions
 	float slot_size = 48.f;
 	float spacing = 10.f;
-	float x_offset = window_width_px / 2.0f - (inventory.max_slots * (slot_size)) / 2.0f + 8.0f;
+	float x_offset = window_width_px / 2.0f - (inventory.max_slots * slot_size) / 2.0f + 8.0f;
 	float y_offset = 30.f; // Position at the top of the screen
 
 	// Loop through each inventory slot and recreate it
@@ -3180,8 +3180,20 @@ void GameScene::refreshInventorySlots(Entity player) {
 			registry.refreshables.emplace(icon);
 
 			// Select the texture based on the item type
-			TEXTURE_ASSET_ID item_texture = (item.type == InventoryItem::Type::AmmoPack) ?
-				TEXTURE_ASSET_ID::ITEM_AMMOPACK : TEXTURE_ASSET_ID::ITEM_MEDKIT;
+			TEXTURE_ASSET_ID item_texture;
+			std::string item_description;
+			if (item.type == InventoryItem::Type::AmmoPack) {
+				item_texture = TEXTURE_ASSET_ID::ITEM_AMMOPACK;
+				item_description = "Ammo Pack: Restores ammunition. Count: " + std::to_string(item.count) + ".";
+			}
+			else if (item.type == InventoryItem::Type::HealthPotion) {
+				item_texture = TEXTURE_ASSET_ID::ITEM_MEDKIT;
+				item_description = "MedKit: Restores health. Count: " + std::to_string(item.count) + ".";
+			}
+			//else if (item.type == InventoryItem::Type::Battery) {
+			//	item_texture = TEXTURE_ASSET_ID::ITEM_BATTERY;
+			//	item_description = "Battery: Powers equipment. Count: " + std::to_string(item.count) + ".";
+			//}
 
 			registry.renderRequests.insert(icon, {
 				item_texture,
@@ -3194,8 +3206,11 @@ void GameScene::refreshInventorySlots(Entity player) {
 			Entity text_entity = renderer->text_renderer.createText(count_text, position + vec2(10, -15), 20.f, { 1.f, 1.f, 1.f });
 			registry.UIs.emplace(text_entity);
 			registry.refreshables.emplace(text_entity);
-			//std::string count_text = std::to_string(inventory.items[i].count);
-			//renderer->text_renderer.createText(count_text, position + vec2(15, -15), 20.f, { 1.f, 1.f, 1.f });
+
+			// Attach HoverInfo component to the icon
+			HoverInfo& hover_info = registry.hoverInfos.emplace(icon);
+			hover_info.description = item_description; // Detailed description
+			hover_info.offset = { 0.f, 40.f }; // Adjust text offset above the icon
 		}
 	}
 }
@@ -3219,6 +3234,7 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	struct PowerUpInfo {
 		TEXTURE_ASSET_ID texture;
 		int count;
+		std::string description; // Detailed description of the power-up
 	};
 	std::vector<PowerUpInfo> power_ups;
 
@@ -3226,7 +3242,11 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	if (registry.speedBoosts.has(player)) {
 		SpeedBoost& speed_boost = registry.speedBoosts.get(player);
 		if (speed_boost.count > 0) {
-			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_SPEED_UP, speed_boost.count });
+			power_ups.push_back({
+				TEXTURE_ASSET_ID::POWER_UP_SPEED_UP,
+				speed_boost.count,
+				"Speed Boost: Increases movement speed for " + std::to_string(speed_boost.count) + " stacks."
+				});
 		}
 	}
 
@@ -3234,7 +3254,11 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	if (registry.shields.has(player)) {
 		Shield& shield = registry.shields.get(player);
 		if (shield.charges > 0) {
-			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_SHIELD, shield.charges });
+			power_ups.push_back({
+				TEXTURE_ASSET_ID::POWER_UP_SHIELD,
+				shield.charges,
+				"Shield: Absorbs damage. Remaining charges: " + std::to_string(shield.charges) + "."
+				});
 		}
 	}
 
@@ -3242,7 +3266,11 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	if (registry.lifeSteals.has(player)) {
 		LifeSteal& life_steal = registry.lifeSteals.get(player);
 		if (life_steal.stacks > 0) {
-			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_LIFE_STEAL, life_steal.stacks });
+			power_ups.push_back({
+				TEXTURE_ASSET_ID::POWER_UP_LIFE_STEAL,
+				life_steal.stacks,
+				"Life Steal: Regenerate health on enemy slay. Stacks: " + std::to_string(life_steal.stacks) + "."
+				});
 		}
 	}
 
@@ -3250,7 +3278,11 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	if (registry.ricochetPowerUps.has(player)) {
 		RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
 		if (ricochet.stacks > 0) {
-			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_RICOCHET, ricochet.stacks });
+			power_ups.push_back({
+				TEXTURE_ASSET_ID::POWER_UP_RICOCHET,
+				ricochet.stacks,
+				"Ricochet: Bullets bounce off walls. Bounces per stack: " + std::to_string(ricochet.stacks) + "."
+				});
 		}
 	}
 
@@ -3258,7 +3290,11 @@ void GameScene::refreshPowerUpUI(Entity player) {
 	if (registry.attackSpeedPowerUps.has(player)) {
 		AttackSpeedPowerUp& powerup = registry.attackSpeedPowerUps.get(player);
 		if (powerup.stacks > 0) {
-			power_ups.push_back({ TEXTURE_ASSET_ID::POWER_UP_ATTACK_SPEED, powerup.stacks });
+			power_ups.push_back({
+				TEXTURE_ASSET_ID::POWER_UP_ATTACK_SPEED,
+				powerup.stacks,
+				"Attack Speed: Increases firing rate. Stacks: " + std::to_string(powerup.stacks) + "."
+				});
 		}
 	}
 
@@ -3286,5 +3322,62 @@ void GameScene::refreshPowerUpUI(Entity player) {
 		Entity text_entity = renderer->text_renderer.createText(count_text, { x_position + 8, y_offset - 8 }, 16.f, { 1.f, 1.f, 1.f });
 		registry.UIs.emplace(text_entity);
 		registry.refreshables.emplace(text_entity);
+
+		// Attach HoverInfo component to the slot
+		HoverInfo& hover_info = registry.hoverInfos.emplace(slot);
+		hover_info.description = power_ups[i].description; // Assign detailed description
+		hover_info.offset = { 0.f, 40.f }; // Adjust text offset above icon
 	}
 }
+
+
+
+void GameScene::updateHoverInfo() {
+	static Entity hover_text_entity = Entity(); // Keep track of the hover text entity
+	static bool is_hover_text_visible = false;  // Track hover visibility
+
+	for (Entity entity : registry.hoverInfos.entities) {
+		HoverInfo& hover = registry.hoverInfos.get(entity);
+		Motion& motion = registry.motions.get(entity);
+
+		// Check if the mouse is hovering over this entity
+		vec2 min = motion.position - (motion.scale / 2.0f);
+		vec2 max = motion.position + (motion.scale / 2.0f);
+		bool is_hovered = (mouse_position.x >= min.x && mouse_position.x <= max.x &&
+			mouse_position.y >= min.y && mouse_position.y <= max.y);
+
+		if (is_hovered) {
+			if (!is_hover_text_visible || hover_text_entity == Entity()) {
+				// Create hover text
+				vec2 text_position = motion.position + hover.offset;
+				hover_text_entity = renderer->text_renderer.createText(
+					hover.description, text_position, 16.f, { 1.f, 1.f, 1.f });
+				is_hover_text_visible = true;
+			}
+			else {
+				// Update position of the existing text entity
+				vec2 new_position = motion.position + hover.offset;
+				renderer->text_renderer.updateTextPosition(hover_text_entity, new_position);
+			}
+			return; // Exit early since only one entity can be hovered at a time
+		}
+	}
+
+	// No entity is hovered, remove hover text
+	if (is_hover_text_visible) {
+		renderer->text_renderer.removeText(hover_text_entity);
+		hover_text_entity = Entity(); // Reset the text entity reference
+		is_hover_text_visible = false;
+	}
+}
+
+
+
+
+
+
+//vec2 GameScene::fetchMousePosition() {
+//	double xpos, ypos;
+//	glfwGetCursorPos(window, &xpos, &ypos);  // Assuming `window` is a pointer to the current GLFW window
+//	return { static_cast<float>(xpos), static_cast<float>(ypos) };
+//}

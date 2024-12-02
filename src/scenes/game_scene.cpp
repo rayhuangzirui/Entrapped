@@ -618,6 +618,15 @@ void GameScene::initialize(RenderSystem* renderer) {
 		if (state.saved_speed_boost > 0) {
 			PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, state.saved_speed_boost);
 		}
+		if (state.saved_life_steal > 0) {
+			PowerUpSystem::applyPowerUp(player, PowerUpType::LifeSteal, state.saved_life_steal);
+		}
+		if (state.saved_ricochet > 0) {
+			PowerUpSystem::applyPowerUp(player, PowerUpType::RicochetPowerUp, state.saved_ricochet);
+		}
+		if (state.saved_attack_speed > 0) {
+			PowerUpSystem::applyPowerUp(player, PowerUpType::AttackSpeedPowerUp, state.saved_attack_speed);
+		}
 	}
 
 	state.map_index++;
@@ -931,7 +940,8 @@ void GameScene::step(float elapsed_ms) {
 			}
 
 			int choice = floor(uniform_dist(rng) * avail_pos.size());
-			createEnemyAgile(avail_pos[choice]);
+			Entity enemy = createEnemyAgile(avail_pos[choice]);
+			registry.colors.insert(enemy, { 1, 0.8f, 0.8f });
 			player_component.battery_timer = 3000.0;
 		}
 	}

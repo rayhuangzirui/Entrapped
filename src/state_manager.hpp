@@ -33,8 +33,12 @@ public:
 	int saved_ammo_pack;
 	int saved_health_potion;
 
+	// powerups
 	int saved_speed_boost;
 	int saved_shield;
+	int saved_life_steal;
+	int saved_ricochet;
+	int saved_attack_speed;
 
 	std::string saved_profession;
 
@@ -64,8 +68,13 @@ public:
 		saved_ammo_pack = 0;
 		saved_health_potion = 0;
 
+		// power ups
 		saved_speed_boost = 0;
 		saved_shield = 0;
+		saved_life_steal = 0;
+		saved_ricochet = 0;
+		saved_attack_speed = 0;
+
 		saved_profession = "Soldier";
 	}
 

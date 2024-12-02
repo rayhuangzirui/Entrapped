@@ -81,6 +81,24 @@ void StateManager::save() {
 			Shield& shield = registry.shields.get(player);
 			saved_shield = shield.charges;
 		}
+
+		saved_life_steal = 0;
+		if (registry.lifeSteals.has(player)) {
+			LifeSteal& life_steal = registry.lifeSteals.get(player);
+			saved_life_steal = life_steal.stacks;
+		}
+
+		saved_ricochet = 0;
+		if (registry.ricochetPowerUps.has(player)) {
+			RicochetPowerUp& ricochet = registry.ricochetPowerUps.get(player);
+			saved_ricochet = ricochet.stacks;
+		}
+
+		saved_attack_speed = 0;
+		if (registry.attackSpeedPowerUps.has(player)) {
+			AttackSpeedPowerUp& attack_speed = registry.attackSpeedPowerUps.get(player);
+			saved_attack_speed = attack_speed.stacks;
+		}
 	}
 
 	std::cout << "Game saved" << std::endl;
@@ -95,8 +113,12 @@ void StateManager::save() {
 	fprintf(file, "ammo=%d\n", saved_ammo);
 	fprintf(file, "ammo_pack=%d\n", saved_ammo_pack);
 	fprintf(file, "health_potion=%d\n", saved_health_potion);
+	// powerups
 	fprintf(file, "speed_boost=%d\n", saved_speed_boost);
 	fprintf(file, "shield=%d\n", saved_shield);
+	fprintf(file, "life_steal=%d\n", saved_life_steal);
+	fprintf(file, "ricochet=%d\n", saved_ricochet);
+	fprintf(file, "attack_speed=%d\n", saved_attack_speed);
 
 	// initialize player's powerup by the profession
 	if (saved_profession == "Soldier") {
@@ -183,6 +205,21 @@ void StateManager::load() {
 		return;
 	}
 	res = fscanf(file, "shield=%d\n", &saved_shield);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+	res = fscanf(file, "life_steal=%d\n", &saved_life_steal);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+	res = fscanf(file, "ricochet=%d\n", &saved_ricochet);
+	if (res == EOF) {
+		std::cerr << "Unable to read the save data" << std::endl;
+		return;
+	}
+	res = fscanf(file, "attack_speed=%d\n", &saved_attack_speed);
 	if (res == EOF) {
 		std::cerr << "Unable to read the save data" << std::endl;
 		return;

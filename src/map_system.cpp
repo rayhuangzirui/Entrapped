@@ -149,8 +149,8 @@ MapState CreateMap1() {
     MapState map;
 
     map.name = "map1";
-    map.player_spawn = { 3, 39 };
-    map.exit = { 3, 3 };
+    map.player_spawn = { 9, 57 };
+    map.exit = { 158, 58 };
 
     map.collision_layer = LoadMap("map1", "collision");
     map.decoration_layer = LoadMap("map1", "decoration");
@@ -166,8 +166,8 @@ MapState CreateMap2() {
     MapState map;
 
     map.name = "map2";
-    map.player_spawn = { 3, 39 };
-    map.exit = { 3, 3 };
+    map.player_spawn = { 4, 85 };
+    map.exit = { 15, 15 };
 
     map.collision_layer = LoadMap("map2", "collision");
     map.decoration_layer = LoadMap("map2", "decoration");
@@ -183,8 +183,8 @@ MapState CreateMap3() {
     MapState map;
 
     map.name = "map3";
-    map.player_spawn = { 6, 6 };
-    map.exit = { 3, 3 };
+    map.player_spawn = { 33, 6 };
+    map.exit = { 40, 66 };
 
     map.collision_layer = LoadMap("map3", "collision");
     map.decoration_layer = LoadMap("map3", "decoration");
@@ -200,8 +200,8 @@ MapState CreateMap4() {
     MapState map;
 
     map.name = "map4";
-    map.player_spawn = { 6, 6 };
-    map.exit = { 3, 3 };
+    map.player_spawn = { 24, 85 };
+    map.exit = { 129, 83 };
 
     map.collision_layer = LoadMap("map4", "collision");
     map.decoration_layer = LoadMap("map4", "decoration");
@@ -217,8 +217,8 @@ MapState CreateMap5() {
     MapState map;
 
     map.name = "map5";
-    map.player_spawn = { 6, 6 };
-    map.exit = { 3, 3 };
+    map.player_spawn = { 102, 78 };
+    map.exit = { 5, 81 };
 
     map.collision_layer = LoadMap("map5", "collision");
     map.decoration_layer = LoadMap("map5", "decoration");
@@ -234,8 +234,8 @@ MapState CreateMap6() {
     MapState map;
 
     map.name = "map6";
-    map.player_spawn = { 20, 20 };
-    map.exit = { 3, 3 };
+    map.player_spawn = { 40, 5 };
+    map.exit = { 0, 0 };
 
     map.collision_layer = LoadMap("map6", "collision");
     map.decoration_layer = LoadMap("map6", "decoration");

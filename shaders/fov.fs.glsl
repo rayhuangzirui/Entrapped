@@ -118,10 +118,10 @@ void main()
     {
         col_factor = rayTest(vec2(tpos.x + 0.0, tpos.y+0.0), center_pos);
     }else if(getMap(int(twpos.x), int(twpos.y)) == 2){ // Wall
-        col_factor = 0.0f;
+        col_factor = 0.7f;
     }
     else{ // Ceiling
-        col_factor = 0.0f;
+        col_factor = 0.7f;
     }
 
     float fade_width = 100.0;

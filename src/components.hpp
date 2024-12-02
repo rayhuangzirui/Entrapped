@@ -470,6 +470,13 @@ struct PowerUp {
 	int strength;      // Effect strength (e.g., shield points)
 };
 
+// Component for PowerUp pickups
+struct Pickup
+{
+	PowerUpType item_type;
+};
+
+
 // Component for Shield effect on the player
 struct Shield {
 	int charges; // Number of shield charges

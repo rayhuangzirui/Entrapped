@@ -37,7 +37,6 @@ private:
 	bool check_aabb_collision(const vec2& box1_min, const vec2& box1_max, const vec2& box2_min, const vec2& box2_max);
 	//Entity createHealthBar(RenderSystem* renderer, Entity entity, vec2 offset, vec2 size);
 	Entity createHealthBarNew(Entity entity);
-	Entity createChest(RenderSystem* renderer, vec2 pos);
 	Entity createPlayer(vec2 pos, std::string profession);
 	Entity createGun(Entity player);
 	Entity createPortal(vec2 pos, std::string map_name);
@@ -52,6 +51,7 @@ private:
 	Entity createDirectionMarker(vec2 position);
 	Entity createBackground();
 	Entity createChest(vec2 position);
+	Entity createPickup(vec2 position, PowerUpType type);
 
 	Entity createTape(vec2 pos, int tape_num);
 	void startTextAnimation(std::vector<std::string> text, int tape_num);

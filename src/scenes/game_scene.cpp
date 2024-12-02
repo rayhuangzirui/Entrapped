@@ -336,6 +336,32 @@ void GameScene::spawnEnemiesAndItems() {
 			}
 			else if (state.map.interactive_layer[row][col] == 6) {
 				// add random power-up pickups
+				int choice = floor(uniform_dist(rng) * 5);
+				PowerUpType type = PowerUpType::Shield;
+				if (choice == 0) {
+					type = PowerUpType::Shield;
+				}
+				else if (choice == 1) {
+					type = PowerUpType::SpeedBoost;
+				}
+				else if (choice == 2) {
+					type = PowerUpType::LifeSteal;
+				}
+				else if (choice == 3) {
+					type = PowerUpType::RicochetPowerUp;
+				}
+				else if (choice == 4) {
+					type = PowerUpType::AttackSpeedPowerUp;
+				}
+				Entity pickup = createPickup(pos, type);
+				Pickup& pickup_component = registry.pickups.emplace(pickup);
+				pickup_component.item_type = type;
+				if (state.map_index == 0) {
+					Hint hint;
+					hint.text = "A powerup!. Press E to pick up";
+					hint.radius = 200.0f;  // Set the radius for the hint display
+					registry.hints.emplace(pickup, hint);
+				}
 			}
 			else if (state.map.interactive_layer[row][col] == 7) {
 				// agile enemy
@@ -363,14 +389,32 @@ void GameScene::spawnEnemiesAndItems() {
 		hint1.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint1);
 
-		marker = createInvisible({ (26+0.5)*48, (25 + 0.5) * 48 });
+		marker = createInvisible({ (30+0.5)*48, (25 + 0.5) * 48 });
 		Hint hint2;
 		hint2.text = "Hold shift to sprint";
 		hint2.radius = 300.0f;  // Set the radius for the hint display
 		registry.hints.emplace(marker, hint2);
+
+		marker = createInvisible({ (20 + 0.5) * 48, (25 + 0.5) * 48 });
+		Hint hint3;
+		hint3.text = "Press space to dash";
+		hint3.radius = 300.0f;  // Set the radius for the hint display
+		registry.hints.emplace(marker, hint3);
+
+		marker = createInvisible({ (3 + 0.5) * 48, (19 + 0.5) * 48 });
+		Hint hint4;
+		hint4.text = "Hover over icon to see more details";
+		hint4.radius = 300.0f;  // Set the radius for the hint display
+		registry.hints.emplace(marker, hint4);
+
+		marker = createInvisible({ (20 + 0.5) * 48, (33 + 0.5) * 48 });
+		Hint hint5;
+		hint5.text = "Battery will affect your view radius. Be careful!";
+		hint5.radius = 300.0f;  // Set the radius for the hint display
+		registry.hints.emplace(marker, hint5);
 	}
 	else if (state.map_index == 1) {
-		Entity marker = createInvisible({ 10, 10 });
+		Entity marker = createInvisible({ 9, 54 });
 		Hint hint3;
 		hint3.text = "Look for the exit of the maze!";
 		hint3.radius = 300.0f;  // Set the radius for the hint display
@@ -380,39 +424,43 @@ void GameScene::spawnEnemiesAndItems() {
 	// tapes
 	if (state.map_index == 1) {
 		// tape 1
-		vec2 coords = { 45, 11 };
+		vec2 coords = { 158, 66 };
 		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
 		Entity tape1 = createTape(pos, 1);
 		Hint hint1;
 		hint1.text = "Press E to pick up and play the tape";
 		hint1.radius = 200.0f;  // Set the radius for the hint display
 		registry.hints.emplace(tape1, hint1);
-		
-		// tape 2
-		coords = { 47, 38 };
-		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
-		Entity tape2 = createTape(pos, 2);
-
-		// tape 3
-		coords = { 93, 54 };
-		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
-		Entity tape3 = createTape(pos, 3);
 	}
 	else if (state.map_index == 2) {
+		// tape 2
+		vec2 coords = { 18, 17 };
+		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape2 = createTape(pos, 2);
+	}
+	else if (state.map_index == 3) {
+		// tape 3
+		vec2 coords = { 36, 66 };
+		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		Entity tape3 = createTape(pos, 3);
+	}
+	else if (state.map_index == 4) {
 		// tape 4
-		vec2 coords = { 15, 23 };
+		vec2 coords = { 129, 87 };
 		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
 		Entity tape4 = createTape(pos, 4);
-
+	}
+	else if (state.map_index == 5) {
 		// tape 5
-		coords = { 92, 5 };
-		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+		vec2 coords = { 9, 81 };
+		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
 		Entity tape5 = createTape(pos, 5);
-
-		coords = { 78, 45 };
-		pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
+	}
+	else if (state.map_index == 6) {
+		// tape 6
+		vec2 coords = { 44, 6 };
+		vec2 pos = { (coords.x + 0.5) * state.TILE_SIZE, (coords.y + 0.5) * state.TILE_SIZE };
 		Entity tape6 = createTape(pos, 6);
-
 	}
 
 }
@@ -434,11 +482,6 @@ void GameScene::refreshUI(Entity player) {
 	registry.UIs.emplace(ammo_text);
 	registry.refreshables.emplace(ammo_text);
 
-	// create battery text
-	Entity battery_text = renderer->text_renderer.createText("Battery: " + print_to_precision(player_component.battery_level, 2) + "%", {35.f, 112.f}, 20.f, {1.f, 1.f, 1.f});
-	registry.UIs.emplace(battery_text);
-	registry.refreshables.emplace(battery_text);
-
 	// Refresh inventory display
 	refreshInventorySlots(player);
 	// Draw inventory slots
@@ -447,6 +490,11 @@ void GameScene::refreshUI(Entity player) {
 	Entity exp_text = renderer->text_renderer.createText("Experience: " + std::to_string(state.exp), {window_width_px - 175.f, 20.f}, 20.f, {1.f, 1.f, 1.f});
 	registry.UIs.emplace(exp_text);
 	registry.refreshables.emplace(exp_text);
+
+	// create battery text
+	Entity battery_text = renderer->text_renderer.createText("Battery: " + print_to_precision(player_component.battery_level, 2) + "%", { window_width_px - 175.f, 60.f }, 20.f, { 1.f, 1.f, 1.f });
+	registry.UIs.emplace(battery_text);
+	registry.refreshables.emplace(battery_text);
 
 	// Power-up icons
 	refreshPowerUpUI(player);
@@ -573,11 +621,12 @@ void GameScene::initialize(RenderSystem* renderer) {
 	}
 
 	state.map_index++;
+	Entity portal;
 	if (state.map_index >= state.map_lists.size()) {
-		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
+		portal = createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, "n/a");
 	}
 	else {
-		createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
+		portal = createPortal({ (map_state.exit.x + 0.5) * state.TILE_SIZE, (map_state.exit.y + 0.5) * state.TILE_SIZE }, state.map_lists[state.map_index]);
 	}
   
 	background_music = Mix_LoadMUS(audio_path("bgm.wav").c_str());
@@ -1500,7 +1549,7 @@ void GameScene::on_key(int key, int action, int mod) {
 	// display the current cell player is at
 	float grid_x = floor(motion.position.x / state.TILE_SIZE);
 	float grid_y = floor(motion.position.y / state.TILE_SIZE);
-	//std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
+	std::cout << "grid: (" << grid_x << ", " << grid_y << ")" << std::endl;
 
 
 	// Handle movement keys (W, A, S, D)
@@ -1713,18 +1762,12 @@ void GameScene::on_key(int key, int action, int mod) {
 			if (distance(motion.position, player_motion.position) < 200.f && !random_chest.isOpen) {
 				Mix_PlayChannel(-1, item_pickup_sound, 0);
 
-				int choice = floor(uniform_dist(rng)*4);
+				int choice = floor(uniform_dist(rng)*2);
 				if (choice == 0) {
 					InventorySystem::addItem(player, InventoryItem::Type::HealthPotion, 1);
 				}
 				else if(choice == 1) {
 					InventorySystem::addItem(player, InventoryItem::Type::AmmoPack, 1);
-				}
-				else if (choice == 2) {
-					PowerUpSystem::applyPowerUp(player, PowerUpType::Shield, 1);
-				}
-				else if (choice == 3) {
-					PowerUpSystem::applyPowerUp(player, PowerUpType::SpeedBoost, 1);
 				}
 
 				random_chest.isOpen = true;
@@ -1738,6 +1781,30 @@ void GameScene::on_key(int key, int action, int mod) {
 					}
 					registry.hints.remove(entity);
 				}
+			}
+		}
+
+		auto& pickups = registry.pickups;
+		for (Entity entity : pickups.entities) {
+			Pickup& pickup = pickups.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			Motion& player_motion = registry.motions.get(player);
+			Player& player_component = registry.players.get(player);
+			if (distance(motion.position, player_motion.position) < 200.f) {
+				Mix_PlayChannel(-1, item_pickup_sound, 0);
+
+				PowerUpSystem::applyPowerUp(player, pickup.item_type, 1);
+
+				if (registry.hints.has(entity)) {
+					Hint& hint = registry.hints.get(entity);
+					if (hint.is_visible) {
+						// Remove the hint text entity if visible
+						renderer->text_renderer.removeText(hint.text_entity);
+					}
+					registry.hints.remove(entity);
+				}
+
+				registry.remove_all_components_of(entity);
 			}
 		}
 
@@ -2154,46 +2221,55 @@ Entity GameScene::createPlayer(vec2 pos, std::string profession) {
 	return entity;
 }
 
-Entity GameScene::createChest(RenderSystem* renderer, vec2 position) {
-    Entity chest_entity = Entity();
-
-    // Store a reference to the potentially re-used mesh object (basic square for a chest)
-    Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-    registry.meshPtrs.emplace(chest_entity, &mesh);
-
-    
-    Motion& motion = registry.motions.emplace(chest_entity);
-    motion.position = position;  
-    motion.angle = 0.f;         
-    motion.scale = vec2(TILE_SIZE, TILE_SIZE);  
-
-    // Add render request for chest using a colored effect
-    registry.renderRequests.insert(
-        chest_entity,
-        { TEXTURE_ASSET_ID::TEXTURE_COUNT,  // No texture, just use a color
-          EFFECT_ASSET_ID::COLOURED,
-          GEOMETRY_BUFFER_ID::SPRITE });
-
-    // Set the color for the chest (yellow)
-    registry.colors.emplace(chest_entity, vec3(1.0f, 1.0f, 0.0f));  // RGB for yellow
-
-    return chest_entity;
-}
-
 Entity GameScene::createChest(vec2 pos) {
 	auto entity = Entity();
-
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 48.f ,48.f });
+	motion.scale = vec2({ state.TILE_SIZE ,state.TILE_SIZE });
 
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::CHEST_CLOSED,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity GameScene::createPickup(vec2 pos, PowerUpType type) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ state.TILE_SIZE ,state.TILE_SIZE });
+
+	TEXTURE_ASSET_ID texture_id = TEXTURE_ASSET_ID::CHEST_CLOSED;
+	if (type == PowerUpType::SpeedBoost) {
+		texture_id = TEXTURE_ASSET_ID::POWER_UP_SPEED_UP;
+	}
+	else if (type == PowerUpType::Shield) {
+		texture_id = TEXTURE_ASSET_ID::POWER_UP_SHIELD;
+	}
+	else if (type == PowerUpType::LifeSteal) {
+		texture_id = TEXTURE_ASSET_ID::POWER_UP_LIFE_STEAL;
+	}
+	else if (type == PowerUpType::RicochetPowerUp) {
+		texture_id = TEXTURE_ASSET_ID::POWER_UP_RICOCHET;
+	}
+	else if (type == PowerUpType::AttackSpeedPowerUp) {
+		texture_id = TEXTURE_ASSET_ID::POWER_UP_ATTACK_SPEED;
+	}
+
+	registry.renderRequests.insert(
+		entity,
+		{ texture_id,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -2824,6 +2900,7 @@ void GameScene::changeMap(std::string map_name, float elapsed_ms_since_last_upda
 		player_component.ammo = 50+state.ammo_upgrade.curVal;
 	}
 	player_motion.position = { (map_state.player_spawn.x + 0.5) * 48,(map_state.player_spawn.y + 0.5) * 48 };
+	player_component.battery_level = player_component.max_battery_level;
 	// spawn enemies
 	spawnEnemiesAndItems();
 	state.save();
@@ -3149,6 +3226,8 @@ void GameScene::createInventorySlots(Entity player) {
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE,
 			});
+		Entity text_entity = renderer->text_renderer.createText(std::to_string(i+1), position + vec2(0, 30), 20.f, {1.f, 1.f, 1.f});
+		registry.UIs.emplace(text_entity);
 	}
 }
 

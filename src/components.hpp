@@ -140,7 +140,7 @@ struct Enemy
 // Enemy AI component
 struct EnemyAI {
 	vec2 last_player_position = { 0,0 };
-	float detection_radius = 250;
+	float detection_radius = 350;
 	float chase_timer = 3000;
 	float wander_timer = 0;
 	float flee_timer = 3000;

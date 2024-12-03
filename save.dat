@@ -1,5 +1,5 @@
 map_index=1
-exp=5
+exp=6
 heath_upgrades=0
 ammo_upgrades=0
 health=10
@@ -12,4 +12,4 @@ shield=0
 life_steal=0
 ricochet=0
 attack_speed=0
-profession=0
+profession=1

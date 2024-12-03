@@ -897,7 +897,7 @@ void GameScene::step(float elapsed_ms) {
 	Player& player_component = registry.players.get(player);
 	if (!transState.is_fade_in && !transState.is_fade_out && player_component.battery_level > 0) {
 		//player_component.battery_level -= 0.00005 * elapsed_ms;
-		player_component.battery_level -= 0.0005 * elapsed_ms;
+		player_component.battery_level -= 0.0003 * elapsed_ms;
 		//player_component.battery_level -= 0.01 * elapsed_ms;
 		if (player_component.battery_level < 0) {
 			player_component.battery_level = 0;
@@ -2512,7 +2512,7 @@ Entity GameScene::createEnemy(vec2 pos) {
 
 	// Enemy AI
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
-	enemyAI.speed = 100.f;
+	enemyAI.speed = 150.f;
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2624,7 +2624,7 @@ Entity GameScene::createEnemyTank(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 70.f ,160.f });
+	motion.scale = vec2({ 70.f ,160.f }) * 1.5f;
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
@@ -2643,7 +2643,7 @@ Entity GameScene::createEnemyTank(vec2 pos) {
 	// Enemy AI
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
 	enemyAI.detection_radius = enemyAI.detection_radius * 2.f;
-	enemyAI.speed = 50.f;
+	enemyAI.speed = 70.f;
 
 	// Add a bounding box to the enemy entity
 	vec2 min = motion.position - (motion.scale / 2.0f);
@@ -2693,7 +2693,7 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ 200.f ,200.f });
+	motion.scale = vec2({ 200.f ,200.f })*1.5f;
 
 	// Create an empty Enemy component for the enemy character
 	Enemy& enemy = registry.enemies.emplace(entity);
@@ -2712,7 +2712,7 @@ Entity GameScene::createEnemyBoss(vec2 pos) {
 	// Enemy AI
 	EnemyAI& enemyAI = registry.enemyAIs.emplace(entity);
 	enemyAI.detection_radius = enemyAI.detection_radius * 3.f;
-	enemyAI.speed = 300.f;
+	enemyAI.speed = 250.f;
 
 	// Boss AI
 	BossAI& bossAI = registry.bossAIs.emplace(entity);

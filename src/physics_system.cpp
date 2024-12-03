@@ -503,6 +503,10 @@ void PhysicsSystem::step(float elapsed_ms)
     auto& bbox_container = registry.boundingBoxes;
     float step_seconds = elapsed_ms / 1000.f;
 
+    if (step_seconds > 1.0f) {
+        return;
+    }
+
     /*handle_bullet_wall_collision(step_seconds);*/
 
 	// Continuous collision detection: sub-step the motion to avoid tunneling

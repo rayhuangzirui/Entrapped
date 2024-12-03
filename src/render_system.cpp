@@ -207,7 +207,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		
-		float circle_radius = 500.0f;
+		float circle_radius = 1000.0f;
 		if (registry.players.size() > 0) {
 			Entity& player = registry.players.entities[0];
 			Player& player_component = registry.players.get(player);
@@ -575,29 +575,29 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 
 	float x = 0.0;
 	float y = 0.0;
-	for (int row = 0; row < state.map_height; ++row) {
-		for (int col = 0; col < state.map_width; ++col) {
-			GLfloat xpos = x;
-			GLfloat ypos = y;
+	float range = 1000.0f;
+	vec2 center_pos = { 0, 0 };
+	if (registry.players.size() > 0) {
+		Entity& player = registry.players.entities[0];
+		Motion& player_motion = registry.motions.get(player);
+		center_pos = player_motion.position;
+	}
+	float start_x = floor((center_pos.x - range / 2.f)/48.f);
+	float start_y = floor((center_pos.y - range / 2.f) / 48.f);
+	float cell_range = ceil(range / 48.f);
+
+	for (int row = start_y; row < start_y + cell_range; ++row) {
+		for (int col = start_x; col < start_x + cell_range; ++col) {
+			if (row < 0 || row >= state.map_height || col < 0 || col >= state.map_width) {
+				continue;
+			}
+			GLfloat xpos = col*48.f;
+			GLfloat ypos = row*48.f;
 			GLuint texture_id = texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			//if (state.is_wall(state.map[row][col])) {
-			//	//texture_id =
-			//	//	texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::WALL_6];
-			//	texture_id = state.map_tile_textures[0];
-			//}
-			//else if (state.is_floor(state.map[row][col])) {
-			//	texture_id =
-			//		texture_gl_handles[(GLuint)TEXTURE_ASSET_ID::FLOOR_5];
-			//}
-			//else {
-			//	x += 48.f;
-			//	continue;
-			//}
 			if (state.map.decoration_layer[row][col] > -1) {
 				texture_id = state.map_tile_textures[state.map.decoration_layer[row][col]];
 			}
 			else {
-				x += 48.f;
 				continue;
 			}
 			GLuint xpos_loc = glGetUniformLocation(currProgram, "xpos");
@@ -613,10 +613,7 @@ void RenderSystem::drawMap(Entity entity, const mat3& projection) {
 			gl_has_errors();
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-			x += 48.f;
 		}
-		y += 48.f;
-		x = 0.0f;
 	}
 
 	gl_has_errors();

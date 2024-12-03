@@ -412,13 +412,13 @@ bool handle_mesh_wall_collision(Entity entity) {
                             else {
                                 // Remove bullet if no ricochet stacks remain
                                 registry.remove_all_components_of(entity);
-                                std::cout << "[DEBUG] Bullet removed after last ricochet." << std::endl;
+                                //std::cout << "[DEBUG] Bullet removed after last ricochet." << std::endl;
                             }
                         }
                         else {
                             // Remove bullet if no RicochetPowerUp
                             registry.remove_all_components_of(entity);
-                            std::cout << "[DEBUG] Bullet has no ricochet power-up, removing it." << std::endl;
+                            //std::cout << "[DEBUG] Bullet has no ricochet power-up, removing it." << std::endl;
                         }
                     }
 
@@ -551,10 +551,10 @@ void PhysicsSystem::step(float elapsed_ms)
             motion.velocity = motion.velocity - 2 * dot(motion.velocity, ricochet.wall_normal) * ricochet.wall_normal;
 
             // Debug: Print the new velocity
-            std::cout << "[DEBUG] Bullet ricocheted! New velocity: ("
-                << motion.velocity.x << ", "
-                << motion.velocity.y << "), Remaining stacks: "
-                << ricochet.stacks << std::endl;
+            //std::cout << "[DEBUG] Bullet ricocheted! New velocity: ("
+            //    << motion.velocity.x << ", "
+            //    << motion.velocity.y << "), Remaining stacks: "
+            //    << ricochet.stacks << std::endl;
         }
     }
 

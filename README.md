@@ -47,3 +47,9 @@ In 2040, you are part of the second wave of immigrants to Mars, only to find tha
 ## Contact
 
 For more details, feel free to check out the repository and get in touch with us!
+
+## Sources
+
+- **Tileset:** [Sci-Fi TopDown Tileset](https://opengameart.org/content/32x32-sci-fi-tileset)
+- **Zombie Sprites:** [Zombie Game Character](https://itch.io/)
+- **Music:** [pixabay](https://pixabay.com/)

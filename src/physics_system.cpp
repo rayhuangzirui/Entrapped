@@ -315,8 +315,11 @@ bool check_box_in_the_wall(Motion motion) {
 }
 
 // Precise mesh-wall collision handling
-// return: collision detected
-bool handle_mesh_wall_collision(Entity entity) {
+// return: collision direction
+// 0: no collision
+// 1: collision over x
+// 2: collision over y
+int handle_mesh_wall_collision(Entity entity) {
     auto& motion_registry = registry.motions;
     auto& collidable_registry = registry.collidables;
     const int TILE_SIZE = state.TILE_SIZE;
@@ -325,7 +328,7 @@ bool handle_mesh_wall_collision(Entity entity) {
     Motion& motion = motion_registry.get(entity);
 
     if (!registry.meshPtrs.has(entity)) {
-        return false;
+        return 0;
     }
 
     Mesh& mesh = *registry.meshPtrs.get(entity);
@@ -347,9 +350,10 @@ bool handle_mesh_wall_collision(Entity entity) {
 
     bool is_box_in_wall = check_box_in_the_wall(motion);
     if (!is_box_in_wall) {
-        return false;
+        return 0;
     }
-    bool had_collision = false;
+
+    int collision_direction = 0;
     // For each tile that the entity overlaps with
     for (int y = y_min; y <= y_max; ++y) {
         for (int x = x_min; x <= x_max; ++x) {
@@ -368,7 +372,6 @@ bool handle_mesh_wall_collision(Entity entity) {
                     // Check if the vertex is inside the wall's bounding box
                     if (point_in_aabb(transformed_vertex, wall_pos, wall_size)) {
                         collision_detected = true;
-                        had_collision = true;
                         break;
                     }
                 }
@@ -456,7 +459,7 @@ bool handle_mesh_wall_collision(Entity entity) {
                         // Move entity out along x-axis
                         float mtv_x = (motion.position.x < wall_pos.x) ? -overlap_x : overlap_x;
                         motion.position.x += mtv_x;
-
+                        collision_direction = 1;
                         // Adjust velocity along x-axis if moving towards the wall
                         //if ((mtv_x > 0 && motion.velocity.x < 0) || (mtv_x < 0 && motion.velocity.x > 0)) {
                         //    motion.velocity.x = 0.0f;
@@ -466,7 +469,7 @@ bool handle_mesh_wall_collision(Entity entity) {
                         // Move entity out along y-axis
                         float mtv_y = (motion.position.y < wall_pos.y) ? -overlap_y : overlap_y;
                         motion.position.y += mtv_y;
-
+                        collision_direction = 2;
                         // Adjust velocity along y-axis if moving towards the wall
                         //if ((mtv_y > 0 && motion.velocity.y < 0) || (mtv_y < 0 && motion.velocity.y > 0)) {
                         //    motion.velocity.y = 0.0f;
@@ -487,7 +490,7 @@ bool handle_mesh_wall_collision(Entity entity) {
             break;
         }
     }
-    return had_collision;
+    return collision_direction;
 }
 
 const float DASH_MULTIPLIER = 5.0f;
@@ -503,7 +506,7 @@ void PhysicsSystem::step(float elapsed_ms)
     auto& bbox_container = registry.boundingBoxes;
     float step_seconds = elapsed_ms / 1000.f;
 
-    if (step_seconds > 1.0f) {
+    if (step_seconds > 0.1f) {
         return;
     }
 
@@ -541,7 +544,18 @@ void PhysicsSystem::step(float elapsed_ms)
         bool had_collision = false;
         for (int step = 0; step < sub_steps; ++step) {
             motion.position += movement_per_substep;
-            had_collision = had_collision || handle_mesh_wall_collision(entity);
+            int collision_direction = handle_mesh_wall_collision(entity);
+            if (collision_direction == 1) {
+                movement_per_substep.x = 0.0;
+            }
+            else if (collision_direction == 2){
+                movement_per_substep.y = 0.0;
+            }
+            if (length(movement_per_substep) <= 0.0) {
+                break;
+            }
+
+            had_collision = had_collision || (collision_direction == 2 || collision_direction == 1);
         }
         // reflect after MTV
         if (had_collision && registry.bullets.has(entity) && registry.ricochetPowerUps.has(entity)) {

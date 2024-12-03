@@ -203,6 +203,7 @@ void ProfessionMenu::on_profession_selected(const std::string& profession) {
 		if (prof.name == profession) {
 			prof.is_selected = true;
 			selected_profession = prof.name;
+			state.selected_profession = selected_profession;
 			confirm_button_enabled = true;
 		}
 		else {

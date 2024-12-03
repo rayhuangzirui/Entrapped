@@ -41,6 +41,7 @@ public:
 	int saved_attack_speed;
 
 	std::string saved_profession;
+	std::string selected_profession;
 
 	// experience and upgrade
 	int exp;
@@ -76,6 +77,7 @@ public:
 		saved_attack_speed = 0;
 
 		saved_profession = "Soldier";
+		std::string selected_profession = "Soldier";
 	}
 
 	~StateManager() {

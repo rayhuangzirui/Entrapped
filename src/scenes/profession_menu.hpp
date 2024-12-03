@@ -13,7 +13,6 @@ struct Profession {
 	bool is_selected;
 };
 
-
 class ProfessionMenu : public BaseScene {
 public:
 	void initialize(RenderSystem* renderer);

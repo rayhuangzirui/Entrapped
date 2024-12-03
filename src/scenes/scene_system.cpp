@@ -75,10 +75,10 @@ void SceneSystem::changeScene(std::string name) {
 	}
 	else if (name.compare("game_scene") == 0) {
 		this->popScene();
-		this->profession = static_cast<ProfessionMenu*>(this->current_scene)->selected_profession;
+		//this->profession = static_cast<ProfessionMenu*>(this->current_scene)->selected_profession;
 		delete this->current_scene;
 		this->current_scene = new GameScene();
-		this->current_scene->selected_profession = this->profession;
+		this->current_scene->selected_profession = state.selected_profession;
 	}
 	else if (name.compare("death_scene") == 0) {
 		this->popScene();

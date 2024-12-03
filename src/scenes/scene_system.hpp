@@ -6,6 +6,7 @@
 #include "main_menu.hpp"
 #include "game_scene.hpp"
 #include "death_scene.hpp"
+#include "state_manager.hpp"
 #include <render_system.hpp>
 
 class SceneSystem
